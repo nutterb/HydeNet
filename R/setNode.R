@@ -74,8 +74,8 @@
 #' carNet$nodeFitter$mpg
 #' carNet$nodeType$mpg
 
-setNode <- function(network, node, nodeType='dnorm', params, 
-                    nodeFitter, nodeFormula, 
+setNode <- function(network, node, nodeType='dnorm', params=NULL, 
+                    nodeFitter=NULL, nodeFormula, 
                     fromData=!is.null(network$data), ...){
   network.t <- as.character(substitute(network))
   node.t <- as.character(substitute(node))
@@ -110,6 +110,28 @@ setNode <- function(network, node, nodeType='dnorm', params,
                    paste0(err.flag, ": nodeType must be one of the following -\n    ",
                           paste(unique(jagsDists$FnName), collapse=", ")))
     }
+  }
+
+  # translate inputted parameters into JAGS code if the params argument was not specified
+  if (missing(params)){
+    
+    inputtedArgs <- ls()
+    
+    if(nodeType=="dbern"){
+      if("pi" %in% inputtedArgs){
+        if(!is.numeric(pi)) {
+          err.flag <- err.flag + 1
+          err.msg  <- c(err.msg, paste0(err.flag, ": dbern must have 0 <= pi <= 1"))
+        } else if(pi<0 | pi>1){
+          err.flag <- err.flag + 1
+          err.msg  <- c(err.msg, paste0(err.flag, ": dbern must have 0 <= pi <= 1"))
+        } else params <- paste0("pi."deparse(substitute(node)) <- ",pi,";")
+      } else {
+        err.flag <- err.flag + 1
+        err.msg  <- c(err.msg, paste0(err.flag, ": parameters missing for dbern.  See help(\"setNode\")."))
+      }
+    }
+    
   }
   
   network$nodeType[[node.t]] <- nodeType
