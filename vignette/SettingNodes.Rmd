@@ -1,0 +1,25 @@
+install.packages("Hyde")
+library(Hyde)
+
+# summary(DATASET)
+
+net <- HydeNetwork(~ ...)
+
+plot(net)
+
+# (see `vignette("Customizing_Network_Graphs", package = "Hyde")`) 
+
+net
+
+
+#*** NODE TYPES
+single binary parent y | x (single binary child)
+HydeNetwork(~ y|x)
+setNode(HydeNetwork, x, ....)
+
+# alternative 1
+setNode(HydeNetwork, y, .... a vector of probabilities the length of levels(x))
+
+# alternative 2
+setNode(HydeNetwork, y, via logistic regression equation)
+
