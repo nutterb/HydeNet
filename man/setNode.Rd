@@ -9,7 +9,7 @@ fromData()
 
 fromFormula()
 
-setNode(network, node, nodeType = "dnorm", params, nodeFitter, nodeFormula,
+setNode(network, node, nodeType, nodeFitter, nodeFormula, fitterArgs = list(),
   fromData = !is.null(network$data), ...)
 }
 \arguments{
@@ -20,27 +20,28 @@ setNode(network, node, nodeType = "dnorm", params, nodeFitter, nodeFormula,
 \item{nodeType}{a valid distribution function from JAGS.  See the data set
 in \code{data(jagsDists)} for a complete list.}
 
-\item{params}{to be passed to the JAGS distribution function.  Each parameter
-in the distribution function must be a named element in the vector.  For
-example, the parameters to pass to \code{dnorm} would be \code{c(mu='', tau='')}.
-The required parameters can be looked up using the
-\code{expectedParameters} function.  If parameters are to be estimated
-from the data, the functions \code{fromData} and \code{fromFormula} may
-be used as placeholders.}
-
 \item{nodeFitter}{the fitting function, such as \code{lm} or \code{glm}.  This
 will probably only be needed when \code{fromData = TRUE}.}
 
 \item{nodeFormula}{A formula object specifying the relationship between a
 node and its parents.  It must use as a term every parent of \code{node}.}
 
+\item{fitterArgs}{Additional arguments to be passed to \code{fitter}.  This does not
+yet have any effect as I haven't yet decided out where to store this and
+how to implement the fitting.}
+
 \item{fromData}{Logical.  Determines if a node's relationship is calculated
 from the data object in \code{network}.  Defaults to \code{TRUE} whenever
 \code{network} has a data object.}
 
-\item{...}{Additional arguments to be passed to \code{fitter}.  This does not
-  yet have any effect as I haven't yet decided out where to store this and
-  how to implement the fitting.}
+\item{...}{parameters to be passed to the JAGS distribution function.  Each parameter
+in the distribution function must be named.  For
+example, the parameters to pass to \code{dnorm} would be \code{mu='', tau=''}.
+The required parameters can be looked up using the
+\code{expectedParameters} function.  If parameters are to be estimated
+from the data, the functions \code{fromData} and \code{fromFormula} may
+be used as placeholders.
+#'}
 }
 \description{
 Set Node Relationships

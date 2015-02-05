@@ -1,20 +1,120 @@
+---
+output:
+  html_document:
+    fig_caption: yes
+    number_section: yes
+    toc: no
+  pdf_document:
+    fig_caption: yes
+    number_section: yes
+    toc: no
+---
+
+```{r}
 install.packages("Hyde")
 library(Hyde)
+```
 
+```{r}
 # summary(DATASET)
+```
 
+```{r}
 net <- HydeNetwork(~ x)
 
 plot(net)
-
 # (see `vignette("Customizing_Network_Graphs", package = "Hyde")`) 
 
 net
+```
+
+# Root Nodes
+
+## Binary
+### Using `setNode`
+```{r, eval=FALSE}
+net <- HydeNetwork(~ x)
+net <- setNode(net, x, nodeType="dbern", p=.4)
+net
+```
+### Using JAGS Code
+I don't think there's really a JAGS code thing to do here.  The step above takes care of all of it.  
+
+I think the only other way to specify this would be from ~xtabs (which would actually use `dcat`)
+
+## Categorical
+### Using `setNode`
+```{r, eval=FALSE}
+net <- HydeNetwork(~ x)
+net <- setNode(net, x, nodeType="dcat", pi=vectorProbs(c(3, 6, 2), x))
+```
+### Using JAGS code
+```{r, eval=FALSE}
+net <- HydeNetwork(~ x)
+net <- setNode(net, x, nodeType="dcat", 
+               pi="pi.x[1] <- .2727; pi.x[2] <- .5454; pi.x[3] <- .1818")
+```
 
 
-#*** Using setNode()
-#*** There are multiple ways to specify the distribution of a node in the network
+## Normal
+### Using `setNode`
+### Using JAGS Code
 
+## Uniform
+### Using `setNode`
+### Using JAGS code
+
+## Weibull
+### Using `setNode`
+### Using JAGS code
+
+## Other types:
+dgamma, dexp, dpois, dnegbin, etc
+
+
+
+# Nodes With or Without Parents -- Manually specifying regression equations
+
+## Nodes in the exponential family -- need regression equation + link function
+### Ordinary Least Squares
+### Lognormal
+### Logistic regression nodes ... I think JAGS has a logit() function that my be useful
+### Poisson Regression nodes
+### Gamma regression nodes
+
+## Categorical Nodes -- list (?) of multinomial logistic regression equations -- this will be tricky
+
+## Continuous Nodes
+### Regression equation with Gaussian errors
+
+## Manual Specification using JAGS code
+### Linear regression equation with cauchy errors
+### Mixture distributions (do this last!)
+#### Zero-inflated Poisson
+#### Zero inflated negative binomial
+
+
+
+
+# Node With or Without Parents -- Reading formula from existing model objects
+
+## Reading from `lm` objects
+## Reading from `glm` objects - can we make this work for lognormal
+## Reading from multinom objects
+## Reading from survreg objects (note the list component modelObject$dist that stores the type of distribution used for the parametric survival regression model)
+
+
+
+# Learning Node Distributions from Training Data
+
+## Default behavior of `HydeNetwork(.formula, data=trainingData)`
+## Tutorial involving user-specified distributions for particular nodes and estimation of regression equations from data 
+one node may be survival (with censoring), one may be binary, one may be normal, one may be Poisson, and the other may be categorical
+
+
+
+
+```{r, echo=FALSE}
 #----------------------------------------------------------------------------------------------------------
 # 1) Root Nodes
 #----------------------------------------------------------------------------------------------------------
@@ -38,7 +138,6 @@ net
 #    1.5.1) setNode(HydeNetwork, x, nodeType="dweib", nu=3, lambda=1.5)
 #    1.5.2) Using JAGS code
 #  1.6 -- 1.1x  [dgamma, dexp, dpois, dnegbin, etc...]
-
 
 #----------------------------------------------------------------------------------------------------------
 # 2) Nodes With or Without Parents -- Manually specifying regression equations
@@ -81,5 +180,4 @@ net
 #  4.2) Tutorial involving user-specified distributions for particular nodes and estimation of regression
 #       equations from data -- one node may be survival (with censoring), one may be binary, one may be normal,
 #       one may be Poisson, and the other may be categorical
-
-
+```
