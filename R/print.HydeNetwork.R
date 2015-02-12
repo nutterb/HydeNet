@@ -25,8 +25,8 @@
 #'                       data=mtcars)
 #' carNet
 #' 
-#' carNet <- setNode(gm, mpg, 
-#'                   nodeType='dnorm', params=c(tau=1/2.65), 
+#' carNet <- setNode(carNet, mpg, 
+#'                   nodeType='dnorm', mu=fromFormula(), tau=1/2.65, 
 #'                   nodeFormula = mpg ~ disp + hp + wt + factor(gear),
 #'                   nodeFitter='lm')
 #' carNet

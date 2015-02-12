@@ -15,7 +15,9 @@
 \item{color_observed}{The default color for observed nodes}
 
 \item{nodeAttrs}{A list of node attributes to be passed to
-  \code{graph::plot}.  See "Notes" for more details.}
+\code{graph::plot}.  See "Notes" for more details.}
+
+\item{...}{Other arguments to be passed to \code{graph::plot}.}
 }
 \description{
 Compiled Hyde Networks are network objects created by

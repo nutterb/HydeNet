@@ -1,16 +1,24 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{Setting Nodes}
+-->
 ---
 output:
-  html_document:
-    fig_caption: yes
-    number_section: yes
-    toc: no
   pdf_document:
     fig_caption: yes
     number_section: yes
     toc: no
+  html_document:
+    fig_caption: yes
+    number_section: yes
+    toc: yes
 ---
 
-```{r}
+*Some notes to consider*
+
+1. I'm not sure the division of "Using `setNode`" and "Using JAGS Code" is very clear.  We use `setNode` for everything.  We enter the JAGS code into the parameters to define the node, or we tell `setNode` to pull the values from the data.
+
+```{r, eval=2}
 install.packages("Hyde")
 library(Hyde)
 ```
@@ -31,8 +39,7 @@ net
 # Root Nodes
 
 ## Binary
-### Using `setNode`
-```{r, eval=FALSE}
+```{r}
 net <- HydeNetwork(~ x)
 net <- setNode(net, x, nodeType="dbern", p=.4)
 net
@@ -43,30 +50,51 @@ I don't think there's really a JAGS code thing to do here.  The step above takes
 I think the only other way to specify this would be from ~xtabs (which would actually use `dcat`)
 
 ## Categorical
-### Using `setNode`
-```{r, eval=FALSE}
+```{r}
 net <- HydeNetwork(~ x)
 net <- setNode(net, x, nodeType="dcat", pi=vectorProbs(c(3, 6, 2), x))
+net
 ```
-### Using JAGS code
-```{r, eval=FALSE}
+
+```{r}
 net <- HydeNetwork(~ x)
 net <- setNode(net, x, nodeType="dcat", 
                pi="pi.x[1] <- .2727; pi.x[2] <- .5454; pi.x[3] <- .1818")
+net
 ```
 
 
 ## Normal
-### Using `setNode`
-### Using JAGS Code
+
+To define a node that has a normal distribution with $mu = 10$ and $\sigma = 5$
+
+```{r}
+net <- HydeNetwork(~ x)
+net <- setNode(net, x, nodeType="dnorm", 
+               mu=10, tau=1/5)
+net
+```
 
 ## Uniform
-### Using `setNode`
-### Using JAGS code
+
+To define a node that has a Uniform distribution from 0 to 100:
+
+```{r}
+net <- HydeNetwork(~ x)
+net <- setNode(net, x, nodeType="dunif", 
+               a=0, b=100)
+net
+```
 
 ## Weibull
-### Using `setNode`
-### Using JAGS code
+
+
+```{r}
+net <- HydeNetwork(~ x)
+net <- setNode(net, x, nodeType="dweib", 
+               nu=1, lambda=5)
+net
+```
 
 ## Other types:
 dgamma, dexp, dpois, dnegbin, etc
@@ -77,8 +105,63 @@ dgamma, dexp, dpois, dnegbin, etc
 
 ## Nodes in the exponential family -- need regression equation + link function
 ### Ordinary Least Squares
+```{r}
+net <- HydeNetwork(~ x1 + 
+                     x2 + 
+                     x3 + y|x1*x2*x3)
+net
+plot(net)
+
+net <- setNode(net, y, nodeType="dnorm",
+               mu=fromFormula(), tau=4.8934,
+               nodeFormula = y ~ 15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3)
+net
+```
+
+Or, alternatively, one my specify the model in JAGS code in the `mu` parameter.
+
+```{r}
+net <- HydeNetwork(~ x1 + 
+                     x2 + 
+                     x3 + y|x1*x2*x3)
+net <- setNode(net, y, nodeType="dnorm",
+               mu="15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3", tau=4.8934)
+net
+```
+
+The decision of whether to give an `R`-style formula or JAGS code is a matter of preference.  But when using `R` code, be careful that any functions used in the formula can be translated to JAGS.  A list of functions that can be translated between `R` and JAGS can be viewed by calling 
+
+```{r, eval=FALSE}
+data(jagsFunctions, package='Hyde')
+jagsFunctions
+```
+
 ### Lognormal
-### Logistic regression nodes ... I think JAGS has a logit() function that my be useful
+### Logistic regression nodes 
+If the intercept and regression coefficients of a logistic regression are known, one may use the `ilogit` function in JAGS (inverse logit) to back transform the predicted response to a normally distributed probability.
+```{r}
+net <- HydeNetwork(~ x1 + 
+                     x2 + 
+                     x3 + y|x1*x2*x3)
+
+net <- setNode(net, y, nodeType="dnorm",
+               mu="ilogit(15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3)", tau=4.8934)
+net
+
+writeNetworkModel(net, TRUE)
+```
+
+If desired, one could also format this as a bernoulli distributed random variable.
+```{r}
+net <- HydeNetwork(~ x1 + 
+                     x2 + 
+                     x3 + y|x1*x2*x3)
+
+net <- setNode(net, y, nodeType="dbern",
+               p="ilogit(15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3)")
+net
+```
+
 ### Poisson Regression nodes
 ### Gamma regression nodes
 

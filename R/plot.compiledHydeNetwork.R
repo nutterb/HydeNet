@@ -17,6 +17,7 @@
 #' @param color_observed The default color for observed nodes
 #' @param nodeAttrs A list of node attributes to be passed to 
 #'   \code{graph::plot}.  See "Notes" for more details.
+#' @param ... Other arguments to be passed to \code{graph::plot}.
 #' 
 #' @details Default colors and shapes are used for observed nodes (nodes for which at 
 #'   least one value was given in the \code{compileJagsModel} function's 

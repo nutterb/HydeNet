@@ -10,5 +10,5 @@ expectedParameters <- function(network, node, returnVector=FALSE){
   params <- jagsDists$Parameters[jagsDists$FnName == inputs]
 
   if (returnVector) return(params)
-  else cat(paste("c(", paste(paste0(params, "= "), collapse=", "), ")"))
+  else cat(paste(paste(paste0(params, "= "), collapse=", ")))
 }
