@@ -1,49 +1,128 @@
 <!--
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Setting Nodes}
+%\VignetteIndexEntry{Specifying Node Distributions}
 -->
 ---
+title: "Specifying Node Distributions in Hyde"
+author: "Jarrod Dalton and Benjamin Nutter"
+date: "3 Feb 2015"
 output:
-  pdf_document:
-    fig_caption: yes
-    number_section: yes
-    toc: no
   html_document:
     fig_caption: yes
     number_section: yes
     toc: yes
+  pdf_document:
+    fig_caption: yes
+    number_section: yes
+    toc: no
 ---
 
-*Some notes to consider*
 
-1. I'm not sure the division of "Using `setNode`" and "Using JAGS Code" is very clear.  We use `setNode` for everything.  We enter the JAGS code into the parameters to define the node, or we tell `setNode` to pull the values from the data.
 
+Setting up decision network models with **Hyde** generally involves two components -- the network structure and the (conditional) probability distribution of each node (given any parent nodes). Network structure is specified within the **HydeNetwork()** function, while node distributions are set using either **HydeNetwork()** or **setNode()**.
+
+The default behavior of **HydeNetwork()** when used with a training dataset (parameter *data*) is to run linear regression, logistic regression, or multinomial logistic regression, depending on the classes (and number of levels, for factors) of the variables in the data frame and the user-specified network structure. For this, we use the functions **lm()**, **glm(..., family="binomial")**, and **nnet::multinom()** respectively.
+
+When **HydeNetwork()** is used without training data, the distributions for each node in the network are manually specified. This is accomplished with the **setNode()** function. As we discuss below, we have implemented a wide array of techniques for specifying node distributions with **setNode()**.
+
+We start by loading the package:
 ```{r, eval=2}
 install.packages("Hyde")
 library(Hyde)
 ```
+The network we will study involves the diagnosis and treatment of pulmonary embolism, or PE (node **pe**).  There are two commonly-used tests for diagnosing PE. One is a blood test called D-dimer (node **d.dimer**), and the other is pulmonary angiography (node **angio**). For each, the probability of positive and negative test values depends on the status of PE. In other words, the conditional distribution function for each test node can be defined using the sensitivity and specificity of each test. The D-dimer test also is affected by pregnancy (node **pregnant**), with higher false positive rates.  Clinicians prior beliefs about the likelihood of PE are captured in a score (node **wells**). Since PE cannot directly be observed, the likelihood of a patient receiving treatment (node **treat**) depends on the test results. And the likelihood of survival through hospital discharge (node **death**) depends on both the status of the disease and whether or not the patient received treatment.  
+
+A graphical representation of the PE network can be constructed based on an unpopulated **HydeNetwork** object (i.e., a "base" object for which node distributions have not yet been specified):
 
 ```{r}
-# summary(DATASET)
+net <- HydeNetwork(~ wells
+                   + pe | wells
+                   + d.dimer | pregnant*pe
+                   + angio | pe
+                   + treat | d.dimer*angio
+                   + death | pe*treat)
+
+attribs <- list(node = list(shape="ellipse", fillcolor="orange"))
+
+plot(net, attrs=attribs)
 ```
 
-```{r}
-net <- HydeNetwork(~ x)
 
-plot(net)
-# (see `vignette("Customizing_Network_Graphs", package = "Hyde")`) 
+Note that the **attribs** object and use of the *attrs* parameter in the plot call use the Rgraphviz package. See *vignette(topic="Rgraphviz", package = "Rgraphviz")* for details.
 
+The **HydeNetwork** object we created, called **net**, is worth exploring:
+
+```{r, echo=FALSE}
 net
 ```
 
-# Root Nodes
+Since we haven't given **HydeNetwork()** a training dataset from which to extract node types (again, assumed to be either binary, categorical, or normal), we have a skeleton object where each node is distributed as normal given its parent nodes.  The parameters *mu* and *tau* are to this point unspecified (note: in JAGS, the mean and *precision* are specified for the normal distribution - the precision parameter $\tau$ is equal to $1/\sigma^2$).
 
-## Binary
+
+###Univariate Distributions for Root Nodes
+
+#### Binary Root Nodes
+
+The most straightforward way to specify distributions for root nodes, or nodes without parents is by using **setNode** with specific distributions and parameters.  For example, we can define a Bernoulli distribution for node **pregnant**:
+
 ```{r}
-net <- HydeNetwork(~ x)
-net <- setNode(net, x, nodeType="dbern", p=.4)
+net <- setNode(network = net, node = pregnant,
+               nodeType = "dbern", p=.4)
 net
 ```
+
+In the code above, we can see that **setNode** works by returning a modified *HydeNet* object. In the output, node **pregnant** is now Bernoulli with probability of 0.4.
+
+#### Normally-distributed Root Nodes
+
+Univariate normal distributions are specified using **nodeType = "dnorm"**. We will specify a normal distribution with a $\mu = 5$ and $\sigma = 1.5$ for node **wells**:
+
+```{r}
+net <- setNode(net, wells,
+               nodeType = "dnorm", 
+               mu = 5, tau = 1 / (1.5^2))
+
+net$nodeType$wells
+net$nodeParams$wells
+```
+
+#### Multicategory Root Nodes
+
+Suppose instead that the Wells score was categorical in nature, with three values (e.g., low, medium and high).  We can specify categorical distributions as follows:
+
+
+```{r}
+net <- setNode(net, wells,
+               nodeType = "dcat",
+               pi = vectorProbs(p = c(.3, .6, .1)) )
+               
+net$nodeType$wells
+net$nodeParams$wells
+```
+
+Note here that we have overwritten the node distribution within the object **net** to be categorical in nature.
+
+The **vectorProbs()** function converts a probability vector into JAGS code, as seen above in the list element *net\$nodeParams\$wells*. This function will by default normalize probability vectors, so that counts can be directly fed into the model:
+
+```{r}
+net <- setNode(net, wells,
+               nodeType = "dcat",
+               pi = vectorProbs(p = c(37, 162, 48)) )
+               
+net$nodeType$wells
+net$nodeParams$wells
+```
+
+We could have achieved the same by directly inserting the JAGS code into the pi parameter:
+
+```{r}
+net <- setNode(net, wells,
+               nodeType = "dcat",
+               pi = "pi.wells[1] <- 0.15; pi.wells[2] <- 0.66; pi.wells[3] <- 0.19")
+```
+
+
+
 ### Using JAGS Code
 I don't think there's really a JAGS code thing to do here.  The step above takes care of all of it.  
 
@@ -63,17 +142,6 @@ net <- setNode(net, x, nodeType="dcat",
 net
 ```
 
-
-## Normal
-
-To define a node that has a normal distribution with $mu = 10$ and $\sigma = 5$
-
-```{r}
-net <- HydeNetwork(~ x)
-net <- setNode(net, x, nodeType="dnorm", 
-               mu=10, tau=1/5)
-net
-```
 
 ## Uniform
 
