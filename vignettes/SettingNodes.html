@@ -71,9 +71,9 @@ img {
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{Specifying Node Distributions}
 -->
-<p>Setting up decision network models with <strong>Hyde</strong> generally involves two components – the network structure and the (conditional) probability distribution of each node (given any parent nodes). Network structure is specified within the <strong>HydeNetwork()</strong> function, while node distributions are set using either <strong>HydeNetwork()</strong> or <strong>setNode()</strong>.</p>
-<p>The default behavior of <strong>HydeNetwork()</strong> when used with a training dataset (parameter <em>data</em>) is to run linear regression, logistic regression, or multinomial logistic regression, depending on the classes (and number of levels, for factors) of the variables in the data frame and the user-specified network structure. For this, we use the functions <strong>lm()</strong>, <strong>glm(…, family=“binomial”)</strong>, and <strong>nnet::multinom()</strong> respectively.</p>
-<p>When <strong>HydeNetwork()</strong> is used without training data, the distributions for each node in the network are manually specified. This is accomplished with the <strong>setNode()</strong> function. As we discuss below, we have implemented a wide array of techniques for specifying node distributions with <strong>setNode()</strong>.</p>
+<p>Setting up belief network models with <strong>Hyde</strong> generally involves two components – the network structure and the (conditional) probability distribution of each node (given any parent nodes). Network structure is specified within the <code>HydeNetwork()</code> function, while node distributions are set using either <code>HydeNetwork()</code> or <code>setNode()</code>.</p>
+<p>The default behavior of <code>HydeNetwork()</code> when used with a training dataset (parameter <code>data</code>) is to run linear regression, logistic regression, or multinomial logistic regression, depending on the classes (and number of levels, for factors) of the variables in the data frame and the user-specified network structure. For this, we use the functions <code>lm()</code>, <code>glm(..., family=&quot;binomial&quot;)</code>, and <code>nnet::multinom()</code> respectively.</p>
+<p>When <code>HydeNetwork()</code> is used without training data, the distributions for each node in the network are manually specified. This is accomplished with the <code>setNode()</code> function. As we discuss below, we have implemented a wide array of techniques for specifying node distributions with <code>setNode()</code>.</p>
 <p>We start by loading the package:</p>
 <pre class="r"><code>## install.packages(&quot;Hyde&quot;)
 library(Hyde)</code></pre>
@@ -84,7 +84,7 @@ library(Hyde)</code></pre>
 ## Loading required package: lattice
 ## Linked to JAGS 3.3.0
 ## Loaded modules: basemod,bugs</code></pre>
-<p>The network we will study involves the diagnosis and treatment of pulmonary embolism, or PE (node <strong>pe</strong>). There are two commonly-used tests for diagnosing PE. One is a blood test called D-dimer (node <strong>d.dimer</strong>), and the other is pulmonary angiography (node <strong>angio</strong>). For each, the probability of positive and negative test values depends on the status of PE. In other words, the conditional distribution function for each test node can be defined using the sensitivity and specificity of each test. The D-dimer test also is affected by pregnancy (node <strong>pregnant</strong>), with higher false positive rates. Clinicians prior beliefs about the likelihood of PE are captured in a score (node <strong>wells</strong>). Since PE cannot directly be observed, the likelihood of a patient receiving treatment (node <strong>treat</strong>) depends on the test results. And the likelihood of survival through hospital discharge (node <strong>death</strong>) depends on both the status of the disease and whether or not the patient received treatment.</p>
+<p>The network we will study involves the diagnosis and treatment of pulmonary embolism, or PE (node <strong>pe</strong>). PE is a condition where the arteries carrying blood to the lungs get blocked, typically by a blood clot that dislodged from a vein in the leg. There are two commonly-used tests for diagnosing PE. One is a blood test called D-dimer (node <strong>d.dimer</strong>), and the other is pulmonary angiography (node <strong>angio</strong>). For each, the probability of positive and negative test values depends on the status of PE. In other words, the conditional distribution function for each test node can be defined using the sensitivity and specificity of each test. The D-dimer test also is affected by pregnancy (node <strong>pregnant</strong>), with higher false positive rates. Clinicians prior beliefs about the likelihood of PE are captured in a score (node <strong>wells</strong>). Since PE cannot directly be observed, the likelihood of a patient receiving treatment (node <strong>treat</strong>) depends on the test results. And the likelihood of survival through hospital discharge (node <strong>death</strong>) depends on both the status of the disease and whether or not the patient received treatment.</p>
 <p>A graphical representation of the PE network can be constructed based on an unpopulated <strong>HydeNetwork</strong> object (i.e., a “base” object for which node distributions have not yet been specified):</p>
 <pre class="r"><code>net &lt;- HydeNetwork(~ wells
                    + pe | wells
@@ -97,8 +97,8 @@ attribs &lt;- list(node = list(shape=&quot;ellipse&quot;, fillcolor=&quot;orange
 
 plot(net, attrs=attribs)</code></pre>
 <p><img src="data:image/png;base64,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" title alt width="672" /></p>
-<p>Note that the <strong>attribs</strong> object and use of the <em>attrs</em> parameter in the plot call use the Rgraphviz package. See <em>vignette(topic=“Rgraphviz”, package = “Rgraphviz”)</em> for details.</p>
-<p>The <strong>HydeNetwork</strong> object we created, called <strong>net</strong>, is worth exploring:</p>
+<p>Note that the <code>attribs</code> object and use of the <code>attrs</code> parameter in the <code>plot()</code> call use the Rgraphviz package. See <code>vignette(topic=&quot;Rgraphviz&quot;, package = &quot;Rgraphviz&quot;)</code> for details.</p>
+<p>The <strong>HydeNetwork</strong> object we created, called <code>net</code>, is worth exploring:</p>
 <pre><code>## A Probabilistic Graphical Network
 ## Has data attached: No
 ## 
@@ -129,12 +129,42 @@ plot(net, attrs=attribs)</code></pre>
 ## death | pe * treat
 ## dnorm(mu = Unspecified, tau = Unspecified)
 ## : death ~ pe + treat</code></pre>
-<p>Since we haven’t given <strong>HydeNetwork()</strong> a training dataset from which to extract node types (again, assumed to be either binary, categorical, or normal), we have a skeleton object where each node is distributed as normal given its parent nodes. The parameters <em>mu</em> and <em>tau</em> are to this point unspecified (note: in JAGS, the mean and <em>precision</em> are specified for the normal distribution - the precision parameter <span class="math">\(\tau\)</span> is equal to <span class="math">\(1/\sigma^2\)</span>).</p>
-<div id="univariate-distributions-for-root-nodes" class="section level3">
-<h3>Univariate Distributions for Root Nodes</h3>
+<p>Since we haven’t given <code>HydeNetwork()</code> a training dataset from which to extract node types (again, in which case nodes are assumed to be either binary, categorical, or normal), we have a skeleton object where each node is distributed as normal given its parent nodes. The parameters <code>mu</code> and <code>tau</code> are to this point unspecified (note: in JAGS, the mean and <em>precision</em> are specified for the normal distribution - the precision parameter <span class="math">\(\tau\)</span> is equal to <span class="math">\(1/\sigma^2\)</span>).</p>
+<div id="using-a-training-dataset" class="section level3">
+<h3>Using a training dataset</h3>
+<p>Using <code>HydeNetwork()</code> with a training dataset implements the following default node-specific model classes:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Node Class</th>
+<th align="left">Model Type</th>
+<th align="left">Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>factor</code> with 2 levels</td>
+<td align="left">Logistic Regression</td>
+<td align="left"><code>base::glm(..., family=&quot;binomial&quot;)</code></td>
+</tr>
+<tr class="even">
+<td align="left"><code>factor</code> with 3+ levels</td>
+<td align="left">Multinomial Logistic Regression</td>
+<td align="left"><code>nnet::multinom()</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>numeric</code> or <code>integer</code></td>
+<td align="left">Ordinary Least Squares</td>
+<td align="left"><code>base::lm()</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="specifying-univariate-distributions-for-root-nodes" class="section level3">
+<h3>Specifying Univariate Distributions for Root Nodes</h3>
 <div id="binary-root-nodes" class="section level4">
 <h4>Binary Root Nodes</h4>
-<p>The most straightforward way to specify distributions for root nodes, or nodes without parents is by using <strong>setNode</strong> with specific distributions and parameters. For example, we can define a Bernoulli distribution for node <strong>pregnant</strong>:</p>
+<p>The most straightforward way to specify distributions for root nodes, or nodes without parents is by using <code>setNode</code> with specific distributions and parameters. For example, we can define a Bernoulli distribution for node <strong>pregnant</strong>:</p>
 <pre class="r"><code>net &lt;- setNode(network = net, node = pregnant,
                nodeType = &quot;dbern&quot;, p=.4)
 net</code></pre>
@@ -168,11 +198,11 @@ net</code></pre>
 ## death | pe * treat
 ## dnorm(mu = Unspecified, tau = Unspecified)
 ## : death ~ pe + treat</code></pre>
-<p>In the code above, we can see that <strong>setNode</strong> works by returning a modified <em>HydeNet</em> object. In the output, node <strong>pregnant</strong> is now Bernoulli with probability of 0.4.</p>
+<p>In the code above, we can see that <code>setNode</code> works by returning a modified <em>HydeNet</em> object. In the output, node <strong>pregnant</strong> is now Bernoulli with probability of 0.4.</p>
 </div>
 <div id="normally-distributed-root-nodes" class="section level4">
 <h4>Normally-distributed Root Nodes</h4>
-<p>Univariate normal distributions are specified using <strong>nodeType = “dnorm”</strong>. We will specify a normal distribution with a <span class="math">\(\mu = 5\)</span> and <span class="math">\(\sigma = 1.5\)</span> for node <strong>wells</strong>:</p>
+<p>Univariate normal distributions are specified using <code>nodeType = &quot;dnorm&quot;</code>. We will specify a normal distribution with a <span class="math">\(\mu = 5\)</span> and <span class="math">\(\sigma = 1.5\)</span> for node <strong>wells</strong>:</p>
 <pre class="r"><code>net &lt;- setNode(net, wells,
                nodeType = &quot;dnorm&quot;, 
                mu = 5, tau = 1 / (1.5^2))
@@ -198,8 +228,8 @@ net$nodeType$wells</code></pre>
 <pre class="r"><code>net$nodeParams$wells</code></pre>
 <pre><code>## $pi
 ## [1] &quot;pi.[1] &lt;- 0.3; pi.[2] &lt;- 0.6; pi.[3] &lt;- 0.1&quot;</code></pre>
-<p>Note here that we have overwritten the node distribution within the object <strong>net</strong> to be categorical in nature.</p>
-<p>The <strong>vectorProbs()</strong> function converts a probability vector into JAGS code, as seen above in the list element <em>net$nodeParams$wells</em>. This function will by default normalize probability vectors, so that counts can be directly fed into the model:</p>
+<p>Note here that we have overwritten the node distribution within the object <code>net</code> to be categorical in nature.</p>
+<p>The <code>vectorProbs()</code> function converts a probability vector into JAGS code, as seen above in the list element <code>net\$nodeParams\$wells</code>. This function will by default normalize probability vectors, so that counts can be directly fed into the model:</p>
 <pre class="r"><code>net &lt;- setNode(net, wells,
                nodeType = &quot;dcat&quot;,
                pi = vectorProbs(p = c(37, 162, 48)) )
@@ -214,217 +244,325 @@ net$nodeType$wells</code></pre>
                nodeType = &quot;dcat&quot;,
                pi = &quot;pi.wells[1] &lt;- 0.15; pi.wells[2] &lt;- 0.66; pi.wells[3] &lt;- 0.19&quot;)</code></pre>
 </div>
+<div id="other-univariate-distributions" class="section level4">
+<h4>Other Univariate Distributions</h4>
+<p><strong>Hyde</strong> supports all the statistical distributions supported by JAGS. A table of these distributions is stored in the <code>jagsDists</code> dataset. We show a portion of this table below:</p>
+<pre class="r"><code>data(jagsDists, package='Hyde')
+jagsDists[1:15,c(1,2,5,6)]</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">DistName</th>
+<th align="left">FnName</th>
+<th align="left">Parameters</th>
+<th align="left">paramLimit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Beta</td>
+<td align="left">dbeta</td>
+<td align="left">a</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="even">
+<td align="left">Beta</td>
+<td align="left">dbeta</td>
+<td align="left">b</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="odd">
+<td align="left">Chi-square</td>
+<td align="left">dchisqr</td>
+<td align="left">k</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="even">
+<td align="left">Double exponential</td>
+<td align="left">ddexp</td>
+<td align="left">mu</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Double exponential</td>
+<td align="left">ddexp</td>
+<td align="left">tau</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="even">
+<td align="left">Exponential</td>
+<td align="left">dexp</td>
+<td align="left">lambda</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="odd">
+<td align="left">F</td>
+<td align="left">df</td>
+<td align="left">n</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="even">
+<td align="left">F</td>
+<td align="left">df</td>
+<td align="left">mu</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="odd">
+<td align="left">Gamma</td>
+<td align="left">dgamma</td>
+<td align="left">r</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="even">
+<td align="left">Gamma</td>
+<td align="left">dgamma</td>
+<td align="left">lambda</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="odd">
+<td align="left">Generalized gamma</td>
+<td align="left">dgen.gamma</td>
+<td align="left">r</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="even">
+<td align="left">Generalized gamma</td>
+<td align="left">dgen.gamma</td>
+<td align="left">b</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="odd">
+<td align="left">Generalized gamma</td>
+<td align="left">dgen.gamma</td>
+<td align="left">lambda</td>
+<td align="left">&gt; 0</td>
+</tr>
+<tr class="even">
+<td align="left">Logistic</td>
+<td align="left">dlogis</td>
+<td align="left">mu</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Logistic</td>
+<td align="left">dlogis</td>
+<td align="left">tau</td>
+<td align="left">&gt; 0</td>
+</tr>
+</tbody>
+</table>
+<p>So, to assign a Weibull distribution to a node <em>XYZ</em>, we would use the following code:</p>
+<pre class="r"><code>net &lt;- setNode(net, XYZ, nodeType = &quot;dweib&quot;, nu=2, lambda=5)</code></pre>
+<p>Finally, note that there is built-in error handling when parameters are outside allowable limits:</p>
+<pre class="r"><code>net &lt;- setNode(net, d.dimer, nodeType = &quot;dpois&quot;, lambda=-10)</code></pre>
 </div>
-<div id="using-jags-code" class="section level3">
-<h3>Using JAGS Code</h3>
-<p>I don’t think there’s really a JAGS code thing to do here. The step above takes care of all of it.</p>
-<p>I think the only other way to specify this would be from ~xtabs (which would actually use <code>dcat</code>)</p>
 </div>
-<div id="categorical" class="section level2">
-<h2>Categorical</h2>
-<pre class="r"><code>net &lt;- HydeNetwork(~ x)
-net &lt;- setNode(net, x, nodeType=&quot;dcat&quot;, pi=vectorProbs(c(3, 6, 2), x))
-net</code></pre>
-<pre><code>## A Probabilistic Graphical Network
-## Has data attached: No
+<div id="using-regression-equations" class="section level3">
+<h3>Using Regression Equations</h3>
+<div id="ordinary-least-squares-ols" class="section level4">
+<h4>Ordinary Least Squares (OLS)</h4>
+<p>For OLS models, <code>nodeType=&quot;dnorm&quot;</code> can be used. We use a regression equation to characterize the dependency of the node on its parents. We note again that normal distributions are specified using the mean and <em>precision</em> parameters, where the precision parameter is the inverse of the variance.</p>
+<p><code>setNode()</code> supports the use of formula syntax to define a regression equation for a given node. This is achieved using the <code>fromFormula()</code> function with the <em>nodeFormula</em> parameter, as follows:</p>
+<pre class="r"><code>net &lt;- setNode(net, d.dimer, nodeType=&quot;dnorm&quot;,
+               mu=fromFormula(), tau=1/30,  #sigma^2 = 30
+               nodeFormula = d.dimer ~ 210 + 29*pregnant + 68*pe)
+
+net$nodeType$d.dimer</code></pre>
+<pre><code>## [1] &quot;dnorm&quot;</code></pre>
+<pre class="r"><code>net$nodeParams$d.dimer</code></pre>
+<pre><code>## $mu
+## [1] &quot;fromFormula&quot;
 ## 
-## x
-## dcat(pi = pi.x[1] &lt;- 0.272727272727273; pi.x[2] &lt;- 0.545454545454545; pi.x[3] &lt;- 0.181818181818182)
-## : x ~ 1</code></pre>
-<pre class="r"><code>net &lt;- HydeNetwork(~ x)
-net &lt;- setNode(net, x, nodeType=&quot;dcat&quot;, 
-               pi=&quot;pi.x[1] &lt;- .2727; pi.x[2] &lt;- .5454; pi.x[3] &lt;- .1818&quot;)
-net</code></pre>
-<pre><code>## A Probabilistic Graphical Network
-## Has data attached: No
-## 
-## x
-## dcat(pi = pi.x[1] &lt;- .2727; pi.x[2] &lt;- .5454; pi.x[3] &lt;- .1818)
-## : x ~ 1</code></pre>
+## $tau
+## [1] 0.03333333</code></pre>
+<pre class="r"><code>net$nodeFormula$d.dimer</code></pre>
+<pre><code>## d.dimer ~ 210 + 29 * pregnant + 68 * pe</code></pre>
 </div>
-<div id="uniform" class="section level2">
-<h2>Uniform</h2>
-<p>To define a node that has a Uniform distribution from 0 to 100:</p>
-<pre class="r"><code>net &lt;- HydeNetwork(~ x)
-net &lt;- setNode(net, x, nodeType=&quot;dunif&quot;, 
-               a=0, b=100)
-net</code></pre>
-<pre><code>## A Probabilistic Graphical Network
-## Has data attached: No
-## 
-## x
-## dunif(a = 0, b = 100)
-## : x ~ 1</code></pre>
 </div>
-<div id="weibull" class="section level2">
-<h2>Weibull</h2>
-<pre class="r"><code>net &lt;- HydeNetwork(~ x)
-net &lt;- setNode(net, x, nodeType=&quot;dweib&quot;, 
-               nu=1, lambda=5)
-net</code></pre>
-<pre><code>## A Probabilistic Graphical Network
-## Has data attached: No
-## 
-## x
-## dweib(nu = 1, lambda = 5)
-## : x ~ 1</code></pre>
-</div>
-<div id="other-types" class="section level2">
-<h2>Other types:</h2>
-<p>dgamma, dexp, dpois, dnegbin, etc</p>
-</div>
-<div id="nodes-with-or-without-parents-manually-specifying-regression-equations" class="section level1">
-<h1>Nodes With or Without Parents – Manually specifying regression equations</h1>
-<div id="nodes-in-the-exponential-family-need-regression-equation-link-function" class="section level2">
-<h2>Nodes in the exponential family – need regression equation + link function</h2>
-<div id="ordinary-least-squares" class="section level3">
-<h3>Ordinary Least Squares</h3>
-<pre class="r"><code>net &lt;- HydeNetwork(~ x1 + 
-                     x2 + 
-                     x3 + y|x1*x2*x3)
-net</code></pre>
-<pre><code>## A Probabilistic Graphical Network
-## Has data attached: No
-## 
-## x1
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x1 ~ 1
-## 
-## x2
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x2 ~ 1
-## 
-## x3
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x3 ~ 1
-## 
-## y | x1 * x2 * x3
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : y ~ x1 + x2 + x3</code></pre>
-<pre class="r"><code>plot(net)</code></pre>
-<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAB2HAAAdhwGP5fFlAAAgAElEQVR4nO3d4WLbOK4G0PT9X/re2Zm2iS1ZFERSAHXOr90klkgA/GKlmfbrFwAhX3cvAKAqAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUIAgAQoQJEABggQoQJAABQgSoABBAhQgSIACBAlQgCABChAkQAGCBChAkAAFCBKgAEECFCBIgAIECVCAIAEKECRAAYIEKECQAAUIEqAAQQIUIEiAAgQJUICgBQP0a8Pda+IULazvIT1cak9bPVu9gYvRwvoe1cN1NvO5P0s2bzVaWN/TerjITtraslrzlqKF9T2whyts40xDlmreOrSwvmf2sP4eTrdimd4tQwvre2oPq+8g1oU1ercILazvuT2svf54B1bo3RK0sL4n97Dy6q9Vv37vFqCF9T27h3XXfr3y1XtXnhbW9/Qell15l6qXbl15Wljf43tYdOHdSl65d7VpYX16WDRAO9a7butq08L69LBogPYtdtXWlaaF9enhr5oB2rvURVtXmRbWp4f/qLfmAW/2yz4/FKWF9enhv8qteEiVS7auLC2sTw//U23Bo0pc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" title alt width="672" /></p>
-<pre class="r"><code>net &lt;- setNode(net, y, nodeType=&quot;dnorm&quot;,
-               mu=fromFormula(), tau=4.8934,
-               nodeFormula = y ~ 15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3)
-net</code></pre>
-<pre><code>## A Probabilistic Graphical Network
-## Has data attached: No
-## 
-## x1
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x1 ~ 1
-## 
-## x2
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x2 ~ 1
-## 
-## x3
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x3 ~ 1
-## 
-## y | x1 * x2 * x3
-## dnorm(mu = fromFormula, tau = 4.8934)
-## : y ~ 15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3</code></pre>
-<p>Or, alternatively, one my specify the model in JAGS code in the <code>mu</code> parameter.</p>
-<pre class="r"><code>net &lt;- HydeNetwork(~ x1 + 
-                     x2 + 
-                     x3 + y|x1*x2*x3)
-net &lt;- setNode(net, y, nodeType=&quot;dnorm&quot;,
-               mu=&quot;15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3&quot;, tau=4.8934)
-net</code></pre>
-<pre><code>## A Probabilistic Graphical Network
-## Has data attached: No
-## 
-## x1
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x1 ~ 1
-## 
-## x2
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x2 ~ 1
-## 
-## x3
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x3 ~ 1
-## 
-## y | x1 * x2 * x3
-## dnorm(mu = 15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3, tau = 4.8934)
-## : y ~ x1 + x2 + x3</code></pre>
+<div id="what-is-the-right-way-to-describe-the-implicit-conversion-of-factors-pregnant-and-pe-by-jags-in-the-above-model" class="section level1">
+<h1>WHAT IS THE RIGHT WAY TO DESCRIBE THE IMPLICIT CONVERSION OF FACTORS PREGNANT AND PE BY JAGS IN THE ABOVE MODEL?</h1>
+<p>Or, alternatively, one may directly specify JAGS code for the <code>mu</code> parameter as a character string:</p>
+<pre class="r"><code>net &lt;- setNode(net, d.dimer, nodeType=&quot;dnorm&quot;,
+               mu=&quot;210 + 29*pregnant + 68*pe&quot;, tau=1/30)</code></pre>
+<p>However, the model syntax is flexible, allowing for alternative distributions to be used if desired. For example, maybe the distribution of the residuals has heavy tails; here, the (non-standardized) Student’s <em>t</em> distribution could be used:</p>
+<pre class="r"><code>net &lt;- setNode(net, d.dimer, nodeType=&quot;dt&quot;,
+               mu=&quot;210 + 29*pregnant + 68*pe&quot;, tau=1/20, k=2)</code></pre>
 <p>The decision of whether to give an <code>R</code>-style formula or JAGS code is a matter of preference. But when using <code>R</code> code, be careful that any functions used in the formula can be translated to JAGS. A list of functions that can be translated between <code>R</code> and JAGS can be viewed by calling</p>
 <pre class="r"><code>data(jagsFunctions, package='Hyde')
 jagsFunctions</code></pre>
-</div>
-<div id="lognormal" class="section level3">
-<h3>Lognormal</h3>
-</div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">jags_function</th>
+<th align="left">r_function</th>
+<th align="left">r_package</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">abs</td>
+<td align="left">abs</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">arccos</td>
+<td align="left">acos</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">arccosh</td>
+<td align="left">acosh</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">arcsin</td>
+<td align="left">asin</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">arcsinh</td>
+<td align="left">asinh</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">arctan</td>
+<td align="left">atan</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">arctanh</td>
+<td align="left">atanh</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">cos</td>
+<td align="left">cos</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">cosh</td>
+<td align="left">cosh</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">cloglog</td>
+<td align="left">cloglog</td>
+<td align="left">VGAM</td>
+</tr>
+<tr class="odd">
+<td align="left">equals</td>
+<td align="left">==</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">exp</td>
+<td align="left">exp</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">icloglog</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">ifelse</td>
+<td align="left">ifelse</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">ilogit</td>
+<td align="left">logit</td>
+<td align="left">VGAM</td>
+</tr>
+<tr class="even">
+<td align="left">log</td>
+<td align="left">log</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">logfact</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">loggam</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">logit</td>
+<td align="left">logit</td>
+<td align="left">VGAM</td>
+</tr>
+<tr class="even">
+<td align="left">phi</td>
+<td align="left">pnorm</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">pow</td>
+<td align="left">^</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">probit</td>
+<td align="left">probit</td>
+<td align="left">VGAM</td>
+</tr>
+<tr class="odd">
+<td align="left">round</td>
+<td align="left">ceiling</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">sin</td>
+<td align="left">sin</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">sinh</td>
+<td align="left">sinh</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">sqrt</td>
+<td align="left">sqrt</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">step</td>
+<td align="left">&gt;= 0</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">tan</td>
+<td align="left">tan</td>
+<td align="left">base</td>
+</tr>
+<tr class="odd">
+<td align="left">tanh</td>
+<td align="left">tanh</td>
+<td align="left">base</td>
+</tr>
+<tr class="even">
+<td align="left">trunc</td>
+<td align="left">floor</td>
+<td align="left">base</td>
+</tr>
+</tbody>
+</table>
 <div id="logistic-regression-nodes" class="section level3">
 <h3>Logistic regression nodes</h3>
-<p>If the intercept and regression coefficients of a logistic regression are known, one may use the <code>ilogit</code> function in JAGS (inverse logit) to back transform the predicted response to a normally distributed probability.</p>
-<pre class="r"><code>net &lt;- HydeNetwork(~ x1 + 
-                     x2 + 
-                     x3 + y|x1*x2*x3)
-
-net &lt;- setNode(net, y, nodeType=&quot;dnorm&quot;,
-               mu=&quot;ilogit(15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3)&quot;, tau=4.8934)
-net</code></pre>
-<pre><code>## A Probabilistic Graphical Network
-## Has data attached: No
-## 
-## x1
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x1 ~ 1
-## 
-## x2
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x2 ~ 1
-## 
-## x3
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x3 ~ 1
-## 
-## y | x1 * x2 * x3
-## dnorm(mu = ilogit(15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3), tau = 4.8934)
-## : y ~ x1 + x2 + x3</code></pre>
-<pre class="r"><code>writeNetworkModel(net, TRUE)</code></pre>
-<pre><code>## model{
-##    x1 ~ dnorm(Unspecified, Unspecified)
-##    x2 ~ dnorm(Unspecified, Unspecified)
-##    x3 ~ dnorm(Unspecified, Unspecified)
-##    y ~ dnorm(ilogit(15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3), 4.8934)
-## }</code></pre>
-<p>If desired, one could also format this as a bernoulli distributed random variable.</p>
-<pre class="r"><code>net &lt;- HydeNetwork(~ x1 + 
-                     x2 + 
-                     x3 + y|x1*x2*x3)
-
-net &lt;- setNode(net, y, nodeType=&quot;dbern&quot;,
-               p=&quot;ilogit(15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3)&quot;)
-net</code></pre>
-<pre><code>## A Probabilistic Graphical Network
-## Has data attached: No
-## 
-## x1
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x1 ~ 1
-## 
-## x2
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x2 ~ 1
-## 
-## x3
-## dnorm(mu = Unspecified, tau = Unspecified)
-## : x3 ~ 1
-## 
-## y | x1 * x2 * x3
-## dbern(p = ilogit(15.23 + 4.3 * x1 + 17.8 * x2 + 9.3 * x3))
-## : y ~ x1 + x2 + x3</code></pre>
+<p>If the intercept and slope coefficients of a logistic regression model are known, one may define a Bernoulli-distributed node using the <code>ilogit</code> function in JAGS (inverse logit):</p>
+<pre class="r"><code>equation &lt;- &quot;-6.3 + 0.02*d.dimer + 2.9*angio - 0.005*d.dimer*angio&quot;
+net &lt;- setNode(net, treat, nodeType=&quot;dbern&quot;,
+               p=paste(&quot;ilogit(&quot;, equation, &quot;)&quot;))</code></pre>
 </div>
 <div id="poisson-regression-nodes" class="section level3">
 <h3>Poisson Regression nodes</h3>
 </div>
 <div id="gamma-regression-nodes" class="section level3">
 <h3>Gamma regression nodes</h3>
-</div>
 </div>
 <div id="categorical-nodes-list-of-multinomial-logistic-regression-equations-this-will-be-tricky" class="section level2">
 <h2>Categorical Nodes – list (?) of multinomial logistic regression equations – this will be tricky</h2>
