@@ -11,6 +11,8 @@
   \item{xHigh}{Maximum value for x, the random variable}
   \item{Parameters}{Names of the parameters}
   \item{paramLimit}{Limits on the parameter}
+  \item{paramLogic}{The text of a logical check used in \code{setNode} to
+    ensure stated parameters are valid.}
 }}
 \source{
 \url{http://people.math.aau.dk/~kkb/Undervisning/Bayes14/sorenh/docs/jags_user_manual.pdf}

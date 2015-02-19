@@ -128,7 +128,8 @@ HydeNetwork <- function(.formula, data=NULL, ...){
   #* fitterArgs
   nodeFitterArgs <- lapply(1:length(nodes), function(x) return(NULL))
   if (any(sapply(nodeFitter, function(x) if (is.null(x)) FALSE else x == "glm")))
-    nodeFitterArgs[[which(sapply(nodeFitter, function(x) x == "glm"))]] <- list(family='binomial')
+#     return(nodeFitterArgs[which(sapply(nodeFitter, function(x) x == "glm"))])
+    nodeFitterArgs[which(sapply(nodeFitter, function(x) x == "glm"))] <- list(family='binomial')
   names(nodeFitterArgs) <- nodes
   
   #* Define the HydeNetwork object
@@ -137,6 +138,8 @@ HydeNetwork <- function(.formula, data=NULL, ...){
                   nodeFitter=nodeFitter, nodeFitterArgs=nodeFitterArgs,
                   nodeParams=nodeParams, 
                   fromData=fromData, dag=network)
+  
+
   network$data <- if (!is.null(data)) data else NULL
   network$network_formula <- .formula
   class(network) <- c("HydeNetwork")

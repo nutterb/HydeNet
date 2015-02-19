@@ -113,13 +113,24 @@ setNode <- function(network, node, nodeType,
  
   exp_param <- eval(substitute(expectedParameters(network, node, TRUE)))
   params <- list(...)[exp_param]
-
+  
   if (!all(exp_param %in% names(params))){
     err.flag <- err.flag + 1
     err.msg <- c(err.msg,
                  paste0(err.flag, ": Nodes of type ", network$nodeType[[node.t]], 
                         " must have all of the following parameters--",
                         paste(exp_param, collapse=", "), "."), collapse="\n")
+  }
+
+  valid <- validateParameters(params, network$nodeType[[node.t]]) 
+
+  if (!all(valid)){
+    not_valid <- which(!valid)
+    msg <- paste0("Please define ", names(params)[not_valid], " such that ", names(valid)[not_valid], ".")
+    msg <- paste(msg, collapse="\n")
+    err.flag <- err.flag + 1
+    err.msg <- c(err.msg,
+                 paste0(err.flag, ": ", msg)) 
   }
 
   if (length(list(...))) network$nodeParams[[node.t]] <- list(...)

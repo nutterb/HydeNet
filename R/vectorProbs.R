@@ -21,6 +21,7 @@
 #'
 
 vectorProbs <- function(p, node, normalize=TRUE){
+  if (missing(node)) stop("Please provide the node name (note: spelling is important)")
   node <- as.character(substitute(node))
   if (normalize) p <- p/sum(p)
   paste0("pi.", node, "[", 1:length(p), "] <- ", p, collapse="; ")
