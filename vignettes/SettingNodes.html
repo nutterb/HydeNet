@@ -126,7 +126,7 @@ net</code></pre>
 </div>
 <div id="normal" class="section level2">
 <h2>Normal</h2>
-<p>To define a node that has a normal distribution with <span class="math">\(mu = 10\)</span> and <span class="math">\(\sigma = 5\)</span></p>
+<p>To define a node that has a normal distribution with <span class="math">\(\mu = 10\)</span> and <span class="math">\(\sigma = 5\)</span></p>
 <pre class="r"><code>net &lt;- HydeNetwork(~ x)
 net &lt;- setNode(net, x, nodeType=&quot;dnorm&quot;, 
                mu=10, tau=1/5)
