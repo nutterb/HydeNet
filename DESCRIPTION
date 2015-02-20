@@ -1,12 +1,5 @@
 Package: Hyde
 Type: Package
-Title: Hybrid Decision Networks
-Version: 0.5
-Date: 2015-02-20
-Author: Jarrod Dalton
-Maintainer: Benjamin Nutter <nutterb@ccf.org>
-Description: Hybrid Decision Networks [Need a description here]
-=======
 Title: Hybrid Bayesian Networks Using R and JAGS
 Version: 0.1
 Date: 2015-04-01
@@ -18,13 +11,13 @@ Description: Facilities for easy implementation of hybrid Bayesian networks
     variable and each edge represents conditionality. The full joint
     distribution is therefore factorized as a product of conditional densities, 
     where each node is assumed to be independent of its non-desendents given 
-    information on its parent nodes. Since fast, closed-form algorithms 
-    do not exist for hybrid networks that contain a combination of continuous
-    and discrete nodes, particle-based approaches like Markov Chain Monte Carlo
-    are popular.  We provide a user-friendly interface to constructing these 
-    networks and running inference using rjags. Econometric analyses (maximum
-    expected utility under competing policies, value of information) involving
-    decision and utility nodes are supported.
+    information on its parent nodes. Since exact, closed-form algorithms 
+    are computationally burdensome for inference within hybrid networks that contain
+    a combination of continuous and discrete nodes, particle-based approximation
+    techniques like Markov Chain Monte Carlo are popular.  We provide a user-friendly
+    interface to constructing these networks and running inference using rjags.
+    Econometric analyses (maximum expected utility under competing policies, value of
+    information) involving decision and utility nodes are also supported.
 License: GPL-3
 Depends:
     R (>= 3.0.0),
@@ -36,5 +29,3 @@ Imports:
     stringr,
     plyr
 LazyLoad: yes
-URL: https://github.com/nutterb/Hyde,
-BugReports: https://github.com/nutterb/Hyde/issues
