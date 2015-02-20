@@ -29,3 +29,5 @@ Imports:
     stringr,
     plyr
 LazyLoad: yes
+URL: https://github.com/nutterb/Hyde,
+BugReports: https://github.com/nutterb/Hyde/issues
