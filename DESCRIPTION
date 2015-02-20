@@ -10,8 +10,8 @@ Description: Hybrid Decision Networks [Need a description here]
 Title: Hybrid Bayesian Networks Using R and JAGS
 Version: 0.1
 Date: 2015-04-01
-Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter <nutterb@ccf.org>
-Maintainer: Benjamin Nutter <nutterb@ccf.org>
+Author: Jarrod E. Dalton <daltonj ccf org> and Benjamin Nutter <nutterb ccf org>
+Maintainer: Benjamin Nutter <nutterb ccf org>
 Description: Facilities for easy implementation of hybrid Bayesian networks
     using R. Bayesian networks are directed acyclic graphs representing joint
     probability distributions, where each node represents a random
