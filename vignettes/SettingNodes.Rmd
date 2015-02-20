@@ -40,7 +40,7 @@ net <- HydeNetwork(~ wells
                    + treat | d.dimer*angio
                    + death | pe*treat)
 
-attribs <- list(node = list(shape="ellipse", fillcolor="orange"))
+attribs <- list(node = list(shape="ellipse", fillcolor="#FDAE6B"))
 
 plot(net, attrs=attribs)
 ```
@@ -116,7 +116,7 @@ Suppose instead that the Wells score was categorical in nature, with three value
 ```{r}
 net <- setNode(net, wells,
                nodeType = "dcat",
-               pi = vectorProbs(p = c(.3, .6, .1)) )
+               pi = vectorProbs(p = c(.3, .6, .1), wells) )
                
 net$nodeType$wells
 net$nodeParams$wells
@@ -124,12 +124,12 @@ net$nodeParams$wells
 
 Note here that we have overwritten the node distribution within the object `net` to be categorical in nature.
 
-The `vectorProbs()` function converts a probability vector into JAGS code, as seen above in the list element `net\$nodeParams\$wells`. This function will by default normalize probability vectors, so that counts can be directly fed into the model:
+The `vectorProbs()` function converts a probability vector into JAGS code, as seen above in the list element `net$nodeParams$wells`. This function will by default normalize probability vectors, so that counts can be directly fed into the model:
 
 ```{r}
 net <- setNode(net, wells,
                nodeType = "dcat",
-               pi = vectorProbs(p = c(37, 162, 48)) )
+               pi = vectorProbs(p = c(37, 162, 48), wells) )
                
 net$nodeType$wells
 net$nodeParams$wells
@@ -269,7 +269,8 @@ If the intercept and slope coefficients of a logistic regression model are known
 ```{r}
 equation <- "-6.3 + 0.02*d.dimer + 2.9*angio - 0.005*d.dimer*angio"
 net <- setNode(net, treat, nodeType="dbern",
-               p=paste("ilogit(", equation, ")"))
+               p=paste("ilogit(", equation, ")"), 
+               validate=FALSE)
 ```
 
 

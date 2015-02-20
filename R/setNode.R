@@ -29,7 +29,10 @@
 #'   \code{expectedParameters} function.  If parameters are to be estimated 
 #'   from the data, the functions \code{fromData} and \code{fromFormula} may 
 #'   be used as placeholders.
-#'   #'   
+#' @param validate Logical.  Toggles validation of parameters given in \code{...}.
+#'   When passing raw JAGS code (ie, character strings), this should be turned off, 
+#'   as the validation is applicable to numerical values.
+#'   
 #' @details \code{HydeNetwork} doesn't create a space for the \code{params} to be
 #'   stored.  I put this in place in case a non-gaussian distribution was desired
 #'   that did not lend itself to a modeling estimation.  I don't know what exactly
@@ -77,7 +80,8 @@
 setNode <- function(network, node, nodeType, 
                     nodeFitter, nodeFormula, 
                     fitterArgs = list(),
-                    fromData=!is.null(network$data), ...){
+                    fromData=!is.null(network$data), ...,
+                    validate=TRUE){
   
   network.t <- as.character(substitute(network))
   node.t <- as.character(substitute(node))
@@ -122,15 +126,18 @@ setNode <- function(network, node, nodeType,
                         paste(exp_param, collapse=", "), "."), collapse="\n")
   }
 
-  valid <- validateParameters(params, network$nodeType[[node.t]]) 
+  if (validate){
+    valid <- validateParameters(params, network$nodeType[[node.t]]) 
 
-  if (!all(valid)){
-    not_valid <- which(!valid)
-    msg <- paste0("Please define ", names(params)[not_valid], " such that ", names(valid)[not_valid], ".")
-    msg <- paste(msg, collapse="\n")
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg,
-                 paste0(err.flag, ": ", msg)) 
+    if (!all(valid)){
+      not_valid <- which(!valid)
+      msg <- paste0("Please define ", names(params)[not_valid], " such that ", names(valid)[not_valid], 
+                    " (or use validate=FALSE).")
+      msg <- paste(msg, collapse="\n")
+      err.flag <- err.flag + 1
+      err.msg <- c(err.msg,
+                   paste0(err.flag, ": ", msg)) 
+    }
   }
 
   if (length(list(...))) network$nodeParams[[node.t]] <- list(...)

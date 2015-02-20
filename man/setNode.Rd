@@ -10,7 +10,7 @@ fromData()
 fromFormula()
 
 setNode(network, node, nodeType, nodeFitter, nodeFormula, fitterArgs = list(),
-  fromData = !is.null(network$data), ...)
+  fromData = !is.null(network$data), ..., validate = TRUE)
 }
 \arguments{
 \item{network}{A \code{HydeNetwork}.}
@@ -40,8 +40,11 @@ example, the parameters to pass to \code{dnorm} would be \code{mu='', tau=''}.
 The required parameters can be looked up using the
 \code{expectedParameters} function.  If parameters are to be estimated
 from the data, the functions \code{fromData} and \code{fromFormula} may
-be used as placeholders.
-#'}
+be used as placeholders.}
+
+\item{validate}{Logical.  Toggles validation of parameters given in \code{...}.
+  When passing raw JAGS code (ie, character strings), this should be turned off,
+  as the validation is applicable to numerical values.}
 }
 \description{
 Set Node Relationships
