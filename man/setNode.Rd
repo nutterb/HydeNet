@@ -10,7 +10,8 @@ fromData()
 fromFormula()
 
 setNode(network, node, nodeType, nodeFitter, nodeFormula, fitterArgs = list(),
-  fromData = !is.null(network$data), ..., validate = TRUE)
+  fromData = !is.null(network$data), ..., validate = TRUE,
+  fitModel = getOption("Hyde_fitModel"))
 }
 \arguments{
 \item{network}{A \code{HydeNetwork}.}
@@ -43,8 +44,12 @@ from the data, the functions \code{fromData} and \code{fromFormula} may
 be used as placeholders.}
 
 \item{validate}{Logical.  Toggles validation of parameters given in \code{...}.
-  When passing raw JAGS code (ie, character strings), this should be turned off,
-  as the validation is applicable to numerical values.}
+When passing raw JAGS code (ie, character strings), this should be turned off,
+as the validation is applicable to numerical values.}
+
+\item{fitModel}{Logical. Toggles if the model is fit within the function call.
+  This may be set globally using \code{options('Hyde_fitModel')}.  See Details
+  for more about when to use this option.}
 }
 \description{
 Set Node Relationships

@@ -32,6 +32,9 @@
 #' @param validate Logical.  Toggles validation of parameters given in \code{...}.
 #'   When passing raw JAGS code (ie, character strings), this should be turned off, 
 #'   as the validation is applicable to numerical values.
+#' @param fitModel Logical. Toggles if the model is fit within the function call.
+#'   This may be set globally using \code{options('Hyde_fitModel')}.  See Details
+#'   for more about when to use this option.
 #'   
 #' @details \code{HydeNetwork} doesn't create a space for the \code{params} to be
 #'   stored.  I put this in place in case a non-gaussian distribution was desired
@@ -49,10 +52,14 @@
 #'   data or inferred from the formula, these functions may be used as placeholders
 #'   instead of writing JAGS code in the \code{params} argument.
 #'   
-#'   The arguments passed to \code{...} need to be stored somewhere.  Theoretically,
-#'   these arguments could be different for each node.  At this point, I'm thinking I'll
-#'   need to use \code{setNode} to define the relationships and then use some other 
-#'   function to initiate the model (perhaps HydeToJags, or something).
+#'   By default, \code{options(Hyde_fitModel=FALSE)}.  This prevents \code{setNode}
+#'   from fitting any models.  Instead, the fitting is delayed until the user 
+#'   calls \code{writeJagsModel} and all of the models are fit at the same time.
+#'   When using large data sets that may require time to run, it may be better to
+#'   leave this option \code{FALSE} so that the models can all be compiled together
+#'   (especially if you are working interactively).  Using \code{fitModel=TRUE} 
+#'   will cause the model to be fit and the JAGS code for the parameters to be
+#'   stored in the \code{nodeParams} attribute.
 #'   
 #' @author Jarrod Dalton and Benjamin Nutter
 #'   
@@ -81,7 +88,7 @@ setNode <- function(network, node, nodeType,
                     nodeFitter, nodeFormula, 
                     fitterArgs = list(),
                     fromData=!is.null(network$data), ...,
-                    validate=TRUE){
+                    validate=TRUE, fitModel=getOption("Hyde_fitModel")){
   
   network.t <- as.character(substitute(network))
   node.t <- as.character(substitute(node))
@@ -144,6 +151,29 @@ setNode <- function(network, node, nodeType,
   if (!missing(nodeFormula)) network$nodeFormula[[node.t]] <- nodeFormula
   if (!missing(nodeFitter)) network$nodeFitter[[node.t]] <- nodeFitter
   if (length(fitterArgs)) network$nodeFitterArgs[[node.t]] <- fitterArgs
+
+  if (fitModel) {
+    fit <- do.call(network$nodeFitter[[node.t]],
+                   c(list(formula = network$nodeFormula[[node.t]],
+                          data = if (is.null(network$nodeData[[node.t]])) network$data else network$nodeData[[node.t]]),
+                     network$nodeFitterArgs[[node.t]]))
+    network$nodeModel[[node.t]] <- fit
+    
+    if (network$nodeType[[node.t]] == "dbern"){
+      network$nodeParams[[node.t]]$p <- writeJagsFormula(fit)  
+    }
+    else if (network$nodeType[[node.t]] == "dcat"){
+      network$nodeParams[[node.t]]$pi <- writeJagsFormula(fit)
+    }
+    else if (network$nodeType[[node.t]] == "dnorm"){
+      network$nodeParams[[node.t]]$mu <- writeJagsFormula(fit)
+      network$nodeParams[[node.t]]$tau <- 1/summary(fit)$sigma
+    }
+    else if (network$nodeType[[node.t]] == "dpois"){
+      network$nodeParams[[node.t]]$lambda <- writeJagsFormula(fit)
+    }
+                   
+  }
   
 
   if (err.flag) stop(paste(err.msg, collapse="\n"))

@@ -24,7 +24,7 @@ writeJagsFormula.glm <- function(fit, ...){
   
   #* Binomial Proportion
   if (fit$family$family == "binomial" & fit$family$link == "logit"){
-    fm <- paste0("1/(1+exp(", fm, "))")
+    fm <- paste0("ilogit(", fm, ")")
   }
   
   #* Poisson Regression
