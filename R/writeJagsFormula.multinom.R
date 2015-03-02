@@ -24,8 +24,10 @@ writeJagsFormula.multinom <- function(fit, ...){
   fm <- lapply(1:nrow(coef(fit)), 
          function(r){
            if (is.null(fm)) coef(fit)[r, 1]
-           else paste0(coef(fit)[r, 1], " + ", 
-                       paste(coef(fit)[r, -1], fm, sep="*", collapse=" + "))})
+           else paste0(round(coef(fit)[r, 1], getOption("Hyde_maxDigits")),
+                       " + ", 
+                       paste(round(coef(fit)[r, -1], getOption("Hyde_maxDigits")), 
+                             fm, sep="*", collapse=" + "))})
   
   fm <- sapply(fm, function(x) paste0("exp(", x, ") / (1 + ", 
                                       paste(sapply(fm, function(x) paste0("exp(", x, ")")), collapse=" + "),

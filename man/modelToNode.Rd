@@ -2,6 +2,7 @@
 \name{modelToNode.default}
 \alias{modelToNode}
 \alias{modelToNode.default}
+\alias{modelToNode.glm}
 \alias{modelToNode.lm}
 \alias{modelToNode.multinom}
 \alias{modelToNode.xtabs}
@@ -9,7 +10,7 @@
 \usage{
 \method{modelToNode}{default}(model, ...)
 
-\method{modelToNode}{lm}(model, ...)
+\method{modelToNode}{glm}(model, ...)
 
 \method{modelToNode}{lm}(model, ...)
 

@@ -1,4 +1,8 @@
 #' @name modelToNode
+#' @export modelToNode.glm
+#' @export modelToNode.lm
+#' @export modelToNode.multinom
+#' @export modelToNode.xtabs
 #' 
 #' @title Convert a Model Object to a Network Node
 #' @description In cases where model objects may already be fit and established,

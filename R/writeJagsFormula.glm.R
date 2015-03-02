@@ -20,7 +20,10 @@ writeJagsFormula.glm <- function(fit, ...){
     else return(x)
   }))
   fm <- {if (is.null(fm)) coef(fit)[1]
-         else paste0(coef(fit)[1], " + ", paste(coef(fit)[-1], fm, sep="*", collapse=" + "))}
+         else paste0(round(coef(fit)[1], getOption("Hyde_maxDigits")), 
+                     " + ", 
+                     paste(round(coef(fit)[-1], getOption("Hyde_maxDigits")), 
+                           fm, sep="*", collapse=" + "))}
   
   #* Binomial Proportion
   if (fit$family$family == "binomial" & fit$family$link == "logit"){

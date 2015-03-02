@@ -175,7 +175,7 @@ setNode <- function(network, node, nodeType,
                    
   }
   
-
+  if (wrn.flag) warning(paste(warn.msg, collapse="\n"))
   if (err.flag) stop(paste(err.msg, collapse="\n"))
   return(network)  
 }

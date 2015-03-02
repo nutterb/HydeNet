@@ -1,6 +1,6 @@
 #' @rdname modelToNode
 
-modelToNode.lm <- function(model, ...){
+modelToNode.glm <- function(model, ...){
   list(nodes = as.character(terms(model))[2],
        parents = names(attributes(terms(model))$dataClasses)[-1],
        nodeType = "dbern",
