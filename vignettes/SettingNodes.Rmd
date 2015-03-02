@@ -54,21 +54,22 @@ The **HydeNetwork** object we created, called `net`, is worth exploring:
 net
 ```
 
-Since we haven't given `HydeNetwork()` a training dataset from which to extract node types (again, in which case nodes are assumed to be either binary, categorical, or normal), we have a skeleton object where each node is distributed as normal given its parent nodes.  The parameters `mu` and `tau` are to this point unspecified (note: in JAGS, the mean and *precision* are specified for the normal distribution - the precision parameter $\tau$ is equal to $1/\sigma^2$).
+Since we haven't given `HydeNetwork()` a training dataset from which to extract node types (again, in which case nodes are assumed to be either binary, categorical, or normal depending on the class of the variables in the dataset), we have a skeleton object where each node is distributed as normal given its parent nodes.  The parameters `mu` and `tau` are to this point unspecified (note: in JAGS, the mean and *precision* are specified for the normal distribution - the precision parameter $\tau$ is equal to $1/\sigma^2$).
 
 ###Using a training dataset
 
-Using `HydeNetwork()` with a training dataset implements the following default node-specific model classes:
+Using `HydeNetwork()` with a training dataset implements the following default node-specific model classes, depending on the class of the node (in other words, the class of the variable in the training dataset) and whether or not the node has parents:
 
-|Node Class             |Model Type                     |Function                           |
-|:----------------------|:------------------------------|:----------------------------------|
-|`factor` with 2 levels |Logistic Regression            |`base::glm(..., family="binomial")`|
-|`factor` with 3+ levels|Multinomial Logistic Regression|`nnet::multinom()`                 |
-|`numeric` or `integer` |Ordinary Least Squares         |`base::lm()`                       |
+|Parents? |Node Class                        |Model Type                     |Function                     |
+|:--------|:---------------------------------|:------------------------------|:----------------------------|
+|No       |`factor` with any number of levels|Tabulation                     |`xtabs()`                    |
+|Yes      |`factor` with 2 levels            |Logistic Regression            |`glm(..., family="binomial")`|
+|Yes      |`factor` with 3+ levels           |Multinomial Logistic Regression|`nnet::multinom()`           |
+|Yes or No|`numeric` or `integer`            |Ordinary Least Squares         |`lm()`                       |
 
 The syntax for building a Bayesian network using training data is rather simple:
 
-```{r, eval=FALSE}
+```{r}
 data(PE, package='Hyde')
 autoNet <- HydeNetwork(~ wells
                        + pe | wells
@@ -77,9 +78,16 @@ autoNet <- HydeNetwork(~ wells
                        + treat | d.dimer*angio
                        + death | pe*treat,
                        data = PE)
-autoNet
+writeNetworkModel(autoNet, pretty=TRUE)
 ```
+We can see by the output that the models have all been populated, and verify that these are indeed the coefficients we obtain from the functions in the above table:
 
+```{r}
+glm(treat ~ d.dimer+angio, data=PE, family="binomial")$coef
+```
+```{r}
+xtabs(~PE$pregnant) / nrow(PE)
+```
 
 ###Specifying Univariate Distributions for Root Nodes
 
@@ -262,7 +270,7 @@ jagsFunctions
 |trunc         |floor      |base      |
 
 
-### Logistic regression nodes 
+#### Logistic regression nodes 
 
 If the intercept and slope coefficients of a logistic regression model are known, one may define a Bernoulli-distributed node using the `ilogit` function in JAGS (inverse logit):
 
@@ -274,6 +282,21 @@ net <- setNode(net, treat, nodeType="dbern",
 ```
 
 
+
+### Using **`R`** Model Objects
+
+R model objects of class `lm`, `glm`, and `multinom` can be fed directly into both HydeNetwork() and setNode().
+
+
+
+
+
+
+
+
+
+
+<!--
 ### Poisson Regression nodes
 ### Gamma regression nodes
 
@@ -305,7 +328,7 @@ net <- setNode(net, treat, nodeType="dbern",
 ## Default behavior of `HydeNetwork(.formula, data=trainingData)`
 ## Tutorial involving user-specified distributions for particular nodes and estimation of regression equations from data 
 one node may be survival (with censoring), one may be binary, one may be normal, one may be Poisson, and the other may be categorical
-
+-->
 
 
 
