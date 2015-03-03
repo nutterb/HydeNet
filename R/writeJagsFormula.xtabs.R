@@ -8,7 +8,13 @@ writeJagsFormula.xtabs <- function(fit, ...){
   
   pi <- fit/sum(fit)
   names(pi) <- 1:length(pi)
-  pi <- paste0("pi.", fm[2], "[", names(pi), "] <- ", pi, collapse="; ") 
+  pi <- paste0("pi.", 
+               fm[2], 
+               "[", 
+               names(pi), 
+               "] <- ", 
+               round(pi, getOption("Hyde_maxDigits")), 
+               collapse="; ")
  
   return(pi)
 }

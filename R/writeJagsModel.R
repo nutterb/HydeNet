@@ -32,7 +32,7 @@ writeJagsModel <- function(network, node){
     if (any(c(fromData()) %in% node_params))
       fit <- do.call(network$nodeFitter[[node_str]],
                      c(list(formula = network$nodeFormula[[node_str]],
-                            data = network$data),
+                            data = if (is.null(network$nodeData[[node_str]])) network$data else network$nodeData[[node_str]]),
                        network$nodeFitterArgs[[node_str]]))
     
     if (node_params['p'] %in% c(fromData(), fromFormula())){
@@ -58,7 +58,7 @@ writeJagsModel <- function(network, node){
       node_params["pi"] <- paste0("pi.", node_str)
       pi <- do.call(network$nodeFitter[[node_str]],
                     list(formula = network$nodeFormula[[node_str]],
-                         data=network$data))
+                         data=if (is.null(network$nodeData[[node_str]])) network$data else network$nodeData[[node_str]]))
       pi <- writeJagsFormula(pi)
       model_code <- 
         c(pi,  
@@ -79,7 +79,7 @@ writeJagsModel <- function(network, node){
     if (any(c(fromData()) %in% node_params))
       fit <- do.call(network$nodeFitter[[node_str]],
                      c(list(formula = network$nodeFormula[[node_str]],
-                          data = network$data),
+                          data = if (is.null(network$nodeData[[node_str]])) network$data else network$nodeData[[node_str]]),
                        network$nodeFitterArgs[[node_str]]))
     
     if (node_params['mu'] %in% c(fromData(), fromFormula())){
@@ -111,7 +111,7 @@ writeJagsModel <- function(network, node){
     if (any(c(fromData()) %in% node_params))
       fit <- do.call(network$nodeFitter[[node_str]],
                      c(list(formula = network$nodeFormula[[node_str]],
-                            data = network$data),
+                            data = if (is.null(network$nodeData[[node_str]])) network$data else network$nodeData[[node_str]]),
                        network$nodeFitterArgs[[node_str]]))
     
     if (node_params['lambda'] %in% c(fromData(), fromFormula())){

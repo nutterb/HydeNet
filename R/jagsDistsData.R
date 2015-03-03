@@ -2,7 +2,7 @@
 #'
 #' A dataset listing the JAGS probability distributions and their parameters
 #'
-#' @format A data frame with 30 rows and 6 variables:
+#' @format A data frame with 30 rows and 7 variables:
 #' \describe{
 #'   \item{DistName}{Distribution Name}
 #'   \item{FnName}{Function Name}
