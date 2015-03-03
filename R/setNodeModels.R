@@ -64,7 +64,7 @@ setNodeModels <- function(network, ...){
                         paste(names(equalParents)[!equalParents], collapse=", ")))
   }
   
-  if (wrn.flag) warning(paste(warn.msg, collapse="\n"))
+  if (wrn.flag) warning(paste(wrn.msg, collapse="\n"))
   if (err.flag) stop(paste(err.msg, collapse="\n"))
   
   #* Translate new node features into network object  

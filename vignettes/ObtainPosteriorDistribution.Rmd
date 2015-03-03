@@ -17,7 +17,7 @@ output:
 # A Brief Example of Using `Hyde` to Obtain Posterior Distributions
 
 ```{r}
-library(Hyde)
+library(HydeNet)
 mtcars2 <- transform(mtcars,
                      cyl = factor(cyl),
                      gear=factor(gear),

@@ -3,7 +3,7 @@
 %\VignetteIndexEntry{Specifying Node Distributions}
 -->
 ---
-title: "Specifying Node Distributions in Hyde"
+title: "Specifying Node Distributions in HydeNet"
 author: "Jarrod Dalton and Benjamin Nutter"
 date: "3 Feb 2015"
 output:
@@ -17,7 +17,7 @@ output:
     toc: no
 ---
 
-Setting up Bayesian network models with **Hyde** generally involves two components -- the network structure and the (conditional) probability distribution of each node (given any parent nodes). Network structure is specified within the `HydeNetwork()` function, while node distributions are set using either `HydeNetwork()` or `setNode()`.
+Setting up Bayesian network models with **HydeNet** generally involves two components -- the network structure and the (conditional) probability distribution of each node (given any parent nodes). Network structure is specified within the `HydeNetwork()` function, while node distributions are set using either `HydeNetwork()` or `setNode()`.
 
 The default behavior of `HydeNetwork()` when used with a training dataset (parameter `data`) is to run linear regression, logistic regression, or multinomial logistic regression, depending on the classes (and number of levels, for factors) of the variables in the data frame and the user-specified network structure. For this, we use the functions `lm()`, `glm(..., family="binomial")`, and `nnet::multinom()` respectively.
 
@@ -25,8 +25,8 @@ When `HydeNetwork()` is used without training data, the distributions for each n
 
 We start by loading the package:
 ```{r, eval=2}
-install.packages("Hyde")
-library(Hyde)
+install.packages("HydeNet")
+library(HydeNet)
 ```
 The network we will study involves the diagnosis and treatment of pulmonary embolism, or PE (node **pe**).  PE is a condition where the arteries carrying blood to the lungs get blocked, typically by a blood clot that dislodged from a vein in the leg. There are two commonly-used tests for diagnosing PE. One is a blood test called D-dimer (node **d.dimer**), and the other is pulmonary angiography (node **angio**). For each, the probability of positive and negative test values depends on the status of PE. In other words, the conditional distribution function for each test node can be defined using the sensitivity and specificity of each test. The D-dimer test also is affected by pregnancy (node **pregnant**), with higher false positive rates.  Clinicians prior beliefs about the likelihood of PE are captured in a score (node **wells**). Since PE cannot directly be observed, the likelihood of a patient receiving treatment (node **treat**) depends on the test results. And the likelihood of survival through hospital discharge (node **death**) depends on both the status of the disease and whether or not the patient received treatment.  
 
@@ -70,7 +70,7 @@ Using `HydeNetwork()` with a training dataset implements the following default n
 The syntax for building a Bayesian network using training data is rather simple:
 
 ```{r}
-data(PE, package='Hyde')
+data(PE, package='HydeNet')
 autoNet <- HydeNetwork(~ wells
                        + pe | wells
                        + d.dimer | pregnant*pe
@@ -156,7 +156,7 @@ net <- setNode(net, wells,
 **Hyde** supports all the statistical distributions supported by JAGS.  A table of these distributions is stored in the `jagsDists` dataset. We show a portion of this table below:
 
 ```{r, eval=FALSE}
-data(jagsDists, package='Hyde')
+data(jagsDists, package='HydeNet')
 jagsDists[1:15,c(1,2,5,6)]
 ```
 
@@ -232,7 +232,7 @@ net <- setNode(net, d.dimer, nodeType="dt",
 The decision of whether to give an `R`-style formula or JAGS code is a matter of preference.  But when using `R` code, be careful that any functions used in the formula can be translated to JAGS.  A list of functions that can be translated between `R` and JAGS can be viewed by calling 
 
 ```{r, eval=FALSE}
-data(jagsFunctions, package='Hyde')
+data(jagsFunctions, package='HydeNet')
 jagsFunctions
 ```
 
