@@ -99,7 +99,7 @@ setNode <- function(network, node, nodeType,
   err.msg <- ""
   
   wrn.flag <- 0
-  wrn.flag <- ""
+  wrn.msg <- ""
   
   
   if (!missing(nodeType)){
