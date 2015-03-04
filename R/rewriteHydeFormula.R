@@ -3,8 +3,8 @@
 #' @importFrom plyr ddply
 #' @importFrom plyr summarise
 #' 
-#' @title Rewrite Hybrid Decision Model Formula
-#' @description This is a utility function used to assist in the updating 
+#' @title Rewrite HydeNetwork Graph Model Formula
+#' @description This is a convenience function used to assist in the updating 
 #'   of \code{HydeNetwork} network objects.  It makes it possible to add and 
 #'   subtract individual parent relationships without deleting an entire node.
 #'   

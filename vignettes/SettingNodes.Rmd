@@ -396,19 +396,31 @@ writeNetworkModel(craps, pretty=TRUE)
 
 #### "Helper" Deterministic Functions
 
-We have implemented a series of "helper" deterministic functions that we think might be frequently used.  These include `and()` (intersection of binary parent nodes), `or()` (union of parent nodes), and `xor()` (exclusive or of parent nodes).
+We have implemented a series of "helper" deterministic functions to facilitate model specification.  These include `and()` (intersection of binary parent nodes), `or()` (union of parent nodes), and `xor()` (exclusive or of parent nodes).
 
-##Modifying the Network Structure
+##Modifying the Graph Structure
 
-###Adding Nodes
+Nodes and/or links may be added or removed from an existing `HydeNetwork` object, using an `update` method we have implemented for `HydeNetwork` objects. Syntactically, this function acts in a similar fashion to `update.lm()`, in that you add or subtract terms from the model equation.  Suppose that a new diagnostic test for PE was invented and we wish to incorporate it into the PE network.  We can achieve this by the following code:
 
-###Removing Nodes
+```{r}
+net2 <- update(net, . ~ . + newTest | pe
+                          + treat | newTest
+                          - pregnant)
 
-###Changing Link Structure
 
+plot(net2, attrs=list(node = list(shape="ellipse", fillcolor="#FDAE6B")))
 
+```
 
+The `update()` method for `HydeNetwork` objects processes terms in the given model equation sequentially. In the above example, the original object `net` did not contain a node called `newTest`.  But there were nodes called `pregnant`, `pe`, and `treat`.  The first term within the model equation (`+ newTest | pe`) specifies the addition of the node `newTest` as a child of node `pe`.  The second term (`+ treat | newTest`) specifies the addition of a link from the now-existing node `newTest` into node `treat`.  The third term (`- pregnant`) specifies the removal of node `pregnant`.  Examining the network object, two important points are worth mentioning:
 
+```{r}
+net2
+```
+
+First, while the graph has changed -- and now node `treat` has three parents -- the model for node `treat` has not changed.  The user must specify a new model (with either `setNode()` or `setNodeModels()`) to account for this new dependency if desired.
+
+Second, a warning message indicates that a parent node (`pregnant`) has been removed. Since that node was involved in characterizing the distribution of its child node(s) (`d.dimer`), the function by default removes the distribution from all child nodes still existing in the network.  The user then is required to use either `setNode()` or `setNodeModels()` to repopulate the distribution(s) for the affected node(s).
 
 
 
