@@ -27,8 +27,17 @@ writeJagsModel <- function(network, node){
 
   params <- eval(substitute(expectedParameters(network, node, TRUE)))
   
+  #*** Type 'determ' (Deterministic Nodes)
+  if (network$nodeType[[node_str]] == "determ"){
+    if (fromFormula() %in% node_params){
+      define <- as.character(network$nodeFormula[[node_str]])
+      define <- paste0(define[2], " <- ", define[3])
+      model_code <- define
+    }
+  }
+  
   #*** Type 'dbern'
-  if (network$nodeType[[node_str]] == "dbern"){
+  else if (network$nodeType[[node_str]] == "dbern"){
     if (any(c(fromData()) %in% node_params))
       fit <- do.call(network$nodeFitter[[node_str]],
                      c(list(formula = network$nodeFormula[[node_str]],
@@ -94,7 +103,7 @@ writeJagsModel <- function(network, node){
     
     if (node_params['tau'] %in% c(fromData(), fromFormula())){
       if (node_params['tau'] == fromData())
-        node_params['tau'] <- 1/summary(fit)$sigma
+        node_params['tau'] <- round(1/summary(fit)$sigma, getOption("Hyde_maxDigits"))
       else if (node_params['tau'] == fromFormula())
         stop("parameter 'tau' can not be estimated from a formula.")
     }

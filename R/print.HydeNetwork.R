@@ -34,6 +34,16 @@
 print.HydeNetwork <- function(x, ...){
   Hyde.nm <- as.character(substitute(x))
   
+  #* Requested Nodes
+  requested_nodes <- as.character(substitute(list(...)))[-1]
+  if (length(requested_nodes) == 0) requested_nodes <- x$nodes
+  
+  bad_nodes <- requested_nodes[!requested_nodes %in% x$nodes]
+  if (length(bad_nodes) > 0)
+    stop(paste0("The following nodes are not found in ", substitute(x), ": ", 
+                paste(bad_nodes, collapse=", ")))
+  
+  #* Node Summary Function
   nodeSummary <- function(node){
     nodeName <- if (!is.null(x$parents[[node]]))
                     paste(node, "|", paste(x$parents[[node]], collapse=" * "))
@@ -53,7 +63,9 @@ print.HydeNetwork <- function(x, ...){
     return(paste(nodeName, nodeType, Formula, sep="\n"))
   }
   
-  nodeSummaries <- paste(sapply(x$nodes, nodeSummary), collapse="\n\n")
+  nodeSummaries <- paste(sapply(requested_nodes, 
+                                nodeSummary), 
+                         collapse="\n\n")
 
   cat("A Probabilistic Graphical Network", sep=" ")
   cat(paste("\nHas data attached:", if(is.null(x$data)) "No" else "Yes"))

@@ -16,7 +16,7 @@ writeJagsFormula.lm <- function(fit, ...){
                      }
                      else return(x)
                     }))
-  fm <- {if (is.null(fm)) coef(fit)[1]
+  fm <- {if (is.null(fm)) round(coef(fit)[1], getOption("Hyde_maxDigits"))
          else paste0(round(coef(fit)[1], getOption("Hyde_maxDigits")), 
                      " + ", 
                      paste(round(coef(fit)[-1], getOption("Hyde_maxDigits")), 

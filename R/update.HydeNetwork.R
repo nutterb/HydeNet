@@ -41,6 +41,23 @@ update.HydeNetwork <- function(object, formula, ...){
   new_formula <- rewriteHydeFormula(object$network_formula, formula)
   
   NEW <- HydeNetwork(new_formula, data=object$data)
+  
+  lostParents <- lapply(names(NEW$parents),
+         function(nm){
+           setdiff(object$parents[[nm]], NEW$parents[[nm]])
+         })
+  names(lostParents) <- names(NEW$parents)
+  
+  if (any(sapply(lostParents, length) > 0)){
+    lostParents <- lostParents[sapply(lostParents, length) > 0]
+    warning(paste0("The following nodes lost parents in the update:\n",
+                   paste0("    ", names(lostParents), ": ", sapply(lostParents, paste, collapse=", "),
+                          collapse="\n")))
+  }
+  
+  
+  
+  
   NEW$nodeType[names(object$nodeType)] <- object$nodeType
   NEW$nodeFormula[names(object$nodeFormula)] <- object$nodeFormula
   NEW$nodeFitter[names(object$nodeFitter)] <- object$nodeFitter

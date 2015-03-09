@@ -1,5 +1,6 @@
 #' @name setNode
 #' @export setNode
+#' @importFrom plyr is.formula
 #' 
 #' @title Set Node Relationships
 #' @details The relationship between a node and its parents must be defined

@@ -50,13 +50,20 @@ rewriteHydeFormula <- function(old_form, new_form){
   combine_form <- function(f1, f2){
     f1 <- sub("[+] ", "", f1)
     f2_match <- sub("([+]|[-]) ", "", f2)
-   
+    
+    #* Remove complete nodes
+    for (i in 1:length(f2)){
+      if (!grepl("[|]", f2_match[i])) f1 <- gsub(f2_match[i], "", f1)  
+    }
+ 
+    #* Remove subtracted relations
     for(i in 1:length(f1)){
       f1[i] <- if (f1[i] %in% f2_match){
                    if (substr(f2[f2_match %in% f1[i]], 1, 1) == "-") NA else f1[i] 
                } else f1[i]
     }
   
+    #* Remove subtractions
     f2 <- f2[!substr(f2, 1, 1) == "-"]
     f2 <- sub("[+]", "", f2)
     f2 <- f2[!f2 %in% f1]
@@ -75,10 +82,12 @@ rewriteHydeFormula <- function(old_form, new_form){
   names(Form) <- c("node", "parent")
   parent <- NULL
   
+  Form <- Form[!Form$node %in% " ", ]
+  
   Form <- plyr::ddply(Form,
                      "node",
                      plyr::summarise,
-                     parent = paste(parent, collapse="*"))
+                     parent = paste(parent[!parent %in% c(" ")], collapse="*"))
 
   #* Paste together the complete formula
   Form <- apply(Form, 1, 
