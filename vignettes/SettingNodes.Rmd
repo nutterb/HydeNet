@@ -114,6 +114,11 @@ g7 <- glm(death ~ pe + treat, data=PE, family="binomial")
 bagOfModels <- list(g1,g2,g3,g4,g5,g6,g7)
 
 bagNet <- HydeNetwork(bagOfModels)
+bagNet <- setNode(bagNet,
+                  treat,
+                  nodeFormula = treat ~ poly(d.dimer, 2) + angio,
+                  p=fromData(),
+                  fitModel=TRUE)
 writeNetworkModel(bagNet, pretty=TRUE)
 ```
 

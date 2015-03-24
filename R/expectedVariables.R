@@ -48,6 +48,7 @@ expectedVariables <- function(network, node, returnVector=FALSE){
 
 #' @rdname expectedVariables
 #' @export expectedParameters
+
 expectedParameters <- function(network, node, returnVector=FALSE){
   node <- as.character(substitute(node))
   inputs <- network$nodeType[[node]]

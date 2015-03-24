@@ -183,7 +183,7 @@ HydeNetwork.list <- function(nodes, ...){
   
   #* Reassign parameters from the models
   for (i in names(Attrs)){
-    network$parents[[i]] <- Attrs[[i]]$parents
+#     network$parents[[i]] <- if (length(Attrs[[i]]$parents) == 0) NULL else Attrs[[i]]$parents
     network$nodeType[[i]] <- Attrs[[i]]$nodeType
     network$nodeFormula[[i]] <- Attrs[[i]]$nodeFormula
     network$nodeFitter[[i]] <- Attrs[[i]]$nodeFitter
@@ -191,6 +191,7 @@ HydeNetwork.list <- function(nodes, ...){
     network$nodeParams[[i]] <- Attrs[[i]]$nodeParams
     network$nodeData[[i]] <- Attrs[[i]]$nodeData
     network$nodeModel[[i]] <- Attrs[[i]]$nodeModel
+    network$fromData[[i]] <- TRUE
   }
   
   return(network)

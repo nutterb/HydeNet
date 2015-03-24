@@ -92,8 +92,10 @@ makeJagsReady <- function(mdl, regex){
 
 matchLevelNumber <- function(t, Ref){
   t <- unlist(strsplit(t, ":"))
-  t <- ifelse(!t %in% Ref$term_name, t,
-              paste0("(", t, " == ", Ref$level_value[Ref$term_name == t], ")"))
+  for (i in 1:length(t)){
+    t[i] <- {if (!t[i] %in% Ref$term_name) t[i]
+             else paste0("(", t[i], " == ", Ref$level_value[Ref$term_name == t[i]], ")")}
+  }
   paste0(t, collapse="*")
 }
 
@@ -110,7 +112,7 @@ polyToPow <- function(poly){
   poly <- ifelse(grepl("pow[(]", poly),
                  paste0(poly, ")"),
                  poly)
-  poly <- paste0(poly, collapse="[*]")
+  poly <- paste0(poly, collapse="*")
   return(poly)
 }
 
