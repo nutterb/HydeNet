@@ -7,4 +7,5 @@
 .onUnload <- function(libPath)
 {
   options(Hyde_fitModel=NULL)
+  options(Hyde_maxDigits = NULL)
 }
