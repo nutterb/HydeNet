@@ -187,7 +187,7 @@ HydeNetwork.list <- function(nodes, ...){
     network$nodeType[[i]] <- Attrs[[i]]$nodeType
     network$nodeFormula[[i]] <- Attrs[[i]]$nodeFormula
     network$nodeFitter[[i]] <- Attrs[[i]]$nodeFitter
-    network$nodeFitterargs[[i]] <- Attrs[[i]]$nodeFitterArgs
+    network$nodeFitterArgs[[i]] <- Attrs[[i]]$nodeFitterArgs
     network$nodeParams[[i]] <- Attrs[[i]]$nodeParams
     network$nodeData[[i]] <- Attrs[[i]]$nodeData
     network$nodeModel[[i]] <- Attrs[[i]]$nodeModel
