@@ -1,5 +1,6 @@
 #' @name print.HydeNetwork
-#' @export print.HydeNetwork
+#' @export 
+#' @method print HydeNetwork
 #' 
 #' @title Print a HydeNetwork
 #' @details Prints a HydeNetwork object with a brief summary of each node.

@@ -6,4 +6,4 @@
 ^cran-comments.md
 ^\z_supplemental\*.csv
 ^\z_supplemental\*.R
-^\z_supplemental
+^z_supplemental$

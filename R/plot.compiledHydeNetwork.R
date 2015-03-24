@@ -1,6 +1,6 @@
 #' @name plot.compiledHydeNetwork
 #' @aliases plot.compiledHydeNetwork plotcompiledHydeNetwork
-#' @export plot.compiledHydeNetwork
+#' @export 
 #' @importFrom graph plot
 #' @method plot compiledHydeNetwork
 #' 

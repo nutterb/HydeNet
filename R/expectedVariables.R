@@ -45,3 +45,18 @@ expectedVariables <- function(network, node, returnVector=FALSE){
   if (is.null(inputs)) cat(paste(node, "~ 1"))
   else cat(paste(node, "~", paste(inputs, collapse=" + ")))
 }
+
+#' @rdname expectedVariables
+#' @export expectedParameters
+expectedParameters <- function(network, node, returnVector=FALSE){
+  node <- as.character(substitute(node))
+  inputs <- network$nodeType[[node]]
+  
+  #   return(list(node, inputs))
+  
+  #   data(jagsDists, package='Hyde')
+  params <- jagsDists$Parameters[jagsDists$FnName == inputs]
+  
+  if (returnVector) return(params)
+  else cat(paste(paste(paste0(params, "= "), collapse=", ")))
+}

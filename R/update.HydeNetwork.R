@@ -1,5 +1,6 @@
 #' @name update.HydeNetwork
-#' @export update.HydeNetwork
+#' @export 
+#' @method update HydeNetwork
 #' 
 #' @title Update Probabilistic Graphical Network
 #' @description Add or remove nodes or add parents within a \code{HydeNetwork}
