@@ -1,7 +1,7 @@
 Package: HydeNet
 Type: Package
 Title: Hybrid Bayesian Networks Using R and JAGS
-Version: 0.7
+Version: 0.7.1
 Date: 2015-04-01
 Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter <nutterb@ccf.org>
 Maintainer: Benjamin Nutter <nutterb@ccf.org>
@@ -26,6 +26,7 @@ Depends:
     nnet,
     rjags
 Imports:
+    broom,
     graph,
     stringr,
     plyr

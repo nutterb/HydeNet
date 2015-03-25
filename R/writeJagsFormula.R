@@ -33,35 +33,29 @@ writeJagsFormula.glm <- function(fit, ...){
   if (fit$family$family == "gaussian" & fit$family$link == "identity") 
     return(writeJagsFormula.lm(fit))
   
-  fm <- as.character(fit$call$formula)
-  out_fm <- paste(fm[2], fm[1])
-  fm <- stringr::str_trim(unlist(strsplit(fm[-(1:2)], "[+]")))
-  fm <- unlist(sapply(fm, function(x){
-    if (! x %in% names(attributes(fit$terms)$dataClasses)){
-      return(NULL)
-    }
-    if (attributes(fit$terms)$dataClasses[x] == "factor"){
-      return(paste0("(", x, " == ", 2:nlevels(fit$model[, x]), ")"))
-    }
-    else return(x)
-  }))
-  fm <- {if (is.null(fm)) coef(fit)[1]
-         else paste0(round(coef(fit)[1], getOption("Hyde_maxDigits")), 
-                     " + ", 
-                     paste(round(coef(fit)[-1], getOption("Hyde_maxDigits")), 
-                           fm, sep="*", collapse=" + "))}
+  mdl <- broom::tidy(fit)[, c("term", "estimate")] 
+  
+  regex <- factorRegex(fit)
+  
+  mdl <- makeJagsReady(mdl, regex)
+  
+  #* rhs = right hand side
+  rhs <- paste(round(mdl$estimate, getOption("Hyde_maxDigits")), 
+               ifelse(mdl$jagsVar == "(Intercept)", "", "*"),
+               ifelse(mdl$jagsVar == "(Intercept)", "", mdl$jagsVar), 
+               collapse=" + ")
   
   #* Binomial Proportion
   if (fit$family$family == "binomial" & fit$family$link == "logit"){
-    fm <- paste0("ilogit(", fm, ")")
+    rhs <- paste0("ilogit(", rhs, ")")
   }
   
   #* Poisson Regression
   if (fit$family$family == "poisson" & fit$family$link == "log"){
-    fm <- paste("exp(", fm, ")")  
+    rhs <- paste("exp(", rhs, ")")  
   }
   
-  out_fm <- paste0(out_fm, fm)
+  out_fm <- paste0(as.character(fit$call$formula)[2], " ~ ", rhs)
   rToJags(as.formula(out_fm)) 
 }
 
@@ -71,25 +65,20 @@ writeJagsFormula.glm <- function(fit, ...){
 #' 
 
 writeJagsFormula.lm <- function(fit, ...){
-  fm <- as.character(fit$call$formula)
-  out_fm <- paste(fm[2], fm[1])
-  fm <- stringr::str_trim(unlist(strsplit(fm[-(1:2)], "[+]")))
-  fm <- unlist(sapply(fm, function(x){
-    if (! x %in% names(attributes(fit$terms)$dataClasses)){
-      return(NULL)
-    }
-    if (attributes(fit$terms)$dataClasses[x] == "factor"){
-      return(paste0("(", x, " == ", 2:nlevels(fit$model[, x]), ")"))
-    }
-    else return(x)
-  }))
-  fm <- {if (is.null(fm)) round(coef(fit)[1], getOption("Hyde_maxDigits"))
-         else paste0(round(coef(fit)[1], getOption("Hyde_maxDigits")), 
-                     " + ", 
-                     paste(round(coef(fit)[-1], getOption("Hyde_maxDigits")), 
-                           fm, sep="*", collapse=" + "))}
-  out_fm <- paste0(out_fm, fm)
-  rToJags(as.formula(out_fm))
+  mdl <- broom::tidy(fit)[, c("term", "estimate")] 
+  
+  regex <- factorRegex(fit)
+  
+  mdl <- makeJagsReady(mdl, regex)
+  
+  #* rhs = right hand side
+  rhs <- paste(round(mdl$estimate, getOption("Hyde_maxDigits")), 
+               ifelse(mdl$jagsVar == "(Intercept)", "", "*"),
+               ifelse(mdl$jagsVar == "(Intercept)", "", mdl$jagsVar), 
+               collapse=" + ")
+  
+  out_fm <- paste0(as.character(fit$call$formula)[2], " ~ ", rhs)
+  rToJags(as.formula(out_fm)) 
 }
 
 #' @rdname writeJagsFormula

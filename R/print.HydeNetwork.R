@@ -1,5 +1,6 @@
 #' @name print.HydeNetwork
-#' @export print.HydeNetwork
+#' @export 
+#' @method print HydeNetwork
 #' 
 #' @title Print a HydeNetwork
 #' @details Prints a HydeNetwork object with a brief summary of each node.
@@ -33,7 +34,7 @@
 #'     
 print.HydeNetwork <- function(x, ...){
   Hyde.nm <- as.character(substitute(x))
-  
+   
   #* Requested Nodes
   requested_nodes <- as.character(substitute(list(...)))[-1]
   if (length(requested_nodes) == 0) requested_nodes <- x$nodes

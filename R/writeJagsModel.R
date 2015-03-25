@@ -50,7 +50,7 @@ writeJagsModel <- function(network, node){
       else if (node_params['p'] == fromFormula())
         node_params['p'] <- rToJags(network$nodeFormula[[node_str]])
     
-      node_params['p'] <- as.character(as.formula(node_params['p']))[-(1:2)]
+      node_params['p'] <- as.character(as.formula(node_params[['p']]))[-(1:2)]
     }
     
     model_code <- paste0(node_str, " ~ ",

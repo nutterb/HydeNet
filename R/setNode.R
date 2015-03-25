@@ -180,3 +180,14 @@ setNode <- function(network, node, nodeType,
   if (err.flag) stop(paste(err.msg, collapse="\n"))
   return(network)  
 }
+
+#' @rdname setNode
+#' @export fromData
+
+fromData <- function(){ "fromData" }
+
+#' @rdname setNode
+#' @export fromFormula
+
+fromFormula <- function(){ "fromFormula" }
+
