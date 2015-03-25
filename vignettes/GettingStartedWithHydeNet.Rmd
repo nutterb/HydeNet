@@ -1,0 +1,150 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{An overview of global options and recommendations}
+-->
+---
+title: "Getting Started with HydeNet"
+author: "Jarrod Dalton and Benjamin Nutter"
+date: "3 Feb 2015"
+output:
+  html_document:
+    fig_caption: yes
+    number_section: yes
+    toc: yes
+  pdf_document:
+    fig_caption: yes
+    number_section: yes
+    toc: no
+---
+
+## Installing JAGS
+If you don't already have JAGS installed, you will receive an error when `HydeNet` tries to load the `rjags` package.  `rjags` searches your system for an installation of JAGS and throws an error if none is found.  You will need to [download and install JAGS](http://sourceforge.net/projects/mcmc-jags/files/) before using `HydeNet`.
+
+## Installing `HydeNet`
+Installing `HydeNet` from CRAN (once available) is straight forward and can be done with the usual
+```{r, eval=FALSE}
+install.packages("HydeNet")
+```
+
+If you wish to install a more recent or development version from GitHub, you may need to point R to the BioConductor repositories.  
+
+```{r, eval=FALSE}
+setRepositories(ind=1:2)
+devtools::install_github("nutterb/HydeNet")
+```
+
+## Global `HydeNet` Options
+There are a couple of global options `HydeNet` establishes that you should be aware of.  
+
+#### Hyde_fitModel
+The `Hyde_fitModel` controls the behavior of `setNode` function.  If `FALSE`, the model described by the arguments will not be fit until the JAGS model statement is written by `writeNetworkModel`.  
+
+The option can be set by using the code below.  The default setting is `FALSE`.
+
+```{r, eval=FALSE}
+options(Hyde_fitModel=FALSE)
+```
+
+Realistically, the time spent to fit the model will be spent one way or another, and it's a matter of preference for where you spend that time.  If you wish to do it
+all at once when calling `writeNetworkModel`, set the option to `FALSE`.  Your printed output when reviewing a network will appear as follows:
+
+```{r, echo=FALSE}
+library(HydeNet)
+data(PE, package='HydeNet')
+autoNet <- HydeNetwork(~ wells
+                       + pe | wells
+                       + d.dimer | pregnant*pe
+                       + angio | pe
+                       + treat | d.dimer*angio
+                       + death | pe*treat,
+                       data = PE)
+autoNet <- setNode(autoNet, treat,
+                   nodeFormula = treat ~ poly(d.dimer, 2) + angio,
+                   p = fromData())
+print(autoNet, treat)
+```
+
+Notice that the `mu` and `tau` parameters are not explicitly defined, but only give a notice that they will be estimated from the data.
+
+If the `Hyde_fitModel` option is set to `TRUE`, the output would appear as follows:
+```{r, echo=FALSE}
+library(HydeNet)
+options(Hyde_fitModel=TRUE)
+data(PE, package='HydeNet')
+autoNet <- HydeNetwork(~ wells
+                       + pe | wells
+                       + d.dimer | pregnant*pe
+                       + angio | pe
+                       + treat | d.dimer*angio
+                       + death | pe*treat,
+                       data = PE)
+autoNet <- setNode(autoNet, treat,
+                   nodeFormula = treat ~ poly(d.dimer, 2) + angio,
+                   p = fromData())
+print(autoNet, treat)
+```
+
+
+#### Hyde_maxDigits
+This options, set to 5 by default, controls the number of decimal places printed in the JAGS model code.  It can be increased or decreased depending on the level of precision you need or want in your estimates.
+
+```{r}
+library(HydeNet)
+data(PE, package='HydeNet')
+autoNet <- HydeNetwork(~ wells
+                       + pe | wells
+                       + d.dimer | pregnant*pe
+                       + angio | pe
+                       + treat | d.dimer*angio
+                       + death | pe*treat,
+                       data = PE)
+writeNetworkModel(autoNet, pretty=TRUE)
+```
+
+If 5 digits is too much for your taste:
+
+```{r}
+library(HydeNet)
+options(Hyde_maxDigits=2)
+data(PE, package='HydeNet')
+autoNet <- HydeNetwork(~ wells
+                       + pe | wells
+                       + d.dimer | pregnant*pe
+                       + angio | pe
+                       + treat | d.dimer*angio
+                       + death | pe*treat,
+                       data = PE)
+writeNetworkModel(autoNet, pretty=TRUE)
+```
+
+## A Note About Printing
+You may notice throughout the vignettes that we tend to call the print function explicitly.  That is, we use `print(object)` instead of simply submitting `object` to the console.  The `HydeNet` objects can get pretty large, and the implicit printing can become pretty slow as a result.  Consider the following comparison:
+
+```{r, eval=FALSE}
+> #* Object based on a list of models
+> g1 <- lm(wells ~ 1, data=PE)
+> g2 <- glm(pe ~ wells, data=PE, family="binomial")
+> g3 <- lm(d.dimer ~ pe + pregnant, data=PE)
+> g4 <- xtabs(~ pregnant, data=PE)
+> g5 <- glm(angio ~ pe, data=PE, family="binomial")
+> g6 <- glm(treat ~ d.dimer + angio, data=PE, family="binomial")
+> g7 <- glm(death ~ pe + treat, data=PE, family="binomial")
+
+> bagOfModels <- list(g1,g2,g3,g4,g5,g6,g7)
+> bagNet <- HydeNetwork(bagOfModels)
+
+> #* Time to print bagNet implicitly
+> a <- Sys.time()
+> bagNet
+> b <- Sys.time()
+> b-a
+Time difference of 33.53736 secs
+
+> #* Time to print bagNet explicitly
+> a <- Sys.time()
+> print(bagNet)
+> b <- Sys.time()
+> b-a
+Time difference of 0 secs
+```
+
