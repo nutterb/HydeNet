@@ -27,7 +27,7 @@ Generates the JAGS code from the Hyde network and uses it to
 \details{
 \code{compileJagsModel} is a partial wrapper for
   \code{jags.model}. Running \code{compileJagsModel(network)} is
-  equivalent to running \code{jgas.model(textConnection(writeNetworkModel(network)))}.
+  equivalent to running \code{jags.model(textConnection(writeNetworkModel(network)))}.
 }
 \examples{
 mtcars2 <- transform(mtcars,
