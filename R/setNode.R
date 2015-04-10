@@ -20,6 +20,9 @@
 #' @param fitterArgs Additional arguments to be passed to \code{fitter}.  This does not 
 #'   yet have any effect as I haven't yet decided out where to store this and 
 #'   how to implement the fitting.
+#' @param decision Logical.  If \code{TRUE}, the node will be considered a
+#'   decision node in \code{compileDecisionNetwork}.  This is only a valid
+#'   option when the node is of type \code{"dbern"} or \code{"dcat"}.
 #' @param fromData Logical.  Determines if a node's relationship is calculated 
 #'   from the data object in \code{network}.  Defaults to \code{TRUE} whenever
 #'   \code{network} has a data object.
@@ -88,6 +91,7 @@
 setNode <- function(network, node, nodeType, 
                     nodeFitter, nodeFormula, 
                     fitterArgs = list(),
+                    decision = FALSE,
                     fromData=!is.null(network$data), ...,
                     validate=TRUE, fitModel=getOption("Hyde_fitModel")){
   
@@ -148,10 +152,22 @@ setNode <- function(network, node, nodeType,
     }
   }
 
+  if (decision){
+    if (!nodeType %in% c("dbern", "dcat")){
+      wrn.flag <- wrn.flag + 1
+      wrn.msg <- c(wrn.msg,
+                   paste0(wrn.flag, 
+                          ": Only nodes of type 'dbern' and 'dcat' may be decision nodes. ",
+                          "'decision' has been set to FALSE"))
+      decision <- FALSE
+    }
+  }
+
   if (length(list(...))) network$nodeParams[[node.t]] <- list(...)
   if (!missing(nodeFormula)) network$nodeFormula[[node.t]] <- nodeFormula
   if (!missing(nodeFitter)) network$nodeFitter[[node.t]] <- nodeFitter
   if (length(fitterArgs)) network$nodeFitterArgs[[node.t]] <- fitterArgs
+  network$nodeDecision[[node.t]] <- decision
 
   if (fitModel) {
     fit <- do.call(network$nodeFitter[[node.t]],

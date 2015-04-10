@@ -12,6 +12,10 @@
 #'   [variable] component.  This is typically called from within 
 #'   \code{makeJagsReady}.
 #'   
+#'   \code{decisionOptions}: When compiling multiple JAGS models to evaluate the 
+#'   effect of decision nodes, the options for each decision node are extracted
+#'   by this utility.
+#'   
 #'   \code{makeJagsReady}: Manages the presence of factors in interactions and
 #'   makes sure the proper numeric factor value is given to the JAGS code.  
 #'   This is called from within a \code{writeJagsFormula} call.
@@ -59,6 +63,29 @@ termName <- function(term, reg){
   else return(term)   
 }
 
+#' @rdname HydeUtilities
+#' @importFrom stringr perl
+#' @importFrom stringr str_extract
+#' 
+#' @param node Character string indicating a node in a network
+#' @param network A Hyde Network Object
+
+decisionOptions <- function(node, network){
+  #* This uses a regular expression to extract the level number from
+  #* the node JAGS model.  For instance
+  #* pi.var[1] <- .123; pi.var[2] <- .321; ...
+  #* the regular expression pulls out the numbers in between each set of [].
+  if (network$nodeType[[node]] == "dcat"){
+    dist <- writeJagsModel(network, node)[1]
+    dist <- unlist(strsplit(dist, ";"))
+    dist <- stringr::str_extract(dist, stringr::perl("(?<=[[]).*(?=[]])"))
+  }
+  else if (network$nodeType[[node]] == "dbern"){
+    dist <- 0:1
+  }
+  dist
+}
+
 #' @rdname HydeUtilities 
 #' @param mdl Output from \code{broom::tidy()}
 #' @param regex A regular expression, usually returned by \code{factorRegex}
@@ -70,13 +97,20 @@ makeJagsReady <- function(mdl, regex){
   mdl$level_name <- if (!is.null(regex)) gsub(regex, "", mdl$term) else mdl$term
   mdl$factor <- if (!is.null(regex)) grepl(regex, mdl$term) else FALSE
   
-  factorRef <- mdl[mdl$factor & !grepl(":", mdl$term_name), "term_name", drop=FALSE]
+  factorRef <- mdl[mdl$factor & !grepl(":", mdl$term_name), 
+                   c("term_name", "level_name"), 
+                   drop=FALSE]
   factorRef <- plyr::ddply(factorRef,
                            "term_name",
                            transform,
                            level_value = 2:(length(term_name)+1))
   
-  mdl$jagsVar <- sapply(mdl$term_name, matchLevelNumber, Ref=factorRef)
+  mdl <- merge(mdl, factorRef,
+               by=c("term_name", "level_name"), all=TRUE)
+  
+  mdl$jagsVar <- if (nrow(factorRef) > 0)
+                   mapply(matchLevelNumber, mdl$term_name, mdl$level_value)
+                 else mdl$term
   
   #* Change 'poly' to 'pow'
   mdl$jagsVar <- sapply(mdl$jagsVar, polyToPow)
@@ -87,14 +121,15 @@ makeJagsReady <- function(mdl, regex){
 #' @rdname HydeUtilities
 #' @param t Usually the \code{term_name} column generated within 
 #'   \code{makeJagsReady}
-#' @param Ref usually the levels reference data frame generated within
+#' @param lev usually the \code{level_value} column generated within
 #'   \code{makeJagsReady}
 
-matchLevelNumber <- function(t, Ref){
+matchLevelNumber <- function(t, lev){
   t <- unlist(strsplit(t, ":"))
+  l <- unlist(strsplit(as.character(lev), ":"))
   for (i in 1:length(t)){
-    t[i] <- {if (!t[i] %in% Ref$term_name) t[i]
-             else paste0("(", t[i], " == ", Ref$level_value[Ref$term_name == t[i]], ")")}
+    t[i] <- {if (is.na(l[i])) t[i]
+             else paste0("(", t[i], " == ", l[i], ")")}
   }
   paste0(t, collapse="*")
 }

@@ -34,6 +34,7 @@ writeJagsModel <- function(network, node){
       define <- paste0(define[2], " <- ", define[3])
       model_code <- define
     }
+    else model_code <- paste0(node_str, " <- ", network$nodeParams[[node_str]]$define)
   }
   
   #*** Type 'dbern'

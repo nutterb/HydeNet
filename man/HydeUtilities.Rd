@@ -2,6 +2,7 @@
 % Please edit documentation in R/HydeUtilities.R
 \name{HydeUtilities}
 \alias{HydeUtilities}
+\alias{decisionOptions}
 \alias{makeJagsReady}
 \alias{matchLevelNumber}
 \alias{polyToPow}
@@ -11,9 +12,11 @@
 \usage{
 termName(term, reg)
 
+decisionOptions(node, network)
+
 makeJagsReady(mdl, regex)
 
-matchLevelNumber(t, Ref)
+matchLevelNumber(t, lev)
 
 polyToPow(poly)
 
@@ -25,6 +28,10 @@ validateParameters(params, dist)
 
 \item{reg}{A regular expression, usually provided by \code{factorRegex}}
 
+\item{node}{Character string indicating a node in a network}
+
+\item{network}{A Hyde Network Object}
+
 \item{mdl}{Output from \code{broom::tidy()}}
 
 \item{regex}{A regular expression, usually returned by \code{factorRegex}}
@@ -32,7 +39,7 @@ validateParameters(params, dist)
 \item{t}{Usually the \code{term_name} column generated within
 \code{makeJagsReady}}
 
-\item{Ref}{usually the levels reference data frame generated within
+\item{lev}{usually the \code{level_value} column generated within
 \code{makeJagsReady}}
 
 \item{poly}{A single term for which the polynomial components should be
@@ -54,6 +61,10 @@ The functions described below are unexported functions that
   represented as [variable][level].  This utility function pulls out the
   [variable] component.  This is typically called from within
   \code{makeJagsReady}.
+
+  \code{decisionOptions}: When compiling multiple JAGS models to evaluate the
+  effect of decision nodes, the options for each decision node are extracted
+  by this utility.
 
   \code{makeJagsReady}: Manages the presence of factors in interactions and
   makes sure the proper numeric factor value is given to the JAGS code.

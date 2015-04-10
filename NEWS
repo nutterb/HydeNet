@@ -1,0 +1,21 @@
+### 0.7.2 (10 April 2015)
+
+* The primary additions to this developmental change are the addition of 
+  decision nodes.  Each node now has a new descriptor (found in 
+  `network$nodeDecision`.  It is a logical value indicating if the node should
+  be considered a decision node.
+* The behavior of decision nodes is exactly like all other nodes in every 
+  respect _until_ you call the `compileDecisionNetwork` function.  
+  `compileDecisionNetwork` evaluates all of the decision nodes, builds a table
+  of all combinations of decision options, and systematically runs
+  `compileJagsModel` for each row of that table to create a JAGS model for 
+  each combination of decisions.
+* Decision nodes can be defined in `setNode`, but for convenience, a new 
+  function is introduced (`setDecisionNodes`) to allow multiple nodes to be 
+  defined as decision nodes in one call.  This is intended for use when a list
+  of models is used to define a network.
+* Various bugs have been corrected that were uncovered while testing conditional
+  logic nodes (this is not a formal feature of HydeNet, but can be done.  A 
+  vignette describing their use will be built later)
+* Additional bugs have been corrected while uncovered during the testing of 
+  decision node features.

@@ -144,6 +144,9 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
   nodeModel <- lapply(1:length(node_names), function(x) return(NULL))
   names(nodeModel) <- node_names  
   
+  nodeDecision <- lapply(1:length(node_names), function(x) return(FALSE))
+  names(nodeDecision) <- node_names 
+  
   #* Define the HydeNetwork object
   network <- list(nodes = node_names, parents=parents, nodeType=nodeType,
                   nodeFormula=nodeFormula,
@@ -152,6 +155,7 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
                   fromData=fromData, 
                   nodeData = nodeData,
                   nodeModel = nodeModel,
+                  nodeDecision = nodeDecision,
                   dag=network)
   
   
@@ -191,6 +195,7 @@ HydeNetwork.list <- function(nodes, ...){
     network$nodeParams[[i]] <- Attrs[[i]]$nodeParams
     network$nodeData[[i]] <- Attrs[[i]]$nodeData
     network$nodeModel[[i]] <- Attrs[[i]]$nodeModel
+    network$nodeDecision[[i]] <- Attrs[[i]]$nodeDecision
     network$fromData[[i]] <- TRUE
   }
   

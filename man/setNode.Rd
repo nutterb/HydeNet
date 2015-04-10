@@ -7,8 +7,8 @@
 \title{Set Node Relationships}
 \usage{
 setNode(network, node, nodeType, nodeFitter, nodeFormula, fitterArgs = list(),
-  fromData = !is.null(network$data), ..., validate = TRUE,
-  fitModel = getOption("Hyde_fitModel"))
+  decision = FALSE, fromData = !is.null(network$data), ...,
+  validate = TRUE, fitModel = getOption("Hyde_fitModel"))
 
 fromData()
 
@@ -31,6 +31,10 @@ node and its parents.  It must use as a term every parent of \code{node}.}
 \item{fitterArgs}{Additional arguments to be passed to \code{fitter}.  This does not
 yet have any effect as I haven't yet decided out where to store this and
 how to implement the fitting.}
+
+\item{decision}{Logical.  If \code{TRUE}, the node will be considered a
+decision node in \code{compileDecisionNetwork}.  This is only a valid
+option when the node is of type \code{"dbern"} or \code{"dcat"}.}
 
 \item{fromData}{Logical.  Determines if a node's relationship is calculated
 from the data object in \code{network}.  Defaults to \code{TRUE} whenever
