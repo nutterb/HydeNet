@@ -30,6 +30,3 @@ setUtilityNodes <- function(network, ...){
   network$nodeUtlity[nodes] <- lapply(network$nodeUtility[nodes], function(x) TRUE)
   network
 }
-
-#' @rdname setUtilityNodes
-#' @export
