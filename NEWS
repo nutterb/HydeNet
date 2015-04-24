@@ -1,3 +1,7 @@
+### 0.7.3 (24 April 2015)
+* Addressed a bug in `compileJagsModel` that affected observed data values. 
+  (Issue #36 on GitHub).
+
 ### 0.7.2 (10 April 2015)
 
 * The primary additions to this developmental change are the addition of 

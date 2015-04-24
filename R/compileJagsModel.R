@@ -46,11 +46,24 @@ compileJagsModel <- function(network, data=NULL, ...){
   
     factorRef <- as.list(network$data[, .factors, drop=FALSE])
   
+    msg <- ""
     for (i in .factors){
-      if (i %in% names(data)) data[[i]] <- as.numeric(factor(data[[i]], levels(network$data[, i])))
+      if (i %in% names(data)){
+        if (!is.numeric(data[[i]])){
+          data[[i]] <- as.numeric(factor(data[[i]], levels(network$data[, i])))                            
+        }
+      }
       factorRef[[i]] <- data.frame(value = 1:nlevels(network$data[, i]),
                                    label = levels(network$data[, i]))
+      if (!all(data[[i]] %in% c(1:nlevels(network$data[, i]),
+                                levels(network$data[, i])))){
+        msg <- c(msg,
+                 paste0("Values for '", i, "' must be an integer from 1 to ",
+                        nlevels(network$data[, i]), " or one of the following: ",
+                        paste0(levels(network$data[, i]), collapse=", ")))
+      }      
     }
+    if (length(msg) > 1) stop(paste(msg, collapse="\n"))
   }
   else factorRef <- NULL
   
