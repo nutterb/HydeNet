@@ -38,6 +38,8 @@ modelToNode.glm <- function(model, ...){
        nodeFitter = as.character(model$call)[1],
        nodeFitterArgs = as.list(model$call)[-c(1, which(names(as.list(model$call)) %in% c("formula", "data")))],
        nodeParams = list(p = gsub("[[:print:]]+~", "", writeJagsFormula(model))),
+       nodeDecision = FALSE,
+       nodeUtility = FALSE,
        fromData = TRUE,
        nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
          if (is.null(model$model)) update(model, model=TRUE)$model
@@ -58,6 +60,8 @@ modelToNode.lm <- function(model, ...){
        nodeFitterArgs = as.list(model$call)[-c(1, which(names(as.list(model$call)) %in% c("formula", "data")))],
        nodeParams = list(mu = gsub("[[:print:]]+~", "", writeJagsFormula(model)),
                          tau = 1/summary(model)$sigma),
+       nodeDecision = FALSE,
+       nodeUtility = FALSE,
        fromData = TRUE,
        nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
          if (is.null(model$model)) update(model, model=TRUE)$model
@@ -77,6 +81,8 @@ modelToNode.multinom <- function(model, ...){
        nodeFitter = as.character(model$call)[1],
        nodeFitterArgs = as.list(model$call)[-c(1, which(names(as.list(model$call)) %in% c("formula", "data")))],
        nodeParams = list(pi = gsub("[[:print:]]+~", "", writeJagsFormula(model))),
+       nodeDecision = FALSE,
+       nodeUtility = FALSE,
        fromData = TRUE,
        nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
          if (is.null(model$model)) update(model, model=TRUE)$model
@@ -96,6 +102,8 @@ modelToNode.xtabs <- function(model, ...){
        nodeFitter = as.character(attributes(model)$call)[1],
        nodeFitterArgs = as.list(attributes(model)$call)[-c(1, which(names(as.list(attributes(model)$call)) %in% c("formula", "data")))],
        nodeParams = list(pi = writeJagsFormula(model)),
+       nodeDecision = FALSE,
+       nodeUtility = FALSE,
        fromData = FALSE,
        nodeData = NULL,
        nodeModel = model)

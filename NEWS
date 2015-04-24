@@ -1,5 +1,6 @@
 ### 0.7.3 (24 April 2015)
-* Added a new dependency on package `dplyr`
+* Added a new dependency on package `dplyr` and `magrittr`.  This was done to
+  make `dplyr` available for joining MCMC matrices returned by `coda.samples`.
 * Addressed a bug in `compileJagsModel` that affected observed data values. 
   (Issue #36 on GitHub).
 * Addressed a bug in `modelToNode` that printed the node name in the first 

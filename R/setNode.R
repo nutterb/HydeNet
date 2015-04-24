@@ -23,6 +23,9 @@
 #' @param decision Logical.  If \code{TRUE}, the node will be considered a
 #'   decision node in \code{compileDecisionNetwork}.  This is only a valid
 #'   option when the node is of type \code{"dbern"} or \code{"dcat"}.
+#' @param utility Logical. If \code{TRUE}, the node will be considered a 
+#'   utility node.  This is only a valid option when the node is of type 
+#'   \code{"determ"} and it has no children.
 #' @param fromData Logical.  Determines if a node's relationship is calculated 
 #'   from the data object in \code{network}.  Defaults to \code{TRUE} whenever
 #'   \code{network} has a data object.
@@ -92,6 +95,7 @@ setNode <- function(network, node, nodeType,
                     nodeFitter, nodeFormula, 
                     fitterArgs = list(),
                     decision = FALSE,
+                    utility = FALSE,
                     fromData=!is.null(network$data), ...,
                     validate=TRUE, fitModel=getOption("Hyde_fitModel")){
   
@@ -163,11 +167,28 @@ setNode <- function(network, node, nodeType,
     }
   }
 
+  if (utility){
+    if (!nodeType %in% c("determ")){
+      err.flag <- err.flag + 1
+      err.msg <- c(err.msg,
+                   paste0(err.flag, 
+                          ": Utility nodes must be of type 'determ'."))
+    }
+    
+    if (any(sapply(network$parents, function(p, t) t %in% p, node.t))){
+      err.flag <- err.flag + 1
+      err.msg <- c(err.msg,
+                   paste0(err.flag,
+                          ": Utility nodes may not have children."))
+    }
+  }
+
   if (length(list(...))) network$nodeParams[[node.t]] <- list(...)
   if (!missing(nodeFormula)) network$nodeFormula[[node.t]] <- nodeFormula
   if (!missing(nodeFitter)) network$nodeFitter[[node.t]] <- nodeFitter
   if (length(fitterArgs)) network$nodeFitterArgs[[node.t]] <- fitterArgs
   network$nodeDecision[[node.t]] <- decision
+  network$nodeUtility[[node.t]] <- utility
 
   if (fitModel) {
     fit <- do.call(network$nodeFitter[[node.t]],

@@ -21,3 +21,12 @@ setDecisionNodes <- function(network, ...){
   network$nodeDecision[nodes] <- lapply(network$nodeDecision[nodes], function(x) TRUE)
   network
 }
+
+#' @rdname setDecisionNodes
+#' @export
+
+setUtilityNodes <- function(network, ...){
+  nodes <- as.character(substitute(list(...)))[-1]
+  network$nodeUtlity[nodes] <- lapply(network$nodeUtility[nodes], function(x) TRUE)
+  network
+}
