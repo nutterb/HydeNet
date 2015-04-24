@@ -1,6 +1,8 @@
 ### 0.7.3 (24 April 2015)
 * Addressed a bug in `compileJagsModel` that affected observed data values. 
   (Issue #36 on GitHub).
+* Addressed a bug in `modelToNode` that printed the node name in the first 
+  parameter, causing `compileJagsModel` to fail. (Issue #35 on GitHub).
 
 ### 0.7.2 (10 April 2015)
 
