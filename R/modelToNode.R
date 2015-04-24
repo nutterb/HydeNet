@@ -37,7 +37,7 @@ modelToNode.glm <- function(model, ...){
        nodeFormula = model$call$formula,
        nodeFitter = as.character(model$call)[1],
        nodeFitterArgs = as.list(model$call)[-c(1, which(names(as.list(model$call)) %in% c("formula", "data")))],
-       nodeParams = list(p = writeJagsFormula(model)),
+       nodeParams = list(p = gsub("[[:print:]]+~", "", writeJagsFormula(model))),
        fromData = TRUE,
        nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
          if (is.null(model$model)) update(model, model=TRUE)$model
@@ -56,7 +56,7 @@ modelToNode.lm <- function(model, ...){
        nodeFormula = model$call$formula,
        nodeFitter = as.character(model$call)[1],
        nodeFitterArgs = as.list(model$call)[-c(1, which(names(as.list(model$call)) %in% c("formula", "data")))],
-       nodeParams = list(mu = writeJagsFormula(model),
+       nodeParams = list(mu = gsub("[[:print:]]+~", "", writeJagsFormula(model)),
                          tau = 1/summary(model)$sigma),
        fromData = TRUE,
        nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
@@ -76,7 +76,7 @@ modelToNode.multinom <- function(model, ...){
        nodeFormula = model$call$formula,
        nodeFitter = as.character(model$call)[1],
        nodeFitterArgs = as.list(model$call)[-c(1, which(names(as.list(model$call)) %in% c("formula", "data")))],
-       nodeParams = list(pi = writeJagsFormula(model)),
+       nodeParams = list(pi = gsub("[[:print:]]+~", "", writeJagsFormula(model))),
        fromData = TRUE,
        nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
          if (is.null(model$model)) update(model, model=TRUE)$model
