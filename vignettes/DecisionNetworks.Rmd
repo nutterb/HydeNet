@@ -19,33 +19,49 @@ output:
 
 
 Decision networks are Bayesian networks where a subset of nodes represents *decisions* that may be chosen by an actor (or actors) and another subset of nodes represents *utilities* associated with certain outcomes. These networks are commonly referred to in the literature as *influence diagrams*.
-Below is an example of an influence diagram model for the casino game blackjack, as set up in `HydeNet` (to keep things simple, we assume an infinite deck, and that the dealer stands on "soft" 17 scores with an ace in the hand).
+Below is an example of an influence diagram model for the casino game blackjack, as set up in `HydeNet`:
 
 ```{r, echo=FALSE, message=FALSE}
 library(HydeNet)
 ```
-```{r}
-net <- HydeNetwork(~ card1 + card2
-                   + card1.ace | card1
+```{r, fig.width=7, fig.height=10}
+net <- HydeNetwork(~ card1.ace | card1
                    + card2.ace | card2
                    + initialPoints | card1*card2*card1.ace*card2.ace
                    + hit1 | initialPoints*dealerUpcard
-                   + dealerFinalPoints | dealerUpcard)
-plot(net)
+                   + card3 | hit1
+                   + card3.ace | card3
+                   + pointsAfterCard3 | initialPoints*card3*card3.ace
+                   + hit2 | pointsAfterCard3*dealerUpcard
+                   + card4 | hit2
+                   + card4.ace | card4
+                   + pointsAfterCard4 | pointsAfterCard3*card4*card4.ace
+                   + hit3 | pointsAfterCard4*dealerUpcard
+                   + card5 | hit3
+                   + card5.ace | card5
+                   + pointsAfterCard5 | pointsAfterCard4*card5*card5.ace
+                   + playerFinalPoints | initialPoints*hit1*pointsAfterCard3
+                                         *hit2*pointsAfterCard4*hit3*pointsAfterCard5
+                   + dealerFinalPoints | dealerUpcard
+                   + payoff | playerFinalPoints*dealerFinalPoints)
+net <- setDecisionNodes(net, hit1, hit2, hit3)
+
+attribs <- list(node=list(shape="ellipse", fixedsize=FALSE))
+plot(net, attrs=attribs)
 ```
 
 In blackjack, two cards are dealt to both the player and the dealer. Points are assigned to each card as follows:
 
-|card                     |points         |
+|Card                     |Points         |
 |:------------------------|:--------------|
 |2 through 9              |Face Value     |
 |Ten, Jack, Queen or King |10 Points      |
 |Ace                      |1 or 11 points (player choice)|
 
-For the dealer, one card (called the *upcard*) is dealt face up and the other is dealt face down. Thus, the player has only information on the upcard to guide decision-making. In the most basic form of the game (i.e., ignoring double-down, insurance and split decisions), the player is faced with the decision to *hit* or *stand*.  If the player chooses to hit, they are dealt another card and the points on that card are added to the player's previous total points.  If the total points adds to an amount greater than 21, the player *busts* (i.e., loses their money). Otherwise, the player is given another decision to hit or stand. This process continues until the player is either happy with their point total or they bust.  Once the player is all done taking cards (again, assuming they haven't busted), the dealer deals itself cards until its total is greater than or equal to 17 or it has busted. The conditional probability table of the `dealerFinalPoints` node given its parent node `dealerUpcard` is summarized in the below table (*source: https://www.blackjackinfo.com/dealer-outcome-probabilities. Accessed 2015-04-24.*):
+For the dealer, one card (called the *upcard*) is dealt face up and the other is dealt face down. Thus, the player has only information on the upcard to guide decision-making. In the most basic form of the game (i.e., ignoring double-down, insurance and split decisions), the player is faced with the decision to *hit* or *stand*.  If the player chooses to hit, they are dealt another card and the points on that card are added to the player's previous total points.  If the total points adds to an amount greater than 21, the player *busts* (i.e., loses their money). Otherwise, the player is given another decision to hit or stand. This process continues until the player is either happy with their point total or they bust.  Once the player is all done taking cards (again, assuming they haven't busted), the dealer deals itself cards until its total is greater than or equal to 17 or it has busted. The conditional probability table of the `dealerFinalPoints` node given its parent node `dealerUpcard` (assuming the dealer is drawing from a deck of infinite size) is summarized in the below table (*source: https://www.blackjackinfo.com/dealer-outcome-probabilities. Accessed 2015-04-24.*):
 
 
-|**dealerUpcard**|*Pr(Blackjack)*|*Pr(Bust)*|*Pr(17)*|*Pr(18)*|*Pr(19)*|*Pr(20)*|*Pr(21)*|
+|**`dealerUpcard`**|*Pr(Blackjack)*|*Pr(Bust)*|*Pr(17)*|*Pr(18)*|*Pr(19)*|*Pr(20)*|*Pr(21)*|
 |:---|:---|:---|---:|---:|---:|---:|---:|
 |2|0.0000|0.3567|0.1301|0.1365|0.1313|0.1257|0.1196|
 |3|0.0000|0.3767|0.1263|0.1320|0.1271|0.1218|0.1162|
