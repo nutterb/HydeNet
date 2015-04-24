@@ -1,6 +1,13 @@
-### 0.7.3 (24 April 2015)
+### 0.8.0 (24 April 2015)
 * Added a new dependency on package `dplyr` and `magrittr`.  This was done to
   make `dplyr` available for joining MCMC matrices returned by `coda.samples`.
+* Modified `compileJagsModel` to accommodate compiling multiple JAGS models when
+  a policy/decision matrix is provided.
+* Added the function `HydePosterior`, which generates posterior distributions
+  of all of the JAGS models compiled by `HydePosterior`.
+* Added a print function for the output of `HydePosterior`
+* Added a function to bind all of the MCMC output from `HydePosterior` into
+  a single data frame.
 * Addressed a bug in `compileJagsModel` that affected observed data values. 
   (Issue #36 on GitHub).
 * Addressed a bug in `modelToNode` that printed the node name in the first 
