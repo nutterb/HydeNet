@@ -81,7 +81,7 @@ decisionOptions <- function(node, network){
   if (network$nodeType[[node]] == "dcat"){
     dist <- writeJagsModel(network, node)[1]
     dist <- unlist(strsplit(dist, ";"))
-    dist <- stringr::str_extract(dist, stringr::perl("(?<=[[]).*(?=[]])"))
+    dist <- as.numeric(stringr::str_extract(dist, stringr::perl("(?<=[[]).*(?=[]])")))
   }
   else if (network$nodeType[[node]] == "dbern"){
     dist <- 0:1

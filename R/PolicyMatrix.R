@@ -39,6 +39,11 @@
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
 #' @examples
+#' mtcars2 <- transform(mtcars, 
+#'                      am=factor(am), 
+#'                      cyl=factor(cyl), 
+#'                      gear=factor(gear))
+#'                      
 #' carNet <- HydeNetwork( ~ cyl +
 #'                       disp | cyl +
 #'                       hp | disp +
@@ -77,7 +82,7 @@ defaultPolicyMatrix <- function(network){
   if (length(decision_nodes) == 0)
     stop(paste0("There are no decision nodes in '", substitute(network), "'."))
   
-  decision_options <- lapply(decision_nodes, HydeNet:::decisionOptions, network)
+  decision_options <- lapply(decision_nodes, decisionOptions, network)
   names(decision_options) <- decision_nodes
   
   expand.grid(decision_options) 

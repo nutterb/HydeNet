@@ -7,8 +7,8 @@
 \title{Set Node Relationships}
 \usage{
 setNode(network, node, nodeType, nodeFitter, nodeFormula, fitterArgs = list(),
-  decision = FALSE, fromData = !is.null(network$data), ...,
-  validate = TRUE, fitModel = getOption("Hyde_fitModel"))
+  decision = FALSE, utility = FALSE, fromData = !is.null(network$data),
+  ..., validate = TRUE, fitModel = getOption("Hyde_fitModel"))
 
 fromData()
 
@@ -35,6 +35,10 @@ how to implement the fitting.}
 \item{decision}{Logical.  If \code{TRUE}, the node will be considered a
 decision node in \code{compileDecisionNetwork}.  This is only a valid
 option when the node is of type \code{"dbern"} or \code{"dcat"}.}
+
+\item{utility}{Logical. If \code{TRUE}, the node will be considered a
+utility node.  This is only a valid option when the node is of type
+\code{"determ"} and it has no children.}
 
 \item{fromData}{Logical.  Determines if a node's relationship is calculated
 from the data object in \code{network}.  Defaults to \code{TRUE} whenever

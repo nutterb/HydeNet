@@ -8,7 +8,9 @@
 #'   
 #' @param network An object of class \code{HydeNetwork}
 #' @param data A list of data values to be observed in the nodes.  It is
-#'   passed to the \code{data} argument of \code{rjags::jags}.
+#'   passed to the \code{data} argument of \code{rjags::jags}.  Alternatively,
+#'   a data frame representing a policy matrix may be provided to compile
+#'   multiple JAGS models.
 #' @param ... Additional arguments to be passed to \code{jags.model}
 #' 
 #' @details \code{compileJagsModel} is a partial wrapper for 
@@ -67,8 +69,20 @@ compileJagsModel <- function(network, data=NULL, ...){
   }
   else factorRef <- NULL
   
-  jags <- rjags::jags.model(textConnection(writeNetworkModel(network)), 
-                    data = if(is.null(data)) sys.frame(sys.parent()) else data, ...)
+  if (is.list(data)) data <- as.data.frame(data)
+  
+  jags <- if (is.null(data)) 
+    rjags::jags.model(textConnection(writeNetworkModel(network)),
+                      data = sys.frame(sys.parent()), ...)
+    else lapply(1:nrow(data),
+                function(r, network, data, ...){
+                  rjags::jags.model(textConnection(writeNetworkModel(network)),
+                                    data = data[r, , drop=FALSE], ...)
+                },
+         network, data, ...)
+  
+#   jags <- rjags::jags.model(textConnection(writeNetworkModel(network)), 
+#                     data = if(is.null(data)) sys.frame(sys.parent()) else data, ...)
   
   #* cHN for compiled Hyde Network
   cHN <- list(jags=jags, observed=data, dag=network$dag, factorRef=factorRef)

@@ -2,9 +2,12 @@
 % Please edit documentation in R/setDecisionNodes.R
 \name{setDecisionNodes}
 \alias{setDecisionNodes}
+\alias{setUtilityNodes}
 \title{Classify Multiple Nodes as Decision Nodes}
 \usage{
 setDecisionNodes(network, ...)
+
+setUtilityNodes(network, ...)
 }
 \arguments{
 \item{network}{A Hyde Network object}

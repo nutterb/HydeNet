@@ -10,7 +10,9 @@ compileJagsModel(network, data = NULL, ...)
 \item{network}{An object of class \code{HydeNetwork}}
 
 \item{data}{A list of data values to be observed in the nodes.  It is
-passed to the \code{data} argument of \code{rjags::jags}.}
+passed to the \code{data} argument of \code{rjags::jags}.  Alternatively,
+a data frame representing a policy matrix may be provided to compile
+multiple JAGS models.}
 
 \item{...}{Additional arguments to be passed to \code{jags.model}}
 }
