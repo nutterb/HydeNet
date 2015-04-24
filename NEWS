@@ -1,4 +1,5 @@
 ### 0.7.3 (24 April 2015)
+* Added a new dependency on package `dplyr`
 * Addressed a bug in `compileJagsModel` that affected observed data values. 
   (Issue #36 on GitHub).
 * Addressed a bug in `modelToNode` that printed the node name in the first 

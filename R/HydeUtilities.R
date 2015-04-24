@@ -1,5 +1,8 @@
 #' @name HydeUtilities
-#' @importFrom plyr ddply
+#' @importFrom dplyr group_by_
+#' @importFrom dplyr mutate
+#' @importFrom magrittr %>%
+#' @export %>%
 #' 
 #' @title Hyde Network Utility Functions 
 #' @description The functions described below are unexported functions that 
@@ -100,10 +103,15 @@ makeJagsReady <- function(mdl, regex){
   factorRef <- mdl[mdl$factor & !grepl(":", mdl$term_name), 
                    c("term_name", "level_name"), 
                    drop=FALSE]
-  factorRef <- plyr::ddply(factorRef,
-                           "term_name",
-                           transform,
-                           level_value = 2:(length(term_name)+1))
+  if (nrow(factorRef) > 0){
+    factorRef <- factorRef %>%
+      dplyr::group_by_('term_name') %>%
+      dplyr::mutate(level_value = 2:length(term_name) + 1)
+  }
+#   factorRef <- plyr::ddply(factorRef,
+#                            "term_name",
+#                            transform,
+#                            level_value = 2:(length(term_name)+1))
   
   mdl <- merge(mdl, factorRef,
                by=c("term_name", "level_name"), all=TRUE)

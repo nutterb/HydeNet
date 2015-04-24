@@ -1,7 +1,9 @@
 #' @name rewriteHydeFormula
+#' @importFrom dplyr group_by_
+#' @importFrom dplyr summarise
+#' @importFrom magrittr %>%
+#' @export %>%
 #' @importFrom stringr str_split_fixed
-#' @importFrom plyr ddply
-#' @importFrom plyr summarise
 #' 
 #' @title Rewrite HydeNetwork Graph Model Formula
 #' @description This is a convenience function used to assist in the updating 
@@ -84,10 +86,14 @@ rewriteHydeFormula <- function(old_form, new_form){
   
   Form <- Form[!Form$node %in% " ", ]
   
-  Form <- plyr::ddply(Form,
-                     "node",
-                     plyr::summarise,
-                     parent = paste(parent[!parent %in% c(" ")], collapse="*"))
+  Form <- Form %>%
+    dplyr::group_by_('node') %>%
+    dplyr::summarise(parent = paste(parent[!parent %in% c(" ")], collapse = "*"))
+  
+#   Form <- plyr::ddply(Form,
+#                      "node",
+#                      plyr::summarise,
+#                      parent = paste(parent[!parent %in% c(" ")], collapse="*"))
 
   #* Paste together the complete formula
   Form <- apply(Form, 1, 
