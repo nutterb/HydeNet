@@ -44,10 +44,47 @@ net <- HydeNetwork(~ card1.ace | card1
                                          *hit2*pointsAfterCard4*hit3*pointsAfterCard5
                    + dealerFinalPoints | dealerUpcard
                    + payoff | playerFinalPoints*dealerFinalPoints)
-net <- setDecisionNodes(net, hit1, hit2, hit3)
 
-attribs <- list(node=list(shape="ellipse", fixedsize=FALSE))
-plot(net, attrs=attribs)
+net <- setNode(net, card1.ace, "determ", define=fromFormula(), nodeFormula=card1.ace ~ ifelse(card1==1,1,0))
+net <- setNode(net, card2.ace, "determ", define=fromFormula(), nodeFormula=card2.ace ~ ifelse(card2==1,1,0))
+net <- setNode(net, card3.ace, "determ", define=fromFormula(), nodeFormula=card3.ace ~ ifelse(card3==1,1,0))
+net <- setNode(net, card4.ace, "determ", define=fromFormula(), nodeFormula=card4.ace ~ ifelse(card4==1,1,0))
+net <- setNode(net, card5.ace, "determ", define=fromFormula(), nodeFormula=card5.ace ~ ifelse(card5==1,1,0))
+net <- setNode(net, initialPoints, "determ", define=fromFormula(), nodeFormula=initialPoints~card1+card2)
+net <- setNode(net, pointsAfterCard3, "determ", define=fromFormula(),
+               nodeFormula=pointsAfterCard3 ~ initialPoints+card3)
+net <- setNode(net, pointsAfterCard4, "determ", define=fromFormula(),
+               nodeFormula=pointsAfterCard4 ~ pointsAfterCard3+card4)
+net <- setNode(net, pointsAfterCard5, "determ", define=fromFormula(),
+               nodeFormula=pointsAfterCard5 ~ pointsAfterCard4+card5)
+net <- setNode(net, playerFinalPoints, "determ", define=fromFormula(),
+               nodeFormula=playerFinalPoints ~ playerFinalPoints+3)
+
+
+net <- setDecisionNodes(net, hit1, hit2, hit3)
+net <- setUtilityNodes(net, payoff)
+
+decisionNodes <- names(which(unlist(net$nodeDecision)))
+utilityNodes <- "payoff"  #names(which(unlist(net$nodeDecision)))
+determNodes <- names(which(unlist(net$nodeType)=="determ"))
+
+shapes <- rep("box",length(decisionNodes)+length(utilityNodes));
+names(shapes) <- c(decisionNodes, utilityNodes)
+
+fills <- c(rep("cyan",length(decisionNodes)), rep("yellow",length(utilityNodes)))
+names(fills) <- c(decisionNodes, utilityNodes)
+
+fontcols <- rep("gray70", length(determNodes))
+names(fontcols) <- c(determNodes)
+
+cols <- rep("gray70",length(determNodes));
+names(cols) <- determNodes
+
+nodeAttribs <- list(shape=shapes, fillcolor=fills, fontcolor=fontcols, color=cols)
+
+attribs <- list(node=list(shape="ellipse", fixedsize=FALSE, fillcolor="white", style="solid"))
+#graphics.off()
+plot(net, attrs=attribs, nodeAttrs=nodeAttribs)
 ```
 
 In blackjack, two cards are dealt to both the player and the dealer. Points are assigned to each card as follows:

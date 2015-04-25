@@ -399,9 +399,11 @@ plot(craps, attrs=list(node = list(shape="ellipse", fillcolor="green", fixedSize
 writeNetworkModel(craps, pretty=TRUE)
 ```
 
+<!--
 #### "Helper" Deterministic Functions
 
 We have implemented a series of "helper" deterministic functions to facilitate model specification.  These include `and()` (intersection of binary parent nodes), `or()` (union of parent nodes), and `xor()` (exclusive or of parent nodes).
+-->
 
 ##Modifying the Graph Structure
 
