@@ -42,6 +42,43 @@
 #'                     label=list(cyl="Cylinder", disp="Displacement", 
 #'                                mpg="Miles per Gallon")))
 
-plot.HydeNetwork <- function(x, ...){
-  graph::plot(x$dag, ...)
+plot.HydeNetwork <- function(x, ..., useHydeDefaults=TRUE){
+  if (useHydeDefaults){
+    decisionNodes <- names(which(unlist(x$nodeDecision)))
+    utilityNodes <- names(which(unlist(x$nodeUtility)))
+    determNodes <- names(which(unlist(x$nodeType)=="determ"))
+    varNodes <- x$nodes[!x$nodes %in% c(decisionNodes, utilityNodes, determNodes)]
+    
+    shape <- c(rep(getOption("Hyde_plotOptions")$shape$variable, length(varNodes)),
+               rep(getOption("Hyde_plotOptions")$shape$determ, length(determNodes)),
+               rep(getOption("Hyde_plotOptions")$shape$decision, length(decisionNodes)),
+               rep(getOption("Hyde_plotOptions")$shape$utility, length(utilityNodes)))
+    names(shape) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
+    
+    fill <- c(rep(getOption("Hyde_plotOptions")$fill$variable, length(varNodes)),
+              rep(getOption("Hyde_plotOptions")$fill$determ, length(determNodes)),
+              rep(getOption("Hyde_plotOptions")$fill$decision, length(decisionNodes)),
+              rep(getOption("Hyde_plotOptions")$fill$utility, length(utilityNodes)))
+    names(fill) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
+    
+    fontcolor <- c(rep(getOption("Hyde_plotOptions")$fontcolor$variable, length(varNodes)),
+                   rep(getOption("Hyde_plotOptions")$fontcolor$determ, length(determNodes)),
+                   rep(getOption("Hyde_plotOptions")$fontcolor$decision, length(decisionNodes)),
+                   rep(getOption("Hyde_plotOptions")$fontcolor$utility, length(utilityNodes)))
+    names(fontcolor) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
+    
+    linecolor <- c(rep(getOption("Hyde_plotOptions")$linecolor$variable, length(varNodes)),
+                   rep(getOption("Hyde_plotOptions")$linecolor$determ, length(determNodes)),
+                   rep(getOption("Hyde_plotOptions")$linecolor$decision, length(decisionNodes)),
+                   rep(getOption("Hyde_plotOptions")$linecolor$utility, length(utilityNodes)))
+    names(linecolor) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
+    
+    
+                   
+    nodeAttribs <- list(shape=shape, fillcolor=fill, fontcolor=fontcolor,
+                        color=linecolor)
+    
+    graph::plot(x$dag, nodeAttrs=nodeAttribs, ...)
+  }
+  else graph::plot(x$dag, ...)
 }
