@@ -27,6 +27,6 @@ setDecisionNodes <- function(network, ...){
 
 setUtilityNodes <- function(network, ...){
   nodes <- as.character(substitute(list(...)))[-1]
-  network$nodeUtlity[nodes] <- lapply(network$nodeUtility[nodes], function(x) TRUE)
+  network$nodeUtility[nodes] <- lapply(network$nodeUtility[nodes], function(x) TRUE)
   network
 }

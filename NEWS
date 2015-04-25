@@ -1,3 +1,7 @@
+### 0.8.1 (25 April 2015)
+* Fixes Issue #10 dealing with utility nodes not being properly initialized 
+  and set.
+
 ### 0.8.0 (24 April 2015)
 * Added a new dependency on package `dplyr` and `magrittr`.  This was done to
   make `dplyr` available for joining MCMC matrices returned by `coda.samples`.

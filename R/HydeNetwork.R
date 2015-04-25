@@ -159,6 +159,7 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
                   nodeData = nodeData,
                   nodeModel = nodeModel,
                   nodeDecision = nodeDecision,
+                  nodeUtility = nodeUtility,
                   dag=network)
   
   
