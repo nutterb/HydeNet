@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nutterb/HydeNet.png?branch=development)](https://travis-ci.org/nutterb/HydeNet) 
+
 Hybrid Bayesian Networks Using R and JAGS
 ===
 
