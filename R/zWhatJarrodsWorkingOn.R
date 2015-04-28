@@ -16,6 +16,8 @@ normalizeCPTData <- function(y, x, data, massVar){
   } else{
     stopifnot(is.character(massVar))
     stopifnot(massVar %in% names(data))     
+    stopifnot(is.numeric(data[,massVar]))
+    stopifnot(min(data[,massVar]) >= 0)
   }
   
   summedMassArray <- plyr::daply(data, c(y,x), function(x) sum(x[,massVar]), .drop_i=FALSE)
