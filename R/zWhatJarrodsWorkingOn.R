@@ -2,7 +2,55 @@
 #require(reshape2); require(plyr);  require(HydeNet);
 
 
+cpt <- function(y,x,wt=1, factorNames=lis){
+  err.flag <- 0
+  err.msg <- ""
+  
+  wrn.flag <- 0
+  wrn.msg <- ""
+  
+  if(!is.factor(y)){
+    err.flag <- err.flag + 1
+    err.msg <- c(err.msg, paste0(err.flag, ": y must be a factor"))
+  }
+  n <- length(y)
+  
+  if(is.factor(x)){
+    x <- list(x)
+  } else if(is.list(x)){
+    if(!all(unlist(lapply(x, is.factor)))){
+      err.flag <- err.flag + 1
+      err.msg <- c(err.msg, paste0(err.flag, ": all variables in x must be factors"))
+    }
+  } else{
+    err.flag <- err.flag + 1
+    err.msg <- c(err.msg,
+                 paste0(err.flag,
+                        ": x must be a factor or list of factors (e.g., data frame)"))
+  }
+  
+  
+  if(is.null(names(x))){
+    wrn.flag <- wrn.flag + 1
+    wrn.msg <- c(wrn.msg, paste0(wrn.flag, ": Unnamed list supplied for "))
+  }
+  
+  if(missing(wt)) wt <- rep(1, n)
+  
+  sumData <- data.frame(y,x,wt)
+  joint <- plyr::daply(data, c(y,x), function(x) sum(wt), .drop_i=FALSE)
+  cpt <- plyr::aaply(joint, seq_along(c(y,x))[-1], function(x) x/sum(x))
+  
+  names(dimnames(cpt))[length(c(y,x))] <- y
+  return(cpt)
+  
+}
+
 normalizeCPTData <- function(y, x, data, massVar){
+  
+  err.flag <- 0
+  err.msg <- ""
+  
   
   stopifnot(is.character(y) && length(y)==1)
   stopifnot(is.character(x))
@@ -199,5 +247,6 @@ di3.cpt <- normalizeCPTData("di3",c("di1","di2"),d)
 plyr::aaply(di3.cpt, 1:2, sum)
 
 
-
+y <- d$di3
+x <- list(d$di1, d$di2)
 
