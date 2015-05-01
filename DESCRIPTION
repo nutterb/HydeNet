@@ -1,7 +1,7 @@
 Package: HydeNet
 Type: Package
 Title: Hybrid Bayesian Networks Using R and JAGS
-Version: 0.8.1
+Version: 0.8.2
 Date: 2015-04-25
 Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter <nutter@battelle.org>
 Maintainer: Benjamin Nutter <nutter@battelle.org>

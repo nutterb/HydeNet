@@ -5,13 +5,35 @@
 #' @method plot HydeNetwork
 #' 
 #' 
-#' @title Plot a Probabilistic Graphical Network
-#' @details Plots the dag object from a \code{HydeNetwork} class network.
+#' @title Plotting Utilities Probabilistic Graphical Network
+#' @details Generate and customize plots the dag object of a \code{HydeNetwork} 
+#'   class network. \code{HydeNet} provides some initial defaults for standard 
+#'   variable nodes, deterministic nodes, decision nodes, and utility nodes.
+#'   Since these nodes are assumed to be of inherent difference and interest, 
+#'   the options are defined in a way to make these easier to identify in 
+#'   a plot.  The default options may be altered by the user to their liking
+#'   by invoking \code{HydePlotOptions}.  Node attributes are more fully 
+#'   explained in the documentation for \code{?GraphvizAttributes}.
 #' 
 #' @param x an object of class \code{HydeNetwork}
 #' @param ... additional arguments to be passed to \code{graph::plot}
 #' 
-#' @details A simple wrapper function to plot \code{network$dag}
+#' @details The plot method is a simple wrapper function to plot 
+#'   \code{network$dag}.  
+#'   
+#'   When viewing the documentation for \code{GraphvizAttributes}, only
+#'   the section Node Attributes is applicable to the settings used by 
+#'   \code{HydeNet}.  The settings for Graph Attributes and Edge Attributes 
+#'   may be used, but the user will need to provide those settings in an 
+#'   appropriate manner using the \code{...} argument of the \plot{plot} method.
+#'   
+#'   Current settings may be turned off or set to the \code{GraphvizAttributes}
+#'   defaults by supplying \code{NA} for an attribute parameter.  For example,
+#'   the \code{HydeNet} default shape for utility nodes is "box".  This may be 
+#'   turned off by using \code{utility = list(shape = NA)}.
+#'   
+#'   The plot settings can be reviewed at any time by calling 
+#'   \code{options("Hyde_plotOptions")}.
 #' 
 #' @author Jarrod Dalton and Benjamin Nutter
 #' @note
@@ -23,6 +45,8 @@
 #'   
 #'   General Graph Attributes are passed through \code{attrs} and Edge 
 #'   Attributes are passed through \code{edgeAttrs}.
+#'   
+#' @seealso GraphvizAttributes
 #' 
 #' @examples
 #' carNet <- HydeNetwork( ~ cyl + 
@@ -73,12 +97,80 @@ plot.HydeNetwork <- function(x, ..., useHydeDefaults=TRUE){
                    rep(getOption("Hyde_plotOptions")$linecolor$utility, length(utilityNodes)))
     names(linecolor) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
     
-    
+    edgecolor <- c(rep(getOption("Hyde_plotOptions")$edgecolor$variable, length(varNodes)),
+                   rep(getOption("Hyde_plotOptions")$edgecolor$determ, length(determNodes)),
+                   rep(getOption("Hyde_plotOptions")$edgecolor$decision, length(decisionNodes)),
+                   rep(getOption("Hyde_plotOptions")$edgecolor$utility, length(utilityNodes)))
+    if (!is.null(edgecolor)) 
+      names(edgecolor) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
                    
     nodeAttribs <- list(shape=shape, fillcolor=fill, fontcolor=fontcolor,
-                        color=linecolor)
+                        color=linecolor, edgecolor=edgecolor)
+    nodeAttribs <- nodeAttribs[!sapply(nodeAttribs, is.null)]
     
     graph::plot(x$dag, nodeAttrs=nodeAttribs, ...)
   }
   else graph::plot(x$dag, ...)
 }
+
+#' @rdname plot.HydeNetwork
+#' @export HydePlotOptions
+#' 
+#' @param variable A named list of default parameters for standard variables.
+#' @param determ A named list of default parameteres for deterministic nodes.
+#' @param decision A named list of default parameters for decision nodes.
+#' @param utility A named list of default parameters for utility nodes.
+#' @param restorePackageDefault When \code{TRUE}, the initial package defaults
+#'   are restored.
+#'   
+HydePlotOptions <- function(variable = NULL,
+                            determ = NULL,
+                            decision = NULL,
+                            utility = NULL, 
+                            restorePackageDefault = FALSE){
+  if (restorePackageDefault)
+    options(Hyde_plotOptions = list(fill = list(variable = "white",
+                                                determ = "white",
+                                                decision = "#6BAED6",
+                                                utility = "#FFFFB2"),
+                                    shape = list(variable = "ellipse",
+                                                 determ = "ellipse",
+                                                 decision = "rect",
+                                                 utility = "rect"),
+                                    fontcolor = list(variable = "black",
+                                                     determ = "gray70",
+                                                     decision = "black",
+                                                     utility = "black"),
+                                    linecolor = list(variable = "black",
+                                                     determ = "gray70",
+                                                     decision = "black",
+                                                     utility = "black"),
+                                    edgecolor = NULL,
+                                    distortion = NULL,
+                                    fixedsize = NULL,
+                                    fontname = NULL,
+                                    fontsize = NULL,
+                                    height = NULL,
+                                    width = NULL,
+                                    sides = NULL,
+                                    skew = NULL))
+  else {
+    current_options <- getOption("Hyde_plotOptions")
+    
+    updatePlotOptions <- function(current_opts, new_opts, type){
+      for(n in names(new_opts)){
+        current_opts[n][[1]][[type]] <- if (is.null(new_opts)) NULL else new_opts[[n]]
+      }
+      return(current_opts)
+    }
+    
+    for (t in c("variable", "determ", "decision", "utility")){
+      if (!is.null(get(t))){
+        current_options <- updatePlotOptions(current_options, get(t), t)
+      }
+    }
+    
+    options(Hyde_plotOptions = current_options)
+  }
+}
+

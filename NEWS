@@ -1,3 +1,6 @@
+### 0.8.2 (1 May 2015)
+* Adds functionality to customize plots.
+
 ### 0.8.1 (25 April 2015)
 * Fixes Issue #10 dealing with utility nodes not being properly initialized 
   and set.

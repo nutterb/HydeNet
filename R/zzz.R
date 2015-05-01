@@ -17,7 +17,16 @@
                                   linecolor = list(variable = "black",
                                                    determ = "gray70",
                                                    decision = "black",
-                                                   utility = "black")))
+                                                   utility = "black"),
+                                  edgecolor = NULL,
+                                  distortion = NULL,
+                                  fixedsize = NULL,
+                                  fontname = NULL,
+                                  fontsize = NULL,
+                                  height = NULL,
+                                  width = NULL,
+                                  sides = NULL,
+                                  skew = NULL))
 }
 
 .onUnload <- function(libPath)
