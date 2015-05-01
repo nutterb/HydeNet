@@ -40,6 +40,9 @@
 #'   
 #'   The plot settings can be reviewed at any time by calling 
 #'   \code{options("Hyde_plotOptions")}.
+#'   
+#'   See the Plotting Hyde Networks vignette (\code{vignette("HydeNetPlots")})
+#'   for a more thorough explanation of plotting networks.
 #' 
 #' @author Jarrod Dalton and Benjamin Nutter
 #' @note
@@ -55,22 +58,23 @@
 #' @seealso GraphvizAttributes
 #' 
 #' @examples
-#' carNet <- HydeNetwork( ~ cyl + 
-#'                       disp | cyl + 
-#'                       hp | disp + 
-#'                       wt + 
-#'                       gear + 
-#'                       mpg | disp*hp*wt*gear,
-#'                       data=mtcars)
-#' plot(carNet)
+#' data(BlackJack, package="HydeNet")
+#' plot(BlackJack)
 #' 
-#' #* Change node colors, shapes, and labels.
-#' #* See "Notes" for more details.
-#' plot(carNet, 
-#'      nodeAttrs=list(fillcolor=list(cyl="green", am="blue"),
-#'                     shape=list(am="rect", mpg="ellipse"),
-#'                     label=list(cyl="Cylinder", disp="Displacement", 
-#'                                mpg="Miles per Gallon")))
+#' HydePlotOptions(variable=list(shape = "rect", fillcolor = "green"),
+#'                 determ = list(shape = "rect", fillcolor = "black",
+#'                               fontcolor = "white", linecolor = "white"),
+#'                 decision = list(shape = "ellipse", fillcolor = "yellow",
+#'                                 linecolor = "red"),
+#'                 utility = list(shape = "circle", fillcolor = "red", 
+#'                                fontcolor = "white"))
+#' plot(BlackJack)
+#' 
+#' HydePlotOptions(restorePackageDefault = TRUE)
+#' 
+#' plot(BlackJack,
+#'      hit1 = customNode(fillcolor = "purple", shape = "circle", 
+#'                        fontcolor = "white", height = "2"))
 
 plot.HydeNetwork <- function(x, ..., useHydeDefaults=TRUE){
   #* If any nodes are being customized via the `customNode` function,

@@ -17,20 +17,21 @@
 #'   
 #' @author Jarrod Dalton and Benjamin Nutter
 #' @examples
-#' carNet <- HydeNetwork( ~ cyl + 
-#'                       disp | cyl + 
-#'                       hp | disp + 
-#'                       wt + 
-#'                       gear + 
-#'                       mpg | disp*hp*wt*gear,
-#'                       data=mtcars)
-#' carNet
-#' 
-#' carNet <- setNode(carNet, mpg, 
-#'                   nodeType='dnorm', mu=fromFormula(), tau=1/2.65, 
-#'                   nodeFormula = mpg ~ disp + hp + wt + factor(gear),
+#' data(PE, data="HydeNet")
+#' Net <- HydeNetwork(~ wells + 
+#'                      pe | wells + 
+#'                      d.dimer | pregnant*pe + 
+#'                      angio | pe + 
+#'                      treat | d.dimer*angio + 
+#'                      death | pe*treat) 
+#' print(Net)  
+#' print(Net, d.dimer) 
+#'                     
+#' Net <- setNode(Net, d.dimer, 
+#'                   nodeType='dnorm', mu=fromData(), tau=fromData(), 
+#'                   nodeFormula = d.dimer ~ pregnant + pe,
 #'                   nodeFitter='lm')
-#' carNet
+#' print(Net, d.dimer)
 #'     
 print.HydeNetwork <- function(x, ...){
   Hyde.nm <- as.character(substitute(x))

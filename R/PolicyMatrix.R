@@ -39,24 +39,23 @@
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
 #' @examples
-#' mtcars2 <- transform(mtcars, 
-#'                      am=factor(am), 
-#'                      cyl=factor(cyl), 
-#'                      gear=factor(gear))
+#' data(PE, data="HydeNet")
+#' Net <- HydeNetwork(~ wells + 
+#'                      pe | wells + 
+#'                      d.dimer | pregnant*pe + 
+#'                      angio | pe + 
+#'                      treat | d.dimer*angio + 
+#'                      death | pe*treat,
+#'                      data = PE) 
 #'                      
-#' carNet <- HydeNetwork( ~ cyl +
-#'                       disp | cyl +
-#'                       hp | disp +
-#'                       wt +
-#'                       gear +
-#'                       mpg | disp*hp*wt*gear,
-#'                       data=mtcars2)
-#'                  
-#' carNet <- setDecisionNodes(carNet, cyl, gear)
-#'
-#' policyMatrix(carNet)
 #' 
-#' policyMatrix(carNet, cyl=c(4, 6), gear=c(4, 5))
+#'                  
+#' Net <- setDecisionNodes(Net, angio, treat)
+#' plot(Net)
+#'
+#' policyMatrix(Net)
+#' 
+#' policyMatrix(Net, treat="No", angio = c("No", "Yes"))
 #' 
  
 policyMatrix <- function(network, ...){

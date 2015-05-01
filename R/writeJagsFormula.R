@@ -12,6 +12,10 @@
 #' @details Methods for different model objects can be written so that 
 #'   this function can be extended as desired.
 #'   
+#'   The resulting formulas are based on the coefficient matrix of the fitted
+#'   model, and the returned result is the JAGS code representing the 
+#'   regression equation of the model.
+#'   
 #'   In the \code{writeJagsFormula.glm} method, appropriate transformations
 #'   exist for the following combinations:
 #'   \enumerate{
@@ -21,6 +25,16 @@
 #'   }
 #'   
 #' @author Jarrod Dalton and Benjamin Nutter
+#' 
+#' @seealso \code{\link{writeJagsModel}}, \code{\link{writeNetworkModel}}
+#' 
+#' @examples
+#' data(PE, package="HydeNet")
+#' fit <- lm(d.dimer ~ pregnant + pe, data=PE)
+#' writeJagsFormula(fit)
+#' 
+#' fit.glm <- glm(death ~ pe + treat, data=PE, family="binomial")
+#' writeJagsFormula(fit.glm)
 
 writeJagsFormula <- function(fit, ...) UseMethod("writeJagsFormula")
 
