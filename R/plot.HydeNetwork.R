@@ -13,7 +13,8 @@
 #'   the options are defined in a way to make these easier to identify in 
 #'   a plot.  The default options may be altered by the user to their liking
 #'   by invoking \code{HydePlotOptions}.  Node attributes are more fully 
-#'   explained in the documentation for \code{?GraphvizAttributes}.
+#'   explained in the documentation for \code{?GraphvizAttributes}.  Individual
+#'   nodes may be customized with \code{customNode}
 #' 
 #' @param x an object of class \code{HydeNetwork}
 #' @param ... additional arguments to be passed to \code{graph::plot}
@@ -67,50 +68,121 @@
 #'                                mpg="Miles per Gallon")))
 
 plot.HydeNetwork <- function(x, ..., useHydeDefaults=TRUE){
+  #* If any nodes are being customized via the `customNode` function,
+  #* we need to separate the `customeNode` calls from the rest of the 
+  #* additional arguments.  
+  #* Here, we spilit them into `custom_nodes` and `add_args` (additional args)
+  add_args <- list(...)
+  if (length(add_args) > 0){
+    node_attr <- sapply(add_args,
+                        function(a) class(a) == "HydeNodePlotAttributes")
+    custom_nodes <- add_args[node_attr]
+    add_args <- add_args[!node_attr]
+  }
+  else custom_nodes <- NULL
+  
+  #* If using HydePackageDefaults
+  #* 1. Identify the nodes of each type
+  #* 2. Make an attribute list for each plotting parameter
+  #* 3. Combine the attribute lists into one massive list
+  #* 4. Remove any attribute lists that are NULL
+  #* 5. Reassign values for customized nodes
+  #* 6. Plot the function if using customized nodes (requires do.call)
+  #* 7. Plot the function if no customized nodes (can be run without do.call)
   if (useHydeDefaults){
+    #* 1. Identify the nodes of each type
     decisionNodes <- names(which(unlist(x$nodeDecision)))
     utilityNodes <- names(which(unlist(x$nodeUtility)))
     determNodes <- names(which(unlist(x$nodeType)=="determ"))
     varNodes <- x$nodes[!x$nodes %in% c(decisionNodes, utilityNodes, determNodes)]
+
+    #* 2. Make an attribute list for each plotting parameter
+    makeAttributeList <- function(attr){
+      att_list <- c(rep(getOption("Hyde_plotOptions")[[attr]]$variable, length(varNodes)),
+                    rep(getOption("Hyde_plotOptions")[[attr]]$determ, length(determNodes)),
+                    rep(getOption("Hyde_plotOptions")[[attr]]$decision, length(decisionNodes)),
+                    rep(getOption("Hyde_plotOptions")[[attr]]$utility, length(utilityNodes)))
+      if (!is.null(att_list)) names(att_list) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
+      return(att_list)
+    }
     
-    shape <- c(rep(getOption("Hyde_plotOptions")$shape$variable, length(varNodes)),
-               rep(getOption("Hyde_plotOptions")$shape$determ, length(determNodes)),
-               rep(getOption("Hyde_plotOptions")$shape$decision, length(decisionNodes)),
-               rep(getOption("Hyde_plotOptions")$shape$utility, length(utilityNodes)))
-    names(shape) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
+    shape <- makeAttributeList("shape")
+    fill <- makeAttributeList("fill")
+    fontcolor <- makeAttributeList("fontcolor")
+    linecolor <- makeAttributeList("linecolor")
+    edgecolor <- makeAttributeList("edgecolor")
+    distortion <- makeAttributeList("distortion")
+    fixedsize <- makeAttributeList("fixedsize")
+    fontname <- makeAttributeList("fontname")
+    fontsize <- makeAttributeList("fontsize")
+    height <- makeAttributeList("height")
+    width <- makeAttributeList("width")
+    sides <- makeAttributeList("sides")
+    skew <- makeAttributeList("skew")
     
-    fill <- c(rep(getOption("Hyde_plotOptions")$fill$variable, length(varNodes)),
-              rep(getOption("Hyde_plotOptions")$fill$determ, length(determNodes)),
-              rep(getOption("Hyde_plotOptions")$fill$decision, length(decisionNodes)),
-              rep(getOption("Hyde_plotOptions")$fill$utility, length(utilityNodes)))
-    names(fill) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
-    
-    fontcolor <- c(rep(getOption("Hyde_plotOptions")$fontcolor$variable, length(varNodes)),
-                   rep(getOption("Hyde_plotOptions")$fontcolor$determ, length(determNodes)),
-                   rep(getOption("Hyde_plotOptions")$fontcolor$decision, length(decisionNodes)),
-                   rep(getOption("Hyde_plotOptions")$fontcolor$utility, length(utilityNodes)))
-    names(fontcolor) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
-    
-    linecolor <- c(rep(getOption("Hyde_plotOptions")$linecolor$variable, length(varNodes)),
-                   rep(getOption("Hyde_plotOptions")$linecolor$determ, length(determNodes)),
-                   rep(getOption("Hyde_plotOptions")$linecolor$decision, length(decisionNodes)),
-                   rep(getOption("Hyde_plotOptions")$linecolor$utility, length(utilityNodes)))
-    names(linecolor) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
-    
-    edgecolor <- c(rep(getOption("Hyde_plotOptions")$edgecolor$variable, length(varNodes)),
-                   rep(getOption("Hyde_plotOptions")$edgecolor$determ, length(determNodes)),
-                   rep(getOption("Hyde_plotOptions")$edgecolor$decision, length(decisionNodes)),
-                   rep(getOption("Hyde_plotOptions")$edgecolor$utility, length(utilityNodes)))
-    if (!is.null(edgecolor)) 
-      names(edgecolor) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
-                   
+    #* 3. Combine the attribute lists into one massive list
     nodeAttribs <- list(shape=shape, fillcolor=fill, fontcolor=fontcolor,
-                        color=linecolor, edgecolor=edgecolor)
+                        color=linecolor, edgecolor=edgecolor,
+                        distortion = distortion, fixedsize=fixedsize,
+                        fontname=fontname, fontsize=fontsize,
+                        height=height, width=width,
+                        sides=sides, skew=skew)
+    
+    #* 4. Remove any attribute lists that are NULL
     nodeAttribs <- nodeAttribs[!sapply(nodeAttribs, is.null)]
     
-    graph::plot(x$dag, nodeAttrs=nodeAttribs, ...)
+
+    #* 5. Reassign values for customized nodes
+    if (!is.null(custom_nodes)){
+      for (n in names(custom_nodes)){
+        for (a in names(custom_nodes[[n]])){
+          nodeAttribs[[a]][n] <- custom_nodes[[n]][[a]]
+        }
+      }
+    }
+    #* 6. Plot the network
+    do.call(graph::plot,
+            args = c(list(x$dag, nodeAttrs=nodeAttribs), add_args))
   }
-  else graph::plot(x$dag, ...)
+  else{
+    #* 1. generate a vector of names for which plotting parameters have been 
+    #*    stated.
+    #* 2. Create a list the same length as the vector of names and give that
+    #*    list the names in the vector from 1.
+    #* 3. for each parameter named in the list (l), extract any nodes for which
+    #*    that parameter was named.
+    #* 4. The unlist function appends the name of the list element to the end
+    #*    of the node name in the format ".name".  To correctly construct the 
+    #*    list, we want to remove all of the characters from the last "." to 
+    #*    the end.  We use a perl-style regular expression to do that.
+    #* 5. place the node name into the nodeAttribs list element.
+    if (!is.null(custom_nodes)){
+      #* 1. generate a vector of names for which plotting parameters have been 
+      #*    stated.
+      list_names <- unique(as.vector(sapply(custom_nodes, names)))
+      #* 2. Create a list the same length as the vector of names and give that
+      #*    list the names in the vector from 1.
+      nodeAttribs <- lapply(list_names, function(x) NULL)
+      names(nodeAttribs) <- list_names
+
+      for(l in list_names){
+        #* 3. for each parameter named in the list (l), extract any nodes for which
+        #*    that parameter was named.
+        nodes_with_attrib <- unlist(sapply(custom_nodes, "[", l))
+        #* 4. The unlist function appends the name of the list element to the end
+        #*    of the node name in the format ".name".  To correctly construct the 
+        #*    list, we want to remove all of the characters from the last "." to 
+        #*    the end.  We use a perl-style regular expression to do that.
+        names(nodes_with_attrib) <- sub("\\.(?=[^.]*$)[[:print:]]+$", "", 
+                                        names(nodes_with_attrib), perl=TRUE)
+        #* 5. place the node name into the nodeAttribs list element.
+        nodeAttribs[[l]] <- nodes_with_attrib
+      }
+      do.call(graph::plot,
+              args = c(list(x$dag, nodeAttrs = nodeAttribs), add_args))
+    }
+    else graph::plot(x$dag, ...)
+  }
 }
 
 #' @rdname plot.HydeNetwork
@@ -172,5 +244,16 @@ HydePlotOptions <- function(variable = NULL,
     
     options(Hyde_plotOptions = current_options)
   }
+}
+
+#' @rdname plot.HydeNetwork
+#' @export customNode
+#'
+#' @param ... named attributes to pass to an individual node.
+
+customNode <- function(...){
+  nodeAttrs <- list(...)
+  class(nodeAttrs) <- "HydeNodePlotAttributes"
+  if (length(nodeAttrs) > 0) return(nodeAttrs)
 }
 

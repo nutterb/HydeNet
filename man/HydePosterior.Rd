@@ -18,7 +18,13 @@ HydePosterior(cHN, variable.names, n.iter, thin = 1, ...,
 \item{thin}{thinning interval for monitors.}
 
 \item{...}{options arguments that are passed to the update method for
-  jags model objects.}
+jags model objects.}
+
+\item{monitor_observed}{If TRUE, the observed or fixed variables (those
+  passed to the \code{data} argument in \code{compileJagsNetwork}) are
+  forced into \code{variable.names} if not already provided.  This is
+  recommended, especially if you will be binding multiple JAGS runs
+  together.}
 }
 \value{
 A list of class \code{HydePosterior} with elements \code{codas}
