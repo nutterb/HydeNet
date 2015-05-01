@@ -2,47 +2,126 @@
 #require(reshape2); require(plyr);  require(HydeNet);
 
 
-cpt <- function(y,x,wt=1, factorNames=lis){
+cpt <- function(formula, data, wt){
   err.flag <- 0
   err.msg <- ""
   
   wrn.flag <- 0
   wrn.msg <- ""
   
-  if(!is.factor(y)){
+  if(!is.formula(formula)){
     err.flag <- err.flag + 1
-    err.msg <- c(err.msg, paste0(err.flag, ": y must be a factor"))
+    err.msg <- c(err.msg, paste0(err.flag,": Object 'formula' must be of class 'formula'"))
   }
-  n <- length(y)
+  variables <- as.character(attr(terms(formula), "variables"))[-1]
+  dependentVar <- variables[1]
+  independentVars <- variables[-1]
   
-  if(is.factor(x)){
-    x <- list(x)
-  } else if(is.list(x)){
-    if(!all(unlist(lapply(x, is.factor)))){
-      err.flag <- err.flag + 1
-      err.msg <- c(err.msg, paste0(err.flag, ": all variables in x must be factors"))
-    }
-  } else{
+  if(!is.data.frame(data)){
+    err.flag <- err.flag + 1
+    err.msg <- c(err.msg, paste0(err.flag,": Object 'data' must be of class 'data.frame'"))
+  }
+  n <- nrow(data)
+  
+  missingVariables <- which(!variables %in% names(data))
+  if(length(missingVariables)>0){
+    tmp <- paste0("'",paste0(variables[missingVariables], collapse="', '"),"'")
     err.flag <- err.flag + 1
     err.msg <- c(err.msg,
                  paste0(err.flag,
-                        ": x must be a factor or list of factors (e.g., data frame)"))
+                        ": These variables do not exist in the inputted data object: ",tmp,".")
+                 )
+    if(err.flag) stop(paste(err.msg, collapse="\n"))
   }
   
   
-  if(is.null(names(x))){
-    wrn.flag <- wrn.flag + 1
-    wrn.msg <- c(wrn.msg, paste0(wrn.flag, ": Unnamed list supplied for "))
+  if(!all(unlist(lapply(data[,variables],function(x) "factor" %in% class(x))))){
+    err.flag <- err.flag + 1
+    err.msg <- c(err.msg, paste0(err.flag, ": All variables in 'formula' must be of class 'factor'"))
   }
   
-  if(missing(wt)) wt <- rep(1, n)
+  if(missing(wt)) wt <- rep(1,n) else {
+    if(is.character(wt)){
+      if(length(wt)>1){
+        wrn.flag <- wrn.flag + 1
+        wrn.msg <- c(wrn.msg,
+                     paste0(wrn.flag, 
+                            ": Character vector of length >1 given for 'wt'. Using only the first element.")
+        )
+        wt <- wt[1]
+      }
+      if(wt %in% names(data)){
+        wt <- data[,"wt"]
+      } else{
+        err.flag <- err.flag + 1
+        err.msg <- c(err.msg,
+                     paste0(err.flag,
+                            ": 'wt' must be a numeric vector or the name of a variable in 'data'")
+        )
+      }
+    }
+    
+    if(!is.numeric(wt)){
+      err.flag <- err.flag + 1
+      err.msg <- c(err.msg,
+                   paste0(err.flag,
+                          ": 'wt' must be a numeric vector or the name of a variable in 'data'")
+      )
+    } else if(length(wt) != n){
+      err.flag <- err.flag + 1
+      err.msg <- c(err.msg,paste0(err.flag,": Length of 'wt' not equal to number of rows in 'data'"))
+    }
+  }
   
-  sumData <- data.frame(y,x,wt)
-  joint <- plyr::daply(data, c(y,x), function(x) sum(wt), .drop_i=FALSE)
-  cpt <- plyr::aaply(joint, seq_along(c(y,x))[-1], function(x) x/sum(x))
+  
+  if(err.flag) stop(paste(err.msg, collapse="\n"))
+  
+  data  <- data.frame(data[,c(dependentVar,independentVars)], wt)
+  joint <- plyr::daply(data, c(dependentVar,independentVars), function(x) sum(wt), .drop_i=FALSE)
+  cpt   <- plyr::aaply(joint, seq_along(c(dependentVar,independentVars))[-1], function(x) x/sum(x))
   
   names(dimnames(cpt))[length(c(y,x))] <- y
+  class(cpt) <- "cpt"
+    
   return(cpt)
+  
+  
+  
+  
+#   if(!is.factor(y)){
+#     err.flag <- err.flag + 1
+#     err.msg <- c(err.msg, paste0(err.flag, ": y must be a factor"))
+#   }
+#   n <- length(y)
+#   
+#   if(is.factor(x)){
+#     x <- list(x)
+#   } else if(is.list(x)){
+#     if(!all(unlist(lapply(x, is.factor)))){
+#       err.flag <- err.flag + 1
+#       err.msg <- c(err.msg, paste0(err.flag, ": all variables in x must be factors"))
+#     }
+#   } else{
+#     err.flag <- err.flag + 1
+#     err.msg <- c(err.msg,
+#                  paste0(err.flag,
+#                         ": x must be a factor or list of factors (e.g., data frame)"))
+#   }
+#   
+#   
+#   if(is.null(names(x))){
+#     wrn.flag <- wrn.flag + 1
+#     wrn.msg <- c(wrn.msg, paste0(wrn.flag, ": Unnamed list supplied for "))
+#   }
+#   
+#   if(missing(wt)) wt <- rep(1, n)
+#   
+#   sumData <- data.frame(y,x,wt)
+#   joint <- plyr::daply(data, c(y,x), function(x) sum(wt), .drop_i=FALSE)
+#   cpt <- plyr::aaply(joint, seq_along(c(y,x))[-1], function(x) x/sum(x))
+#   
+#   names(dimnames(cpt))[length(c(y,x))] <- y
+#   return(cpt)
   
 }
 
