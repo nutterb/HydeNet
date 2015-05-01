@@ -26,20 +26,19 @@
 #' @seealso \code{jags.model} 
 #' 
 #' @examples
-#' mtcars2 <- transform(mtcars, 
-#'                      am=factor(am), 
-#'                      cyl=factor(cyl), 
-#'                      gear=factor(gear))
-#' carNet <- HydeNetwork( ~ cyl +
-#'                       disp | cyl +
-#'                       hp | disp +
-#'                       wt +
-#'                       gear +
-#'                       mpg | disp*hp*wt*gear,
-#'                       data=mtcars2)
+#' data(PE, data="HydeNet")
+#' Net <- HydeNetwork(~ wells + 
+#'                      pe | wells + 
+#'                      d.dimer | pregnant*pe + 
+#'                      angio | pe + 
+#'                      treat | d.dimer*angio + 
+#'                      death | pe*treat,
+#'                      data = PE) 
+#'   
 #'                  
-#' compiledCar <- compileJagsModel(carNet, n.chains=5)
-#' s <- coda.samples(compiledCar$jags, c("cyl", "mpg"), n.iter=1000)                 
+#' compiledNet <- compileJagsModel(Net, n.chains=5)
+#' (s <- coda.samples(compiledNet$jags, c("d.dimer", "death"), n.iter=1000))
+#'                 
 
 compileJagsModel <- function(network, data=NULL, ...){
   

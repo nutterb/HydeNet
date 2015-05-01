@@ -17,7 +17,13 @@ customNode(...)
 \arguments{
 \item{x}{an object of class \code{HydeNetwork}}
 
-\item{...}{additional arguments to be passed to \code{graph::plot}}
+\item{...}{additional arguments to be passed to \code{graph::plot}.
+This may also contain named elements customizing nodes, as in
+\code{node = customNode(...)}.}
+
+\item{useHydeDefaults}{A logical value indicating if the default plot
+  parameters in \code{options("Hyde_plotOptions")} should be applied
+  to the plot.}
 
 \item{variable}{A named list of default parameters for standard variables.}
 
@@ -29,8 +35,6 @@ customNode(...)
 
 \item{restorePackageDefault}{When \code{TRUE}, the initial package defaults
 are restored.}
-
-\item{...}{named attributes to pass to an individual node.}
 }
 \description{
 Plotting Utilities Probabilistic Graphical Network

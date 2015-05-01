@@ -106,7 +106,7 @@ makeJagsReady <- function(mdl, regex){
   if (nrow(factorRef) > 0){
     factorRef <- factorRef %>%
       dplyr::group_by_('term_name') %>%
-      dplyr::mutate(level_value = 2:length(term_name) + 1)
+      dplyr::mutate(level_value = 2:(length(term_name) + 1))
   }
 #   factorRef <- plyr::ddply(factorRef,
 #                            "term_name",

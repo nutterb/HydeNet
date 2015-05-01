@@ -2,11 +2,9 @@
 #' @export HydeNetwork
 #' 
 #' @title Define a Probablistic Graphical Network
-#' @description Using a directed acyclic graph (DAG), define a probabilistic
-#'   graphical network to serve as the basis of building a model.  This function
-#'   only defines the network, but not the relationships that characterize the 
-#'   network.  In other words, this function will define where the relationships
-#'   exist, but will not quantify those relationships.
+#' @description Using either a directed acyclic graph (DAG) or a list of models, 
+#'   define a probabilistic
+#'   graphical network to serve as the basis of building a model.  
 #'   
 #' @param nodes Either a formula that defines the network as passed to 
 #'   \code{gRbase::dag} or a list of model objects.
@@ -18,19 +16,83 @@
 #'   and a list of parents for each node.  These will be used to help quantify
 #'   the relationships.
 #'   
+#'   When given a formula, the relationships are defined, but are not quantified
+#'   until \code{writeNetworkModel} is called.
+#'   
+#'   When a list of models is given, rather than refitting models when 
+#'   \code{writeNetworkModel} is called, the quantified relationships are 
+#'   placed into the object.
+#'   
+#' @return
+#' Returns an object of class \code{HydeNetwork}. The object is really just a 
+#' list with the following components:
+#' \begin{itemize}{
+#'   \item \code{nodes} a vector of node names
+#'   \item \code{parents} a named list with each element being a vector of parents
+#'       for the node named.
+#'   \item \code{nodeType} a named list with each element specifying the JAGS 
+#'       distribution type.
+#'   \item \code{nodeFormula} a named list with the formulae specifying the 
+#'       relationships between nodes.
+#'   \item \code{nodeFitter} a named list giving the fitting function for each
+#'       node.
+#'   \item \code{nodeFitterArgs} A named list with additional arguments to be passed
+#'       to fitter functions.
+#'   \item \code{nodeParams} A named list.  Each element is a vector of parameters 
+#'       that will be expected by JAGS.
+#'   \item \code{fromData} A named list with the logical value of wheather parameters
+#'       should be estimated from the data.
+#'   \item \code{nodeData} A named list with the data for each node.  If a node's 
+#'       entry in \code{fromData} is \code{TRUE} and \code{nodeData} is \code{NULL},
+#'       it will look to the \code{data} attribute instead.
+#'   \item \code{nodeModel} A list of model objects.  This is a storing place for 
+#'       models that have already been fit so that they don't have to be refit 
+#'       again.
+#'   \item \code{nodeDecision} A named list of logical flags for whether the node is
+#'       a decision node or not.
+#'   \item \code{nodeUtility} A named list of logical flags for whether the node is
+#'       a utility node or not.
+#'   \item \code{dag} The dag object returned by \code{gRbase}.  Most of the plotting
+#'       utilities will be based on this element.
+#'   \item \code{data} A common data frame for nodes that do not have their own unique
+#'       data source.
+#'   \item \code{network_formula} The original formula passed to \code{gRbase::dag}
+#'       to construct the model.
+#'  }
+#'  
+#'  @note These objects can get pretty large.  In versions of R earlier than 3.2, 
+#'    it can take a while to print the large network objects if you simply type
+#'    the object name into the console.  It is recommended that you always 
+#'    explicitly invoke the `print` function (ie, \code{print(Net)} instead
+#'    of just \code{Net}) to save yourself some valuable time.
+#'   
 #' @author Jarrod Dalton and Benjamin Nutter
 #' @examples
-#' gm <- HydeNetwork( ~ cyl + 
-#'   disp | cyl + 
-#'   hp | disp + 
-#'   wt + 
-#'   gear + 
-#'   mpg | disp*hp*wt*gear)
-#'   
-#' graph::plot(gm$dag)
-#' gm$nodes
-#' gm$parents
+#' #* Formula Input
+#' Net <- HydeNetwork(~ wells + 
+#'                      pe | wells + 
+#'                      d.dimer | pregnant*pe + 
+#'                      angio | pe + 
+#'                      treat | d.dimer*angio + 
+#'                      death | pe*treat,
+#'                      data = PE) 
+#' print(Net)
 #' 
+#' #* Model Input
+#' g1 <- lm(wells ~ 1, data=PE)
+#' g2 <- glm(pe ~ wells, data=PE, family="binomial")
+#' g3 <- lm(d.dimer ~ pe + pregnant, data=PE)
+#' g4 <- xtabs(~ pregnant, data=PE)
+#' g5 <- glm(angio ~ pe, data=PE, family="binomial")
+#' g6 <- glm(treat ~ d.dimer + angio, data=PE, family="binomial")
+#' g7 <- glm(death ~ pe + treat, data=PE, family="binomial")
+#' 
+#' bagOfModels <- list(g1,g2,g3,g4,g5,g6,g7)
+#' 
+#' bagNet <- HydeNetwork(bagOfModels)
+#' print(bagNet)
+#' 
+
 
 HydeNetwork <- function(nodes, ...) UseMethod("HydeNetwork")
 

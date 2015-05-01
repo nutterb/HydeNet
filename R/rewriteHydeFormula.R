@@ -1,14 +1,13 @@
 #' @name rewriteHydeFormula
 #' @importFrom dplyr group_by_
 #' @importFrom dplyr summarise
-#' @importFrom magrittr %>%
-#' @export %>%
 #' @importFrom stringr str_split_fixed
 #' 
 #' @title Rewrite HydeNetwork Graph Model Formula
 #' @description This is a convenience function used to assist in the updating 
 #'   of \code{HydeNetwork} network objects.  It makes it possible to add and 
-#'   subtract individual parent relationships without deleting an entire node.
+#'   subtract individual parent relationships without deleting an entire node.   
+#'   It's still a work in progress.
 #'   
 #' @param old_form The current formula in a \code{HydeNetwork} object.
 #' @param new_form The formula specifications to be added
@@ -90,11 +89,6 @@ rewriteHydeFormula <- function(old_form, new_form){
     dplyr::group_by_('node') %>%
     dplyr::summarise(parent = paste(parent[!parent %in% c(" ")], collapse = "*"))
   
-#   Form <- plyr::ddply(Form,
-#                      "node",
-#                      plyr::summarise,
-#                      parent = paste(parent[!parent %in% c(" ")], collapse="*"))
-
   #* Paste together the complete formula
   Form <- apply(Form, 1, 
                 function(x) if (x[2] != "") paste(x, collapse="|") else x[1])
