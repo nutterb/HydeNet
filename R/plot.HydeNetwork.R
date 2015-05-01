@@ -17,7 +17,12 @@
 #'   nodes may be customized with \code{customNode}
 #' 
 #' @param x an object of class \code{HydeNetwork}
-#' @param ... additional arguments to be passed to \code{graph::plot}
+#' @param ... additional arguments to be passed to \code{graph::plot}.
+#'   This may also contain named elements customizing nodes, as in
+#'   \code{node = customNode(...)}.
+#' @param useHydeDefaults A logical value indicating if the default plot
+#'   parameters in \code{options("Hyde_plotOptions")} should be applied
+#'   to the plot.
 #' 
 #' @details The plot method is a simple wrapper function to plot 
 #'   \code{network$dag}.  
@@ -81,6 +86,22 @@ plot.HydeNetwork <- function(x, ..., useHydeDefaults=TRUE){
   }
   else custom_nodes <- NULL
   
+  if ("nodeAttrs" %in% names(add_args) & length(custom_nodes) > 0){
+    stop(paste0("An argument named 'nodeAttrs' was given to `plot.HydeNet`",
+                ".\nThis will likely produce conflicts with `customNode`.",
+                "\nPlease consider using either 'nodeAttrs' or 'customNode', ",
+                "but not both."))
+    add_args <- add_args[!"nodeAttrs" %in% names(add_args)]
+  }
+  
+  if ("nodeAttrs" %in% names(add_args) & useHydeDefaults){
+    warning(paste0("An argument named 'nodeAttrs' was given to `plot.HydeNet`",
+                   ".\nThis would conflict with the use of HydeNet defaults, ",
+                   "so it is being ignored.  \nIf you wish to use this ",
+                   "argument, please use 'useHydeDefaults=FALSE'"))
+    add_args <- add_args[!"nodeAttrs" %in% names(add_args)]
+  }
+  
   #* If using HydePackageDefaults
   #* 1. Identify the nodes of each type
   #* 2. Make an attribute list for each plotting parameter
@@ -107,7 +128,7 @@ plot.HydeNetwork <- function(x, ..., useHydeDefaults=TRUE){
     }
     
     shape <- makeAttributeList("shape")
-    fill <- makeAttributeList("fill")
+    fillcolor <- makeAttributeList("fillcolor")
     fontcolor <- makeAttributeList("fontcolor")
     linecolor <- makeAttributeList("linecolor")
     edgecolor <- makeAttributeList("edgecolor")
@@ -121,7 +142,7 @@ plot.HydeNetwork <- function(x, ..., useHydeDefaults=TRUE){
     skew <- makeAttributeList("skew")
     
     #* 3. Combine the attribute lists into one massive list
-    nodeAttribs <- list(shape=shape, fillcolor=fill, fontcolor=fontcolor,
+    nodeAttribs <- list(shape=shape, fillcolor=fillcolor, fontcolor=fontcolor,
                         color=linecolor, edgecolor=edgecolor,
                         distortion = distortion, fixedsize=fixedsize,
                         fontname=fontname, fontsize=fontsize,
@@ -156,7 +177,7 @@ plot.HydeNetwork <- function(x, ..., useHydeDefaults=TRUE){
     #*    list, we want to remove all of the characters from the last "." to 
     #*    the end.  We use a perl-style regular expression to do that.
     #* 5. place the node name into the nodeAttribs list element.
-    if (!is.null(custom_nodes)){
+    if (length(custom_nodes) > 0){
       #* 1. generate a vector of names for which plotting parameters have been 
       #*    stated.
       list_names <- unique(as.vector(sapply(custom_nodes, names)))
@@ -201,7 +222,7 @@ HydePlotOptions <- function(variable = NULL,
                             utility = NULL, 
                             restorePackageDefault = FALSE){
   if (restorePackageDefault)
-    options(Hyde_plotOptions = list(fill = list(variable = "white",
+    options(Hyde_plotOptions = list(fillcolor = list(variable = "white",
                                                 determ = "white",
                                                 decision = "#6BAED6",
                                                 utility = "#FFFFB2"),
@@ -248,8 +269,6 @@ HydePlotOptions <- function(variable = NULL,
 
 #' @rdname plot.HydeNetwork
 #' @export customNode
-#'
-#' @param ... named attributes to pass to an individual node.
 
 customNode <- function(...){
   nodeAttrs <- list(...)

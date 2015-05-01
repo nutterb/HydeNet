@@ -2,10 +2,10 @@
 {
   options(Hyde_fitModel=FALSE)
   options(Hyde_maxDigits = 5)
-  options(Hyde_plotOptions = list(fill = list(variable = "white",
-                                                determ = "white",
-                                                decision = "#6BAED6",
-                                                utility = "#FFFFB2"),
+  options(Hyde_plotOptions = list(fillcolor = list(variable = "white",
+                                                   determ = "white",
+                                                   decision = "#6BAED6",
+                                                   utility = "#FFFFB2"),
                                   shape = list(variable = "ellipse",
                                                determ = "ellipse",
                                                decision = "rect",
@@ -33,4 +33,5 @@
 {
   options(Hyde_fitModel=NULL)
   options(Hyde_maxDigits = NULL)
+  options(Hyde_plotOptions = NULL)
 }

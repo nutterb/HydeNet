@@ -1,5 +1,9 @@
 ### 0.8.2 (1 May 2015)
-* Adds functionality to customize plots.
+* Adds functionality to customize plot defaults.
+* Adds functionality to customize nodes in plots.
+* Added the `BlackJack` data object, which contains a `HydeNetwork` object
+  simulating a game of black jack.
+* Included a vignette showing off the use of plotting methods.
 
 ### 0.8.1 (25 April 2015)
 * Fixes Issue #10 dealing with utility nodes not being properly initialized 
