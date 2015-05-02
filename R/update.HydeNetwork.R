@@ -21,7 +21,7 @@
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
 #' @examples
-#' data(PE, data="HydeNet")
+#' data(PE, package="HydeNet")
 #' Net <- HydeNetwork(~ wells + 
 #'                      pe | wells + 
 #'                      d.dimer | pregnant*pe + 

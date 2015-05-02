@@ -86,7 +86,7 @@ d$pointsAfterCard5[ix3] <- NA
 
 d$handNum <- NULL
 
-bjdata <- d
-rm(list=ls()[!ls() == "bjdata"])
+BlackJackTrain <- d
+rm(list=ls()[!ls() == "BlackJackTrain"])
 
-#save("bjdata", file = "some_path/bjdata.RData")
+#save("BlackJackTrain", file = "some_path/BlackJackTrain.RData")

@@ -1,3 +1,10 @@
+### 0.8.3 (2 May 2015)
+* Implemented policy matrices into `compileDecisionModel` and fixed all the
+  bugs that popped up in doing so.
+* Changed the name of the Black Jack training data from `bjdata` to 
+  `BlackJackTrain`.  Added documentation for it.
+* Completed Documentation.
+
 ### 0.8.2 (1 May 2015)
 * Adds functionality to customize plot defaults.
 * Adds functionality to customize nodes in plots.

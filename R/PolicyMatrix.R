@@ -39,7 +39,7 @@
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
 #' @examples
-#' data(PE, data="HydeNet")
+#' data(PE, package="HydeNet")
 #' Net <- HydeNetwork(~ wells + 
 #'                      pe | wells + 
 #'                      d.dimer | pregnant*pe + 
@@ -70,7 +70,7 @@ policyMatrix <- function(network, ...){
                 paste(not_in_network, collapse=", "), "."))
   }
   
-  expand.grid(policies)
+  expand.grid(policies, stringsAsFactors=FALSE)
 }
 
 #' @rdname policyMatrix

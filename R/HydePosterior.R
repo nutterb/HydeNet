@@ -36,22 +36,72 @@
 #'   
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
+#' @examples
+#' data(PE, package="HydeNet")
+#' Net <- HydeNetwork(~ wells + 
+#'                      pe | wells + 
+#'                      d.dimer | pregnant*pe + 
+#'                      angio | pe + 
+#'                      treat | d.dimer*angio + 
+#'                      death | pe*treat,
+#'                      data = PE) 
+#'   
+#'                  
+#' compiledNet <- compileJagsModel(Net, n.chains=5)
+#' 
+#' #* Generate the posterior distribution
+#' Posterior <- HydePosterior(compiledNet, 
+#'                            variable.names = c("d.dimer", "death"), 
+#'                            n.iter = 1000)
+#' 
+#' #* Posterior Distributions for a Decision Model
+#' Net <- setDecisionNodes(Net, angio, treat)
+#' decisionNet <- compileDecisionModel(Net, n.chains=5)
+#' decisionsPost <- HydePosterior(decisionNet, 
+#'                                variable.names = c("d.dimer", "death"),
+#'                                n.iter = 1000)
+#' 
+#' 
 
 HydePosterior <- function(cHN, variable.names, n.iter, thin=1, ...,
                           monitor_observed=TRUE){
-  if (monitor_observed) variable.names <- unique(c(variable.names, 
-                                                   names(cHN$observed)))
+  if (monitor_observed){
+    variable.names <- 
+      if (class(cHN$jags) == "jags")
+        unique(c(variable.names, names(cHN$observed)))
+      else unique(c(variable.names, names(cHN[[1]]$observed)))
+  }
+    
   
-  codas <- lapply(cHN$jags, coda.samples, 
-                  variable.names = variable.names,
-                  n.iter = n.iter, 
-                  thin = thin, 
-                  ...)
   
-  HydePost <- list(codas = codas,
-                   observed = cHN$observed,
-                   dag = cHN$dag,
-                   factorRef = cHN$factorRef)
+  if (class(cHN$jags) == "jags"){
+    codas <- coda.samples(cHN$jags, variable.names, n.iter, thin, ...)
+    HydePost <- list(codas = codas,
+                     observed = cHN$observed,
+                     dag = cHN$dag,
+                     factorRef = cHN$factorRef)
+  }
+  else{ 
+    codas <- lapply(1:length(cHN),
+                    function(j, ...){
+                      rjags::coda.samples(cHN[[j]]$jags[[1]],
+                                    variable.names = variable.names,
+                                    n.iter = n.iter,
+                                    thin = thin,
+                                    ...)
+                    },
+                    ...)
+  
+    observed <- do.call("rbind", lapply(cHN,
+                                        function(x) x$observed))
+    
+    HydePost <- list(codas = codas,
+                     observed = observed,
+                     dag = cHN[[1]]$dag,
+                     factorRef = cHN[[1]]$factorRef)
+  }
+  
+  
   
   class(HydePost) <- "HydePosterior"
   HydePost

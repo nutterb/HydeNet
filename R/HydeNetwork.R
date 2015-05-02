@@ -26,7 +26,7 @@
 #' @return
 #' Returns an object of class \code{HydeNetwork}. The object is really just a 
 #' list with the following components:
-#' \begin{itemize}{
+#' \itemize{
 #'   \item \code{nodes} a vector of node names
 #'   \item \code{parents} a named list with each element being a vector of parents
 #'       for the node named.

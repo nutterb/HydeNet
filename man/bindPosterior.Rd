@@ -24,6 +24,35 @@ For the purposes of this function, it is assumed that if the
   can be bound together.  Subsequently, the multiple runs are bound
   together.  Lastly, the factors are relabeled, if requested.
 }
+\examples{
+#' data(PE, package="HydeNet")
+Net <- HydeNetwork(~ wells +
+                     pe | wells +
+                     d.dimer | pregnant*pe +
+                     angio | pe +
+                     treat | d.dimer*angio +
+                     death | pe*treat,
+                     data = PE)
+
+
+compiledNet <- compileJagsModel(Net, n.chains=5)
+
+#* Generate the posterior distribution
+Posterior <- HydePosterior(compiledNet,
+                           variable.names = c("d.dimer", "death"),
+                           n.iter=1000)
+
+Bound <- bindPosterior(Posterior)
+
+#* Bind a Decision Network
+#* Note: angio shouldn't really be a decision node.
+#*       We use it here for illustration
+Net <- setDecisionNodes(Net, angio, treat)
+compiledDecision <- compileDecisionModel(Net, n.chains=5)
+PosteriorDecision <- HydePosterior(compiledDecision,
+                                   variable.names = c("d.dimer", "death"),
+                                   n.iter = 1000)
+}
 \author{
 Jarrod Dalton and Benjamin Nutter
 }

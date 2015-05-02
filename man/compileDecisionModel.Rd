@@ -4,13 +4,17 @@
 \alias{compileDecisionModel}
 \title{Compile JAGS Models to Evaluate the Effect of Decisions in a Network}
 \usage{
-compileDecisionModel(network, ...)
+compileDecisionModel(network, policyMatrix = NULL, ...)
 }
 \arguments{
 \item{network}{A HydeNet object with decision nodes defined.}
 
+\item{policyMatrix}{A data frame of policies to apply to decision nodes
+for comparing networks under different conditions.  See
+\code{\link{policyMatrix}}.}
+
 \item{...}{Additional arguments to pass to \code{jags.model}, excepting
-  the \code{data} argument.  The \code{data} argument created by
+  the \code{data} argument.  The \code{data} argument is created by
   \code{compileDecisionModel}, and cannot be passed manually.}
 }
 \value{
@@ -22,13 +26,14 @@ Nodes at which a decision can be made, such as the decision to
   impact the outcome for a subject.  These types of decisions may not be
   truly random and understanding how these decisions may impact downstream
   outcomes may be beneficial to making the decision.  Compiling the decision
-  network permits the network to be evaluate under the conditions of each
+  network permits the network to be evaluated under the conditions of each
   set of decisions separately.
 }
 \details{
 \code{compileDecisionModel} only accepts nodes of type \code{"dbern"}
   (Bernoulli random variable taking either 0 or 1) or \code{"dcat"}
-  (categorical variables).  When the node is type \code{"dcat"}, the
+  (categorical variables) as decision nodes.
+  When the node is type \code{"dcat"}, the
   decision options are extracted from the JAGS statement returned by
   \code{writeJagsModel}.
 
@@ -39,7 +44,38 @@ Nodes at which a decision can be made, such as the decision to
   model objects is returned.  \code{coda.samples} may be run on each of these
   models.
 }
+\examples{
+#' data(PE, package="HydeNet")
+Net <- HydeNetwork(~ wells +
+                     pe | wells +
+                     d.dimer | pregnant*pe +
+                     angio | pe +
+                     treat | d.dimer*angio +
+                     death | pe*treat,
+                     data = PE)
+
+
+
+Net <- setDecisionNodes(Net, treat)
+plot(Net)
+
+decision1 <- compileDecisionModel(Net)
+
+#* An effectively equivalent call as the previous
+decision2 <- compileDecisionModel(Net, policyMatrix(Net))
+
+#* Using a customized policy matrix
+#* Note: this is a bit of nonsense--you can't decide if a test is negative
+#*       or positive, but we'll do this for illustration.
+custom_policy <- policyMatrix(Net,
+                              treat="No",
+                              angio = c("Negative", "Positive"))
+decision3 <- compileDecisionModel(Net, custom_policy)
+}
 \author{
 Jarrod Dalton and Benjamin Nutter
+}
+\seealso{
+\code{\link{policyMatrix}} \code{\link{compileJagsModel}}
 }
 

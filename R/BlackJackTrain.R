@@ -1,0 +1,24 @@
+#' Black Jack Network Training Dataset
+#'
+#' These are simulated data on 1,000 Black Jack hands.
+#'
+#' @format A data frame with 10000 rows and 7 variables:
+#' \describe{
+#'   \item{card1}{Value of the first card}
+#'   \item{card2}{Value of the second card}
+#'   \item{initialPoints}{Total points with the two cards}
+#'   \item{hit1}{Binary variable indicating if a hit was taken}
+#'   \item{card3}{Value of the third card}
+#'   \item{pointsAfterCard3}{Total points with three cards}
+#'   \item{hit2}{Binary variable indicating if a hit was taken}
+#'   \item{card4}{Value of the fourth card}
+#'   \item{pointsAfterCard4}{Total points with four cards}
+#'   \item{hit3}{Binary variable indicating if a hit was taken}
+#'   \item{card5}{Value of the fifth card}
+#'   \item{pointsAfterCard5}{Total points with five cards}
+#' }
+#' @source 
+#' Bicycle Cards, "Blackjack," 
+#' Retrieved from http://www.bicyclecards.com/card-games/rule/blackjack
+
+"BlackJackTrain"

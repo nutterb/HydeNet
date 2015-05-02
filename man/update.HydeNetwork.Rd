@@ -23,25 +23,22 @@ Adding or removing nodes is fairly straightforward if you are
   removing a complete node (along with its parents).  If you just wish to
   remove a parent, this doesn't work well yet.  I will have to work out
   a solution to remove parent relationships individually.  I had hoped
-  there would be an \code{update.dag} method, but no luck.
+  there would be an \code{update.dag} method, but no luck.  This will continue
+  to be developed in the future, but the arguments will remain the same.
 }
 \examples{
-mtcars2 <- transform(mtcars,
-                     am=factor(am),
-                     cyl=factor(cyl),
-                     gear=factor(gear))
-carNet <- HydeNetwork( ~ cyl +
-                      disp | cyl +
-                      hp | disp +
-                      wt +
-                      gear +
-                      mpg | disp*hp*wt*gear,
-                      data=mtcars2)
+data(PE, package="HydeNet")
+Net <- HydeNetwork(~ wells +
+                     pe | wells +
+                     d.dimer | pregnant*pe +
+                     angio | pe +
+                     treat | d.dimer*angio +
+                     death | pe*treat)
 
-plot(carNet)
+plot(Net)
 
-carNet2 <- update(carNet, ~ . + am|cyl + mpg|am)
-plot(carNet2)
+Net <- update(Net, . ~ . - pregnant)
+plot(Net)
 }
 \author{
 Jarrod Dalton and Benjamin Nutter

@@ -14,11 +14,38 @@
 #'   
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
+#' @examples
+#' data(PE, package="HydeNet")
+#' Net <- HydeNetwork(~ wells + 
+#'                      pe | wells + 
+#'                      d.dimer | pregnant*pe + 
+#'                      angio | pe + 
+#'                      treat | d.dimer*angio + 
+#'                      death | pe*treat,
+#'                      data = PE) 
+#' 
+#' Net <- setDecisionNodes(Net, treat)  
+#'                  
+#' compiledNet <- compileJagsModel(Net, n.chains=5)
+#' 
+#' #* Generate the posterior distribution for the model (but not the 
+#' #* decision model)
+#' Posterior <- HydePosterior(compiledNet, 
+#'                            variable.names = c("d.dimer", "death"), 
+#'                            n.iter = 1000)
+#' Posterior
+#' 
+#' #* Generate the posterior for the decision model
+#' Decision <- compileDecisionModel(Net, n.chains=5)
+#' Posterior_decision <- HydePosterior(Decision, 
+#'                                     variable.names = c("d.dimer", "death"), 
+#'                                     n.iter = 1000)
+#' 
 
 print.HydePosterior <- function(x, ...){
-  n_distributions <- length(x$codas)
-  n_chains <- length(x$codas[[1]])
-  n_iterations <- nrow(x$codas[[1]][[1]])
+  n_distributions <- if (class(x$codas) == "mcmc.list") 1 else length(x$codas)
+  n_chains <- if (class(x$codas) == "mcmc.list") length(x$codas) else length(x$codas[[1]])
+  n_iterations <- if (class(x$codas) == "mcmc.list") nrow(x$codas[[1]]) else nrow(x$codas[[1]][[1]])
   
   cat(paste0("Posterior distributions of a Hyde Network\n",
              "number of posterior distributions: ", n_distributions, "\n",
