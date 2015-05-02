@@ -1,4 +1,6 @@
-#This code makes some fake data on blackjack hands.
+################################################
+# Make some fake data on blackjack hands.
+################################################
 
 require(plyr)
 
@@ -103,3 +105,73 @@ bjdata <- d
 save("bjdata", file="bjdata.RData")
 
 
+
+
+#########################################################
+# Generate JAGS code for conditional probability of 
+# dealerOutcome given dealerUpcard
+#########################################################
+
+require(HydeNetwork)
+
+n <- 5000;
+
+cards <- c(2:9, "10-K", "A")
+outcomes <- c("21","20","19","18","17","Bust","Blackjack")
+
+L <- list(
+  list(card="2",
+       p=rev(c(0.000000001,0.3567,0.1301,0.1365,0.1313,0.1257,0.1196))
+  ),
+  list(card="3",
+       p=rev(c(0.000000001,0.3767,0.1263,0.1320,0.1271,0.1218,0.1162))
+  ),
+  list(card="4",
+       p=rev(c(0.000000001,0.3971,0.1224,0.1273,0.1228,0.1179,0.1126))
+  ),
+  list(card="5",
+       p=rev(c(0.000000001,0.4177,0.1184,0.1229,0.1184,0.1138,0.1089))
+  ),
+  list(card="6",
+       p=rev(c(0.000000001,0.4395,0.1148,0.1148,0.1148,0.1103,0.1057))
+  ),
+  list(card="7",
+       p=rev(c(0.000000001,0.2623,0.3686,0.1378,0.0786,0.0786,0.0741))
+  ),
+  list(card="8",
+       p=rev(c(0.000000001,0.2447,0.1286,0.3593,0.1286,0.0694,0.0694))
+  ),
+  list(card="9",
+       p=rev(c(0.000000001,0.2284,0.1200,0.1200,0.3508,0.1200,0.0608))
+  ),
+  list(card="10-K",
+       p=rev(c(0.0714,0.2134,0.1121,0.1121,0.1121,0.3442,0.0347))
+  ),
+  list(card="A",
+       p=rev(c(0.2353,0.1535,0.0635,0.1582,0.1582,0.1582,0.0732))
+  )
+)
+
+regFunc <- function(l){
+  l$data <- data.frame(dealerUpcard  = l$card,
+                       dealerOutcome = factor(apply(rmultinom(n,1,prob=l$p),
+                                                    2,
+                                                    function(x) which(x==1)),
+                                              1:7,
+                                              outcomes
+                       )
+  )
+  return(l)
+}
+
+getData <- function(l) return(l$data)
+
+L <- lapply(L, regFunc)
+
+d <- data.frame()
+for(i in 1:length(L)) d <- rbind(d, L[[i]]$data)
+
+
+net <- HydeNetwork(~dealerOutcome | dealerUpcard, data=d)
+
+writeNetworkModel(net, pretty=TRUE)

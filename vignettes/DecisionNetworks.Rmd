@@ -18,7 +18,7 @@ output:
 ---
 
 
-Decision networks are Bayesian networks where a subset of nodes represents *decisions* that may be chosen by an actor (or actors) and another subset of nodes represents *utilities* associated with certain outcomes. These networks are commonly referred to in the literature as *influence diagrams*.
+Decision networks are Bayesian networks where a subset of nodes represents *decisions* that may be chosen by an actor (or actors) and another subset of nodes represents *utilities* associated with certain outcomes. These networks are commonly referred to in the literature as *influence diagrams*. 
 
 ## Example Decison Network: Blackjack
 
@@ -78,11 +78,65 @@ net <- HydeNetwork(~ card1.ace | card1
                                          *hit2*pointsAfterCard4*hit3*pointsAfterCard5
                    + dealerFinalPoints | dealerUpcard
                    + payoff | playerFinalPoints*dealerFinalPoints)
+
+plot(net, attrs=list(node=list(fixedsize=FALSE)))
 ```
 
-We momentarily defer visualization of the network structure until after we've specified the types (random variable, deterministic, decision, or utility) of all the nodes in the network, since `plot.HydeNetwork()` allows for enhanced visualization of decision networks. See our vignette titled "Building and Customizing HydeNet Plots" for details.
+Notice in the above network plot that all nodes have the same representation of empty black ovals. The `plot.HydeNetwork()` function allows for enhanced visualization of decision networks (see the vignette titled "Building and Customizing HydeNet Plots" for details), and since we have not yet specified the node types (i.e., random variable, deterministic, decision, or utility), it assumes that all nodes are random variables. We therefore need to populate the network object with the node types and conditional distributions/deterministic functions.
 
-First, we will designate the decision and utility nodes using `setDecisionNodes()` and `setUtilityNodes()`. These functions merely set flags within the `HydeNetwork` object, to be used in later computations:
+First, we will populate the random variable and deterministic nodes using `setNode()` and `setNodeModels()`:
+
+```{r}
+#####################################
+# Random Variable Nodes
+#####################################
+
+cardProbs  <- c(rep(1/13,8), 4/13, 1/13)  # probs. for 2, 3, ..., 9, (10-K), A
+
+net <- setNode(net, card1, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card1))
+net <- setNode(net, card2, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card2))
+net <- setNode(net, card3, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card3))
+net <- setNode(net, card4, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card4))
+net <- setNode(net, card5, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card5))
+
+net <- setNode(net, dealerUpcard, nodeType="dcat",
+               pi=vectorProbs(p=cardProbs, dealerUpcard))
+
+#####################################
+# Deterministic Nodes
+#####################################
+
+
+```
+
+Node distributions for all random variable & deterministic nodes are now specified, other than `dealerFinalPoints`. 
+In the below long and ugly code block, we used logistic regression equations to specify the conditional distribution of `dealerFinalPoints`. These equations are based on the following probabilities (assuming the dealer is drawing from a deck of infinite size; *source: https://www.blackjackinfo.com/dealer-outcome-probabilities. Accessed 2015-04-24.*):
+
+|**`dealerUpcard`**|*Pr(Blackjack)*|*Pr(Bust)*|*Pr(17)*|*Pr(18)*|*Pr(19)*|*Pr(20)*|*Pr(21)*|
+|:---|:---|:---|---:|---:|---:|---:|---:|
+|2|0.0000|0.3567|0.1301|0.1365|0.1313|0.1257|0.1196|
+|3|0.0000|0.3767|0.1263|0.1320|0.1271|0.1218|0.1162|
+|4|0.0000|0.3971|0.1224|0.1273|0.1228|0.1179|0.1126|
+|5|0.0000|0.4177|0.1184|0.1229|0.1184|0.1138|0.1089|
+|6|0.0000|0.4395|0.1148|0.1148|0.1148|0.1103|0.1057|
+|7|0.0000|0.2623|0.3686|0.1378|0.0786|0.0786|0.0741|
+|8|0.0000|0.2447|0.1286|0.3593|0.1286|0.0694|0.0694|
+|9|0.0000|0.2284|0.1200|0.1200|0.3508|0.1200|0.0608|
+|10-King|0.0714|0.2134|0.1121|0.1121|0.1121|0.3442|0.0347|
+|Ace|0.2353|0.1535|0.0635|0.1582|0.1582|0.1582|0.0732|
+
+We are currently working on better and more compact ways to specify node distributions for categorical nodes for which all parents are also categorical in nature.
+
+```{r}
+net <- setNode(net, dealerOutcome, nodeType="dcat",
+               pi=
+"pi.dealerOutcome[1]<-1-(exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10))));pi.dealerOutcome[2]<-exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)));pi.dealerOutcome[3]<-exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)));pi.dealerOutcome[4]<-exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)));pi.dealerOutcome[5]<-exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)));pi.dealerOutcome[6]<-exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)));pi.dealerOutcome[7]<-exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10))/(1+exp(0.11548+0.02869*(dealerUpcard==2)+-0.2358*(dealerUpcard==3)+-0.03846*(dealerUpcard==4)+-0.08754*(dealerUpcard==5)+-0.16226*(dealerUpcard==6)+-0.03163*(dealerUpcard==7)+0.68949*(dealerUpcard==8)+2.24272*(dealerUpcard==9)+0.66467*(dealerUpcard==10))+exp(0.13052+0.0198*(dealerUpcard==2)+-0.1221*(dealerUpcard==3)+-0.07089*(dealerUpcard==4)+0.07547*(dealerUpcard==5)+-0.02113*(dealerUpcard==6)+0.4901*(dealerUpcard==7)+1.73551*(dealerUpcard==8)+1.07642*(dealerUpcard==9)+0.6382*(dealerUpcard==10))+exp(0.12002+0.02261*(dealerUpcard==2)+-0.03103*(dealerUpcard==3)+-0.02929*(dealerUpcard==4)+0.01957*(dealerUpcard==5)+0.48023*(dealerUpcard==6)+1.54719*(dealerUpcard==7)+0.59091*(dealerUpcard==8)+1.08512*(dealerUpcard==9)+0.65126*(dealerUpcard==10))+exp(0.16427+-0.04037*(dealerUpcard==2)+-0.16427*(dealerUpcard==3)+-0.02055*(dealerUpcard==4)+0.02678*(dealerUpcard==5)+1.45905*(dealerUpcard==6)+0.43735*(dealerUpcard==7)+0.57445*(dealerUpcard==8)+0.9852*(dealerUpcard==9)+-0.25958*(dealerUpcard==10))+exp(1.0768+0.1202*(dealerUpcard==2)+0.16797*(dealerUpcard==3)+0.28929*(dealerUpcard==4)+0.42818*(dealerUpcard==5)+0.1698*(dealerUpcard==6)+0.17803*(dealerUpcard==7)+0.33254*(dealerUpcard==8)+0.79311*(dealerUpcard==9)+-0.3379*(dealerUpcard==10))+exp(-15.63168+0.2373*(dealerUpcard==2)+-0.60159*(dealerUpcard==3)+-0.38932*(dealerUpcard==4)+0.38635*(dealerUpcard==5)+-0.57766*(dealerUpcard==6)+0.08342*(dealerUpcard==7)+0.17401*(dealerUpcard==8)+16.43046*(dealerUpcard==9)+16.81646*(dealerUpcard==10)))"
+)
+```
+
+With this work completed, we will now proceed to designating the decision and utility nodes and populating their node distributions (or functions, in the case of deterministic nodes).
+
+The first thing we will do is identify the decision and utility nodes, using the functions `setDecisionNodes()` and `setUtilityNodes()`. These functions merely set flags within the `HydeNetwork` object, to be used in the plot method for `HydeNetwork` objects as well as in later computations (e.g., computing expected utility of a decision):
 
 ```{r}
 net <- setDecisionNodes(net, hit1, hit2, hit3)
@@ -92,15 +146,19 @@ net$nodeDecision$hit2
 net$nodeUtility$payoff
 ```
 
+We are now ready to visualize the finished decision network:
+
+```{r, fig.width=7, fig.height=10}
+plot(net, attrs=list(node=list(fixedsize=FALSE)))
+```
+
 
 ## Decision Nodes
 
-Decision nodes, while special, can also be thought of as random variables and fed into JAGS just as typical, non-manipulable random variables are fed into JAGS. When decision nodes have parents, the implication is that the parent nodes provide *information* that is used to guide the process of decision-making for that node. Hence, these links are called *information links*. We can think of the conditional probability distribution for a decision node as a frequency (or, alternatively, a representation of belief) of observed decisions under distinct combinations of parent nodes within a population. For example, we may have data on observed hit/stand decisions in blackjack, from which a logistic regression model can estimate the relationship between current point total and probability of taking another card. (Actually, this model ignores relevant information on how many aces the player holds: Aces decrease the likelihood of a bust on the next card and thus increase the chances of a hit decision; however, we do not concern ourselves with this for the sake of simplicity.) Note that the data are independent of how many cards the player holds - all that matters for a given hit/stand decision is the current point total. 
 
-Therefore, the conditional distribution of each of the three decision nodes can be specified using a single `glm` model object. 
+Decision nodes, while special, can also be thought of as random variables and fed into JAGS just as typical, non-manipulable random variables are fed into JAGS. When decision nodes have parents, the implication is that the parent nodes provide *information* that is used to guide the process of decision-making for that node. Hence, these links are called *information links*. We can think of the conditional probability distribution for a decision node as a frequency (or, alternatively, a representation of belief) of observed decisions under distinct combinations of parent nodes within a population. For example, we may have data on observed hit/stand decisions in blackjack, from which a logistic regression model can estimate the relationship between current point total and probability of taking another card. (Actually, this model ignores relevant information on how many aces the player holds and what the dealer upcard is; we do not concern ourselves with these issues for the sake of simplicity.)
 
-
-We can manipulate this data frame to get a single two-column data frame for use in our GLM for hit decisions:
+Note that the data are independent of how many cards the player holds - all that matters for a given hit/stand decision is the current point total. Therefore, the conditional distribution of each of the three decision nodes can be specified using a single `glm` model object. Here, we manipulate the blackjack data frame to get a single two-column data frame for use in our GLM for hit decisions, and then apply the glm object to each of the three decision nodes:
 
 ```{r}
 data(bjdata)
@@ -110,13 +168,27 @@ glmdata <- data.frame(points = c(initialPoints, pointsAfterCard3, pointsAfterCar
                       hit    = c(hit1,hit2,hit3))
 detach(bjdata)
 glmdata <- glmdata[!is.na(glmdata$hit),]
+head(glmdata)
 
 g <- glm(hit ~ points, data=glmdata, family="binomial")
 summary(g)$coef
 
+#net <- setNodeModels(net, g)  #CURRENTLY PRODUCES AN ERROR
+
 ```
 
 ## Utility Nodes
+
+
+
+
+
+
+
+# xxxxxxxxxxxxxxxxxxxxxxxxxx
+# xxxxxxxxxxxxxxxxxxxxxxxxxx
+# xxxxxxxxxxxxxxxxxxxxxxxxxx
+# xxxxxxxxxxxxxxxxxxxxxxxxxx
 
 Several of the other nodes are deterministic in nature (e.g., `cardX.ace` is an indicator variable present in the network for ease of computing the player's point totals after each card is dealt, which are also deterministic nodes). These are populated using the following code:
 
@@ -139,34 +211,15 @@ net <- setNode(net, playerFinalPoints, "determ", define=fromFormula(),
 ```
 
 
-
-## Visualization of Decision Networks
-
-With the `HydeNet` model now fully specified, we can now visualize the decision network. The `plot` method for `HydeNetwork` objects supports the use of different node shapes and colors corresponding to each node type (e.g., random variable node, decision node, utility node, or deterministic node).
+## Policy Matrices
 
 
 
 
 
-The conditional probability table of the `dealerFinalPoints` node given its parent node `dealerUpcard` (assuming the dealer is drawing from a deck of infinite size) is summarized in the below table (*source: https://www.blackjackinfo.com/dealer-outcome-probabilities. Accessed 2015-04-24.*):
 
 
-|**`dealerUpcard`**|*Pr(Blackjack)*|*Pr(Bust)*|*Pr(17)*|*Pr(18)*|*Pr(19)*|*Pr(20)*|*Pr(21)*|
-|:---|:---|:---|---:|---:|---:|---:|---:|
-|2|0.0000|0.3567|0.1301|0.1365|0.1313|0.1257|0.1196|
-|3|0.0000|0.3767|0.1263|0.1320|0.1271|0.1218|0.1162|
-|4|0.0000|0.3971|0.1224|0.1273|0.1228|0.1179|0.1126|
-|5|0.0000|0.4177|0.1184|0.1229|0.1184|0.1138|0.1089|
-|6|0.0000|0.4395|0.1148|0.1148|0.1148|0.1103|0.1057|
-|7|0.0000|0.2623|0.3686|0.1378|0.0786|0.0786|0.0741|
-|8|0.0000|0.2447|0.1286|0.3593|0.1286|0.0694|0.0694|
-|9|0.0000|0.2284|0.1200|0.1200|0.3508|0.1200|0.0608|
-|10-King|0.0714|0.2134|0.1121|0.1121|0.1121|0.3442|0.0347|
-|Ace|0.2353|0.1535|0.0635|0.1582|0.1582|0.1582|0.0732|
-
-
-
-```{r, fig.width=7, fig.height=10}
+```{r, eval=FALSE, fig.width=7, fig.height=10}
 net <- HydeNetwork(~ card1.ace | card1
                    + card2.ace | card2
                    + initialPoints | card1*card2*card1.ace*card2.ace
