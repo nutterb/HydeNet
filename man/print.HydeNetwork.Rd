@@ -19,20 +19,21 @@ Print a HydeNetwork
 Prints a HydeNetwork object with a brief summary of each node.
 }
 \examples{
-carNet <- HydeNetwork( ~ cyl +
-                      disp | cyl +
-                      hp | disp +
-                      wt +
-                      gear +
-                      mpg | disp*hp*wt*gear,
-                      data=mtcars)
-carNet
+data(PE, data="HydeNet")
+Net <- HydeNetwork(~ wells +
+                     pe | wells +
+                     d.dimer | pregnant*pe +
+                     angio | pe +
+                     treat | d.dimer*angio +
+                     death | pe*treat)
+print(Net)
+print(Net, d.dimer)
 
-carNet <- setNode(carNet, mpg,
-                  nodeType='dnorm', mu=fromFormula(), tau=1/2.65,
-                  nodeFormula = mpg ~ disp + hp + wt + factor(gear),
+Net <- setNode(Net, d.dimer,
+                  nodeType='dnorm', mu=fromData(), tau=fromData(),
+                  nodeFormula = d.dimer ~ pregnant + pe,
                   nodeFitter='lm')
-carNet
+print(Net, d.dimer)
 }
 \author{
 Jarrod Dalton and Benjamin Nutter

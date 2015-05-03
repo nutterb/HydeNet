@@ -3,7 +3,7 @@
 \name{expectedVariables}
 \alias{expectedParameters}
 \alias{expectedVariables}
-\title{List Expected Parameter Names}
+\title{List Expected Parameter Names and Expected Variables Names}
 \usage{
 expectedVariables(network, node, returnVector = FALSE)
 
@@ -36,16 +36,20 @@ in \code{setNode}, if not all of the parents have been given a coefficient
 more useful for giving informative error messages.
 }
 \examples{
-carNet <- HydeNetwork( ~ cyl +
-                      disp | cyl +
-                      hp | disp +
-                      wt +
-                      gear +
-                      mpg | disp*hp*wt*gear)
+data(PE, data="HydeNet")
+Net <- HydeNetwork(~ wells +
+                     pe | wells +
+                     d.dimer | pregnant*pe +
+                     angio | pe +
+                     treat | d.dimer*angio +
+                     death | pe*treat)
 
-expectedVariables(carNet, mpg)
-expectedVariables(carNet, disp)
-expectedVariables(carNet, cyl)
+expectedVariables(Net, wells)
+expectedVariables(Net, treat)
+expectedVariables(Net, treat, returnVector=TRUE)
+
+expectedParameters(Net, wells)
+expectedParameters(Net, wells, returnVector=TRUE)
 }
 \author{
 Jarrod Dalton and Benjamin Nutter

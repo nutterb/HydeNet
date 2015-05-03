@@ -29,7 +29,7 @@
 #' @param customEdges a data frame giving custom settings for edges (arrows)
 #'   between nodes.
 #' @param ... for the \code{plot} method, additional arguments to be passed to 
-#'   \code{\link{DiagrammeR::graphviz_graph}}.  For \code{customNode}, 
+#'   \code{DiagrammeR::graphviz_graph}.  For \code{customNode}, 
 #'   named node attributes to assign to a node's plotting characteristics.
 #' @param useHydeDefaults A logical value indicating if the default plot
 #'   parameters in \code{options("Hyde_plotOptions")} should be applied
@@ -60,7 +60,6 @@
 #'   for a more thorough explanation of plotting networks.  
 #' 
 #' @author Jarrod Dalton and Benjamin Nutter
-#' @note
 #'   
 #' @source 
 #'   \url{http://rich-iannone.github.io/DiagrammeR/graphviz.html}\cr
@@ -82,11 +81,26 @@
 #'                                fontcolor = "white"))
 #' plot(BlackJack)
 #' 
-#' HydePlotOptions(restorePackageDefault = TRUE)
+#' HydePlotOptions(restorePackageDefaults = TRUE)
 #' 
 #' plot(BlackJack,
-#'      hit1 = customNode(fillcolor = "purple", shape = "circle", 
-#'                        fontcolor = "white", height = "2"))
+#'      customNodes = customNode(fillcolor = "purple", shape = "circle", 
+#'                               fontcolor = "white", height = "2",
+#'                               style="filled"))
+#' plot(BlackJack,
+#'   customNodes = 
+#'     dplyr::bind_rows(
+#'       customNode(pointsAfterCard3,
+#'                  shape = "circle",
+#'                  style = "radial",
+#'                  fillcolor = "purple:yellow",
+#'                  fontcolor = "black",
+#'                  height = "2"),
+#'       customNode(playerFinalPoints,
+#'                  shape = "circle",
+#'                  style = "wedged",
+#'                  height = "3",
+#'                  fillcolor = c("red:orange:yellow:green:blue:purple"))))
 
 
 plot.HydeNetwork <- function(x, 
@@ -121,22 +135,27 @@ plot.HydeNetwork <- function(x,
 #' 
 mergeDefaultPlotOpts <- function(network, node_df){
   nodes <- network$nodes
-  node_df %>%
-    dplyr::mutate(node_type = ifelse(network$nodeType[nodes] == "determ", 
+  node_df <- node_df %>%
+    dplyr::mutate(type = ifelse(network$nodeType[nodes] == "determ", 
                                      "determ",
                                      ifelse(network$nodeDecision[nodes], 
                                             "decision",
                                             ifelse(network$nodeUtility[nodes], 
                                                    "utility",
-                                                   "variable")))) %>%
-    dplyr::left_join(., getOption("Hyde_plotOptions"),
-                     by=c("node_type" = "type")) %>%
-    dplyr::select_("-node_type")
+                                                   "variable"))))
+
+  node_df <- dplyr::left_join(node_df, getOption("Hyde_plotOptions"),
+                   by="type") %>%
+    dplyr::select_("-type")
+  
+  node_df[, -which(names(node_df) == "node_id")] <- 
+    lapply(node_df[, -which(names(node_df) == "node_id"), drop=FALSE],
+           function(x) ifelse(is.na(x), "", x))
+  node_df
 }
 
 #' @rdname plot.HydeNetwork
 #' @param node_df A data frame of node attributes
-#' @param customNodes a data frame of custom node descriptions
 #' 
 mergeCustomNodes <- function(node_df, customNodes)
 {
@@ -161,7 +180,6 @@ mapEdges <- function(n, p) cbind(rep(n, length(p)),
 
 #' @rdname plot.HydeNetwork
 #' @param edge_df The default edge attribute data frame
-#' @param customEdges The custom edge attribute data frame
 #' 
 mergeCustomEdges <- function(edge_df, customEdges)
 {
@@ -175,6 +193,7 @@ mergeCustomEdges <- function(edge_df, customEdges)
 }
 
 #' @rdname plot.HydeNetwork 
+#' @export customNode
 #' @param node_id The name of a node in a \code{HydeNetwork} object.
 #'   May be quoted or unquoted.
 #'   
@@ -187,16 +206,17 @@ customNode <- function(node_id, ...){
 }
 
 #' @rdname plot.HydeNetwork
+#' @export HydePlotOptions
 #' @param variable,determ,decision,utility Named lists of attributes to use as 
 #'   defaults node attribute settings for each variable type.
-#' @param restorPackageDefaults A logical value.  When TRUE, the original 
+#' @param restorePackageDefaults A logical value.  When TRUE, the original 
 #'   package defaults are restored.
 HydePlotOptions <- function(variable = NULL,
                             determ = NULL,
                             decision = NULL,
                             utility = NULL, 
                             restorePackageDefaults = FALSE){
-  if (restorePackageDefault)
+  if (restorePackageDefaults)
     options(Hyde_plotOptions = 
               data.frame(type = c("variable", "determ", "decision", "utility"),
                          fillcolor = c("white", "white", "#6BAED6", "#FFFFB2"),
@@ -208,18 +228,23 @@ HydePlotOptions <- function(variable = NULL,
   else {
     current_options <- getOption("Hyde_plotOptions")
     
-    new_options <- do.call("rbind", 
+    new_options <- dplyr::bind_rows(
                            lapply(list(variable, determ, decision, utility),
-                                  as.data.frame))
+                                  as.data.frame,
+                                  stringsAsFactors=FALSE))
     new_options$type <- c("variable", "determ", "decision", "Utility")
     
-    new_options$rank <- 1
-    current_options$rank <- 2
+    new_options$index <- 1
+    current_options$index <- 2
     
-    updated_options <- dplyr::bind_rows(new_options, current_option) %>%
-      group_by_("type") %>%
-      filter_("rank(index, ties.method='first')==1") %>%
+    updated_options <- dplyr::bind_rows(new_options, current_options) %>%
+      dplyr::group_by_("type") %>%
+      dplyr::filter_("rank(index, ties.method='first')==1") %>%
       dplyr::select_("-index")
+    
+    new_options[, which(names(new_options) == "type")] <- 
+      lapply(new_options[, which(names(new_options) == "type"), drop=FALSE],
+             function(x) ifelse(is.na(x), "", x))
     
     options(Hyde_plotOptions = updated_options)
   }

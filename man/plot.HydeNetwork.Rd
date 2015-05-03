@@ -3,85 +3,117 @@
 \name{plot.HydeNetwork}
 \alias{HydePlotOptions}
 \alias{customNode}
+\alias{mapEdges}
+\alias{mergeCustomEdges}
+\alias{mergeCustomNodes}
 \alias{plot.HydeNetwork}
 \alias{plotHydeNetwork}
 \title{Plotting Utilities Probabilistic Graphical Network}
+\source{
+\url{http://rich-iannone.github.io/DiagrammeR/graphviz.html}\cr
+  See especially the section on Attributes
+
+  \url{http://graphviz.org/}\cr
+  \url{http://graphviz.org/content/attrs}
+}
 \usage{
-\method{plot}{HydeNetwork}(x, ..., useHydeDefaults = TRUE)
+\method{plot}{HydeNetwork}(x, customNodes = NULL, customEdges = NULL, ...,
+  useHydeDefaults = TRUE)
+
+mergeCustomNodes(node_df, customNodes)
+
+mapEdges(n, p)
+
+mergeCustomEdges(edge_df, customEdges)
+
+customNode(node_id, ...)
 
 HydePlotOptions(variable = NULL, determ = NULL, decision = NULL,
-  utility = NULL, restorePackageDefault = FALSE)
-
-customNode(...)
+  utility = NULL, restorePackageDefaults = FALSE)
 }
 \arguments{
 \item{x}{an object of class \code{HydeNetwork}}
 
-\item{...}{additional arguments to be passed to \code{graph::plot}.
-This may also contain named elements customizing nodes, as in
-\code{node = customNode(...)}.}
+\item{customNodes}{a data frame giving additional specifications for nodes.
+The customizations provided here will override the default settings.}
+
+\item{customEdges}{a data frame giving custom settings for edges (arrows)
+between nodes.}
+
+\item{...}{for the \code{plot} method, additional arguments to be passed to
+\code{DiagrammeR::graphviz_graph}.  For \code{customNode},
+named node attributes to assign to a node's plotting characteristics.}
 
 \item{useHydeDefaults}{A logical value indicating if the default plot
   parameters in \code{options("Hyde_plotOptions")} should be applied
   to the plot.}
 
-\item{variable}{A named list of default parameters for standard variables.}
+\item{node_df}{A data frame of node attributes}
 
-\item{determ}{A named list of default parameteres for deterministic nodes.}
+\item{n}{node names from a network object}
 
-\item{decision}{A named list of default parameters for decision nodes.}
+\item{p}{the list of parents from a network object}
 
-\item{utility}{A named list of default parameters for utility nodes.}
+\item{edge_df}{The default edge attribute data frame}
 
-\item{restorePackageDefault}{When \code{TRUE}, the initial package defaults
-are restored.}
+\item{node_id}{The name of a node in a \code{HydeNetwork} object.
+May be quoted or unquoted.}
+
+\item{variable,determ,decision,utility}{Named lists of attributes to use as
+defaults node attribute settings for each variable type.}
+
+\item{restorePackageDefaults}{A logical value.  When TRUE, the original
+package defaults are restored.}
 }
 \description{
 Plotting Utilities Probabilistic Graphical Network
 }
 \details{
-Generate and customize plots the dag object of a \code{HydeNetwork}
+Generate and customize plots of a \code{HydeNetwork}
   class network. \code{HydeNet} provides some initial defaults for standard
   variable nodes, deterministic nodes, decision nodes, and utility nodes.
   Since these nodes are assumed to be of inherent difference and interest,
   the options are defined in a way to make these easier to identify in
   a plot.  The default options may be altered by the user to their liking
   by invoking \code{HydePlotOptions}.  Node attributes are more fully
-  explained in the documentation for \code{?GraphvizAttributes}.  Individual
-  nodes may be customized with \code{customNode}
-}
-\note{
-For customizations, see the \code{Rgraphviz} documentation for
-  \code{GraphvizAttributes}.  Most notably, read the sections about
-  General Node Attributes to manipulate shapes and positions of the
-  nodes and their labels.  These are manipulated through the \code{nodeAttrs}
-  arguments (passed through \code{...}).
-
-  General Graph Attributes are passed through \code{attrs} and Edge
-  Attributes are passed through \code{edgeAttrs}.
+  explained in the documentation for the \code{DiagrammeR} package.
+  Individual nodes may be define with \code{customNode}.
 }
 \examples{
-carNet <- HydeNetwork( ~ cyl +
-                      disp | cyl +
-                      hp | disp +
-                      wt +
-                      gear +
-                      mpg | disp*hp*wt*gear,
-                      data=mtcars)
-plot(carNet)
+data(BlackJack, package="HydeNet")
+plot(BlackJack)
 
-#* Change node colors, shapes, and labels.
-#* See "Notes" for more details.
-plot(carNet,
-     nodeAttrs=list(fillcolor=list(cyl="green", am="blue"),
-                    shape=list(am="rect", mpg="ellipse"),
-                    label=list(cyl="Cylinder", disp="Displacement",
-                               mpg="Miles per Gallon")))
+HydePlotOptions(variable=list(shape = "rect", fillcolor = "green"),
+                determ = list(shape = "rect", fillcolor = "black",
+                              fontcolor = "white", linecolor = "white"),
+                decision = list(shape = "ellipse", fillcolor = "yellow",
+                                linecolor = "red"),
+                utility = list(shape = "circle", fillcolor = "red",
+                               fontcolor = "white"))
+plot(BlackJack)
+
+HydePlotOptions(restorePackageDefaults = TRUE)
+
+plot(BlackJack,
+     customNodes = customNode(fillcolor = "purple", shape = "circle",
+                              fontcolor = "white", height = "2",
+                              style="filled"))
+plot(BlackJack,
+  customNodes =
+    dplyr::bind_rows(
+      customNode(pointsAfterCard3,
+                 shape = "circle",
+                 style = "radial",
+                 fillcolor = "purple:yellow",
+                 fontcolor = "black",
+                 height = "2"),
+      customNode(playerFinalPoints,
+                 shape = "circle",
+                 style = "wedged",
+                 height = "3",
+                 fillcolor = c("red:orange:yellow:green:blue:purple"))))
 }
 \author{
 Jarrod Dalton and Benjamin Nutter
-}
-\seealso{
-GraphvizAttributes
 }
 

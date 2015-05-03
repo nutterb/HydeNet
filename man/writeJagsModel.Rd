@@ -22,14 +22,27 @@ The manipulations are performed on the \code{nodeParams} element
   for inclusion in the Bayesian analysis.
 
   The function will (eventually) travel through a serious of \code{if}
-  statements until it finds the write node type.  It will then match
+  statements until it finds the right node type.  It will then match
   the appropriate arguments to the inputs based on user supplied values or
   estimating them from the data.
+}
+\examples{
+#* NOTE: writeJagsModel isn't an exported function
+data(PE, package='HydeNet')
+Net <- HydeNetwork(~ wells +
+                     pe | wells +
+                     d.dimer | pregnant*pe +
+                     angio | pe +
+                     treat | d.dimer*angio +
+                     death | pe*treat,
+                     data = PE)
+HydeNet:::writeJagsModel(Net, 'pe')
+HydeNet:::writeJagsModel(Net, 'treat')
 }
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
 \seealso{
-\code{writeJagsFormula}
+\code{\link{writeJagsFormula}}
 }
 

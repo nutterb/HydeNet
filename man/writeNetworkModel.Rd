@@ -20,21 +20,25 @@ Based on the parameters given to a network, the code for
   single JAGS model script.
 }
 \examples{
-mtcars2 <- transform(mtcars,
-                     am=factor(am),
-                     gear=factor(gear),
-                     cyl=factor(cyl))
-carNet <- HydeNetwork( ~ cyl +
-                      disp | cyl +
-                      hp | disp +
-                      wt +
-                      gear +
-                      mpg | disp*hp*wt*gear,
-                      data=mtcars2)
+data(PE, package='HydeNet')
+Net <- HydeNetwork(~ wells +
+                     pe | wells +
+                     d.dimer | pregnant*pe +
+                     angio | pe +
+                     treat | d.dimer*angio +
+                     death | pe*treat,
+                     data = PE)
 
-writeNetworkModel(carNet, pretty=TRUE)
+#* Default printing
+writeNetworkModel(Net)
+
+#* Something a little easier on the eyes.
+writeNetworkModel(Net, pretty=TRUE)
 }
 \author{
 Jarrod Dalton and Benjamin Nutter
+}
+\seealso{
+\code{\link{writeJagsModel}}, \code{\link{writeJagsFormula}}
 }
 

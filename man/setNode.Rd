@@ -54,42 +54,52 @@ be used as placeholders.}
 
 \item{validate}{Logical.  Toggles validation of parameters given in \code{...}.
 When passing raw JAGS code (ie, character strings), this should be turned off,
-as the validation is applicable to numerical values.}
+as the validation is applicable to numerical/formula values.}
 
 \item{fitModel}{Logical. Toggles if the model is fit within the function call.
   This may be set globally using \code{options('Hyde_fitModel')}.  See Details
   for more about when to use this option.}
 }
 \description{
-Set Node Relationships
-}
-\details{
 The relationship between a node and its parents must be defined
   before the appropriate JAGS model statement can be constructed.
   \code{setNode} is the utility by which a user can define the distribution
   of the node and its relationship to its parents (usually through a model
   of some sort).
 }
+\details{
+#'
+  The functions \code{fromFormula()} and \code{fromData()} help to control
+  how \code{Hyde} determines the values of parameters passed to JAGS.  If the
+  parameters passed in \code{params} argument are to be calculated from the
+  data or inferred from the formula, these functions may be used as placeholders
+  instead of writing JAGS code in the \code{params} argument.
+
+  By default, \code{options(Hyde_fitModel=FALSE)}.  This prevents \code{setNode}
+  from fitting any models.  Instead, the fitting is delayed until the user
+  calls \code{writeJagsModel} and all of the models are fit at the same time.
+  When using large data sets that may require time to run, it may be better to
+  leave this option \code{FALSE} so that the models can all be compiled together
+  (especially if you are working interactively).  Using \code{fitModel=TRUE}
+  will cause the model to be fit and the JAGS code for the parameters to be
+  stored in the \code{nodeParams} attribute.
+}
 \examples{
-carNet <- HydeNetwork( ~ cyl +
-                      disp | cyl +
-                      hp | disp +
-                      wt +
-                      gear +
-                      mpg | disp*hp*wt*gear,
-                      data=mtcars)
+data(PE, package="HydeNet")
+Net <- HydeNetwork(~ wells +
+                     pe | wells +
+                     d.dimer | pregnant*pe +
+                     angio | pe +
+                     treat | d.dimer*angio +
+                     death | pe*treat,
+                     data = PE)
+print(Net, d.dimer)
 
-carNet$nodeFormula$mpg
-carNet$nodeFitter$mpg
-carNet$nodeType$mpg
-
-carNet <- setNode(carNet, mpg, nodeType='dnorm', mu=fromFormula(), tau=1/2.65,
-                  nodeFormula = mpg ~ disp + hp + wt + factor(gear),
+#* Manually change the precision
+Net <- setNode(Net, d.dimer, nodeType='dnorm', mu=fromFormula(), tau=1/2.65,
+                  nodeFormula = d.dimer ~ pregnant * pe,
                   nodeFitter='lm')
-
-carNet$nodeFormula$mpg
-carNet$nodeFitter$mpg
-carNet$nodeType$mpg
+print(Net, d.dimer)
 }
 \author{
 Jarrod Dalton and Benjamin Nutter

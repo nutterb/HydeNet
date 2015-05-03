@@ -19,7 +19,7 @@ Description: Facilities for easy implementation of hybrid Bayesian networks
     Econometric analyses (maximum expected utility under competing policies,
     value of information) involving decision and utility nodes are also
     supported.
-License: MIT
+License: MIT + file LICENSE
 Depends:
     R (>= 3.0.0),
     gRbase,

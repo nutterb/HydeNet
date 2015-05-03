@@ -12,9 +12,15 @@ factorRegex(fit)
 \description{
 A utility function to produce a regular expression that can
   separate factor names and factor levels in the \code{broom::tidy()$term}
-  output.
+  output.  At some point, this may have to become a method to accomodate
+  different model types, but I haven't run into that problem yet.
+}
+\examples{
+data(PE, package = "HydeNet")
+g6 <- glm(treat ~ d.dimer + angio, data=PE, family="binomial")
+HydeNet:::factorRegex(g6)
 }
 \author{
-Benjamin Nutter
+Jarrod Dalton and Benjamin Nutter
 }
 

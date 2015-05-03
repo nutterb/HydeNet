@@ -49,24 +49,23 @@ When \code{...} is not used, the default policy matrix is defined
   column names match a node in the network.
 }
 \examples{
-mtcars2 <- transform(mtcars,
-                     am=factor(am),
-                     cyl=factor(cyl),
-                     gear=factor(gear))
+data(PE, data="HydeNet")
+Net <- HydeNetwork(~ wells +
+                     pe | wells +
+                     d.dimer | pregnant*pe +
+                     angio | pe +
+                     treat | d.dimer*angio +
+                     death | pe*treat,
+                     data = PE)
 
-carNet <- HydeNetwork( ~ cyl +
-                      disp | cyl +
-                      hp | disp +
-                      wt +
-                      gear +
-                      mpg | disp*hp*wt*gear,
-                      data=mtcars2)
 
-carNet <- setDecisionNodes(carNet, cyl, gear)
 
-policyMatrix(carNet)
+Net <- setDecisionNodes(Net, angio, treat)
+plot(Net)
 
-policyMatrix(carNet, cyl=c(4, 6), gear=c(4, 5))
+policyMatrix(Net)
+
+policyMatrix(Net, treat="No", angio = c("No", "Yes"))
 }
 \author{
 Jarrod Dalton and Benjamin Nutter
