@@ -10,31 +10,6 @@
                color = c("black", "gray70", "black", "black"),
                style = c("filled", "filled", "filled", "filled"),
                stringsAsFactors=FALSE))
-#   options(Hyde_plotOptions = list(fillcolor = list(variable = "white",
-#                                                    determ = "white",
-#                                                    decision = "#6BAED6",
-#                                                    utility = "#FFFFB2"),
-#                                   shape = list(variable = "ellipse",
-#                                                determ = "ellipse",
-#                                                decision = "rect",
-#                                                utility = "rect"),
-#                                   fontcolor = list(variable = "black",
-#                                                    determ = "gray70",
-#                                                    decision = "black",
-#                                                    utility = "black"),
-#                                   linecolor = list(variable = "black",
-#                                                    determ = "gray70",
-#                                                    decision = "black",
-#                                                    utility = "black"),
-#                                   edgecolor = NULL,
-#                                   distortion = NULL,
-#                                   fixedsize = NULL,
-#                                   fontname = NULL,
-#                                   fontsize = NULL,
-#                                   height = NULL,
-#                                   width = NULL,
-#                                   sides = NULL,
-#                                   skew = NULL))
 }
 
 .onUnload <- function(libPath)

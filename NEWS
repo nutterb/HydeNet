@@ -1,3 +1,7 @@
+### 0.8.3 (3 May 2015)
+* Revamped plotting utilities to make use of the DiagrammeR package.  This makes
+  the full range of GraphViz available for use.
+
 ### 0.8.2 (1 May 2015)
 * Adds functionality to customize plot defaults.
 * Adds functionality to customize nodes in plots.

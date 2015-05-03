@@ -1,61 +1,73 @@
 #' @name plot.HydeNetwork
 #' @aliases plot.HydeNetwork plotHydeNetwork
 #' @export 
-#' @importFrom graph plot
+#' @importFrom DiagrammeR create_edges
+#' @importFrom DiagrammeR graphviz_graph
+#' @importFrom DiagrammeR graphviz_render
+#' @importFrom dplyr bind_rows
+#' @importFrom dplyr filter
+#' @importFrom dplyr left_join
+#' @importFrom dplyr mutate
+#' @importFrom dplyr select
 #' @method plot HydeNetwork
 #' 
 #' 
 #' @title Plotting Utilities Probabilistic Graphical Network
-#' @details Generate and customize plots the dag object of a \code{HydeNetwork} 
+#' @details Generate and customize plots of a \code{HydeNetwork} 
 #'   class network. \code{HydeNet} provides some initial defaults for standard 
 #'   variable nodes, deterministic nodes, decision nodes, and utility nodes.
 #'   Since these nodes are assumed to be of inherent difference and interest, 
 #'   the options are defined in a way to make these easier to identify in 
 #'   a plot.  The default options may be altered by the user to their liking
 #'   by invoking \code{HydePlotOptions}.  Node attributes are more fully 
-#'   explained in the documentation for \code{?GraphvizAttributes}.  Individual
-#'   nodes may be customized with \code{customNode}
+#'   explained in the documentation for the \code{DiagrammeR} package.  
+#'   Individual nodes may be define with \code{customNode}.
 #' 
 #' @param x an object of class \code{HydeNetwork}
-#' @param ... additional arguments to be passed to \code{graph::plot}.
-#'   This may also contain named elements customizing nodes, as in
-#'   \code{node = customNode(...)}.
+#' @param customNodes a data frame giving additional specifications for nodes.
+#'   The customizations provided here will override the default settings.
+#' @param customEdges a data frame giving custom settings for edges (arrows)
+#'   between nodes.
+#' @param ... for the \code{plot} method, additional arguments to be passed to 
+#'   \code{\link{DiagrammeR::graphviz_graph}}.  For \code{customNode}, 
+#'   named node attributes to assign to a node's plotting characteristics.
 #' @param useHydeDefaults A logical value indicating if the default plot
 #'   parameters in \code{options("Hyde_plotOptions")} should be applied
 #'   to the plot.
 #' 
-#' @details The plot method is a simple wrapper function to plot 
-#'   \code{network$dag}.  
+#' @details GraphViz is an enormous set of resources for customizing and we 
+#'   cannot adequately describe them all here.  See 'Sources' for links 
+#'   to additional documentation from the \code{DiagrammeR} package and the 
+#'   GraphViz website.
 #'   
-#'   When viewing the documentation for \code{GraphvizAttributes}, only
-#'   the section Node Attributes is applicable to the settings used by 
-#'   \code{HydeNet}.  The settings for Graph Attributes and Edge Attributes 
-#'   may be used, but the user will need to provide those settings in an 
-#'   appropriate manner using the \code{...} argument of the \plot{plot} method.
-#'   
-#'   Current settings may be turned off or set to the \code{GraphvizAttributes}
-#'   defaults by supplying \code{NA} for an attribute parameter.  For example,
-#'   the \code{HydeNet} default shape for utility nodes is "box".  This may be 
-#'   turned off by using \code{utility = list(shape = NA)}.
-#'   
-#'   The plot settings can be reviewed at any time by calling 
-#'   \code{options("Hyde_plotOptions")}.
+#'   With its default settings, \code{HydeNet} makes use of five node 
+#'   attributes for plotting networks.  These are 
+#'   \itemize{
+#'     \item style: By default, set to 'filled', but may also take 'striped',
+#'       'wedged', or 'radial'.
+#'     \item fillcolor: The hexadecimal or X11 color name.  In styles 'striped',
+#'       'wedged', or 'radial', this may take multiple colors separated by a 
+#'       colon (:).
+#'     \item shape: the node shape.  May take the values 'oval', 'diamond',
+#'       'egg', 'ellipse', 'square', 'triangle', or 'rect'
+#'     \item fontcolor: The color of the node label.
+#'     \item color: The color of the node's border.
+#'    }
+#'    
+#'   \code{HydeNet} assumes the GraphViz defaults for edge nodes (arrows).
 #'   
 #'   See the Plotting Hyde Networks vignette (\code{vignette("HydeNetPlots")})
-#'   for a more thorough explanation of plotting networks.
+#'   for a more thorough explanation of plotting networks.  
 #' 
 #' @author Jarrod Dalton and Benjamin Nutter
 #' @note
-#'   For customizations, see the \code{Rgraphviz} documentation for 
-#'   \code{GraphvizAttributes}.  Most notably, read the sections about 
-#'   General Node Attributes to manipulate shapes and positions of the 
-#'   nodes and their labels.  These are manipulated through the \code{nodeAttrs}
-#'   arguments (passed through \code{...}).  
 #'   
-#'   General Graph Attributes are passed through \code{attrs} and Edge 
-#'   Attributes are passed through \code{edgeAttrs}.
+#' @source 
+#'   \url{http://rich-iannone.github.io/DiagrammeR/graphviz.html}\cr
+#'   See especially the section on Attributes
 #'   
-#' @seealso GraphvizAttributes
+#'   \url{http://graphviz.org/}\cr
+#'   \url{http://graphviz.org/content/attrs}
 #' 
 #' @examples
 #' data(BlackJack, package="HydeNet")
@@ -76,207 +88,139 @@
 #'      hit1 = customNode(fillcolor = "purple", shape = "circle", 
 #'                        fontcolor = "white", height = "2"))
 
-plot.HydeNetwork <- function(x, ..., useHydeDefaults=TRUE){
-  #* If any nodes are being customized via the `customNode` function,
-  #* we need to separate the `customeNode` calls from the rest of the 
-  #* additional arguments.  
-  #* Here, we spilit them into `custom_nodes` and `add_args` (additional args)
-  add_args <- list(...)
-  if (length(add_args) > 0){
-    node_attr <- sapply(add_args,
-                        function(a) class(a) == "HydeNodePlotAttributes")
-    custom_nodes <- add_args[node_attr]
-    add_args <- add_args[!node_attr]
-  }
-  else custom_nodes <- NULL
-  
-  if ("nodeAttrs" %in% names(add_args) & length(custom_nodes) > 0){
-    stop(paste0("An argument named 'nodeAttrs' was given to `plot.HydeNet`",
-                ".\nThis will likely produce conflicts with `customNode`.",
-                "\nPlease consider using either 'nodeAttrs' or 'customNode', ",
-                "but not both."))
-    add_args <- add_args[!"nodeAttrs" %in% names(add_args)]
-  }
-  
-  if ("nodeAttrs" %in% names(add_args) & useHydeDefaults){
-    warning(paste0("An argument named 'nodeAttrs' was given to `plot.HydeNet`",
-                   ".\nThis would conflict with the use of HydeNet defaults, ",
-                   "so it is being ignored.  \nIf you wish to use this ",
-                   "argument, please use 'useHydeDefaults=FALSE'"))
-    add_args <- add_args[!"nodeAttrs" %in% names(add_args)]
-  }
-  
-  #* If using HydePackageDefaults
-  #* 1. Identify the nodes of each type
-  #* 2. Make an attribute list for each plotting parameter
-  #* 3. Combine the attribute lists into one massive list
-  #* 4. Remove any attribute lists that are NULL
-  #* 5. Reassign values for customized nodes
-  #* 6. Plot the function if using customized nodes (requires do.call)
-  #* 7. Plot the function if no customized nodes (can be run without do.call)
-  if (useHydeDefaults){
-    #* 1. Identify the nodes of each type
-    decisionNodes <- names(which(unlist(x$nodeDecision)))
-    utilityNodes <- names(which(unlist(x$nodeUtility)))
-    determNodes <- names(which(unlist(x$nodeType)=="determ"))
-    varNodes <- x$nodes[!x$nodes %in% c(decisionNodes, utilityNodes, determNodes)]
 
-    #* 2. Make an attribute list for each plotting parameter
-    makeAttributeList <- function(attr){
-      att_list <- c(rep(getOption("Hyde_plotOptions")[[attr]]$variable, length(varNodes)),
-                    rep(getOption("Hyde_plotOptions")[[attr]]$determ, length(determNodes)),
-                    rep(getOption("Hyde_plotOptions")[[attr]]$decision, length(decisionNodes)),
-                    rep(getOption("Hyde_plotOptions")[[attr]]$utility, length(utilityNodes)))
-      if (!is.null(att_list)) names(att_list) <- c(varNodes, determNodes, decisionNodes, utilityNodes)
-      return(att_list)
-    }
-    
-    shape <- makeAttributeList("shape")
-    fillcolor <- makeAttributeList("fillcolor")
-    fontcolor <- makeAttributeList("fontcolor")
-    linecolor <- makeAttributeList("linecolor")
-    edgecolor <- makeAttributeList("edgecolor")
-    distortion <- makeAttributeList("distortion")
-    fixedsize <- makeAttributeList("fixedsize")
-    fontname <- makeAttributeList("fontname")
-    fontsize <- makeAttributeList("fontsize")
-    height <- makeAttributeList("height")
-    width <- makeAttributeList("width")
-    sides <- makeAttributeList("sides")
-    skew <- makeAttributeList("skew")
-    
-    #* 3. Combine the attribute lists into one massive list
-    nodeAttribs <- list(shape=shape, fillcolor=fillcolor, fontcolor=fontcolor,
-                        color=linecolor, edgecolor=edgecolor,
-                        distortion = distortion, fixedsize=fixedsize,
-                        fontname=fontname, fontsize=fontsize,
-                        height=height, width=width,
-                        sides=sides, skew=skew)
-    
-    #* 4. Remove any attribute lists that are NULL
-    nodeAttribs <- nodeAttribs[!sapply(nodeAttribs, is.null)]
-    
+plot.HydeNetwork <- function(x, 
+                             customNodes = NULL,
+                             customEdges = NULL,
+                             ..., 
+                             useHydeDefaults = TRUE)
+{
+  node_df <- data.frame(node_id = x$nodes,
+                        stringsAsFactors = FALSE)
+  if (useHydeDefaults) node_df <- mergeDefaultPlotOpts(x, node_df)
+  else node_df <- NULL
+  
+  if (!is.null(customNodes)) node_df <- mergeCustomNodes(node_df, customNodes)
 
-    #* 5. Reassign values for customized nodes
-    if (!is.null(custom_nodes)){
-      for (n in names(custom_nodes)){
-        for (a in names(custom_nodes[[n]])){
-          nodeAttribs[[a]][n] <- custom_nodes[[n]][[a]]
-        }
-      }
-    }
-    #* 6. Plot the network
-    do.call(graph::plot,
-            args = c(list(x$dag, nodeAttrs=nodeAttribs), add_args))
-  }
-  else{
-    #* 1. generate a vector of names for which plotting parameters have been 
-    #*    stated.
-    #* 2. Create a list the same length as the vector of names and give that
-    #*    list the names in the vector from 1.
-    #* 3. for each parameter named in the list (l), extract any nodes for which
-    #*    that parameter was named.
-    #* 4. The unlist function appends the name of the list element to the end
-    #*    of the node name in the format ".name".  To correctly construct the 
-    #*    list, we want to remove all of the characters from the last "." to 
-    #*    the end.  We use a perl-style regular expression to do that.
-    #* 5. place the node name into the nodeAttribs list element.
-    if (length(custom_nodes) > 0){
-      #* 1. generate a vector of names for which plotting parameters have been 
-      #*    stated.
-      list_names <- unique(as.vector(sapply(custom_nodes, names)))
-      #* 2. Create a list the same length as the vector of names and give that
-      #*    list the names in the vector from 1.
-      nodeAttribs <- lapply(list_names, function(x) NULL)
-      names(nodeAttribs) <- list_names
+  edge_table <- do.call("rbind", mapply(mapEdges, x$nodes, x$parents))
+  
+  edge_df <- DiagrammeR::create_edges(edge_from = edge_table[, 2], 
+                                      edge_to = edge_table[, 1])
+  
+  if (!is.null(customEdges)) mergeCustomEdges(edge_df, customEdges)
 
-      for(l in list_names){
-        #* 3. for each parameter named in the list (l), extract any nodes for which
-        #*    that parameter was named.
-        nodes_with_attrib <- unlist(sapply(custom_nodes, "[", l))
-        #* 4. The unlist function appends the name of the list element to the end
-        #*    of the node name in the format ".name".  To correctly construct the 
-        #*    list, we want to remove all of the characters from the last "." to 
-        #*    the end.  We use a perl-style regular expression to do that.
-        names(nodes_with_attrib) <- sub("\\.(?=[^.]*$)[[:print:]]+$", "", 
-                                        names(nodes_with_attrib), perl=TRUE)
-        #* 5. place the node name into the nodeAttribs list element.
-        nodeAttribs[[l]] <- nodes_with_attrib
-      }
-      do.call(graph::plot,
-              args = c(list(x$dag, nodeAttrs = nodeAttribs), add_args))
-    }
-    else graph::plot(x$dag, ...)
-  }
+  DiagrammeR::graphviz_graph(nodes_df = as.data.frame(node_df),
+                             edges_df = edge_df) %>%
+    DiagrammeR::graphviz_render()
+  
+}
+
+#' rdname plot.HydeNetwork
+#' @param network a \code{HydeNetwork} object
+#' @param node_df A data frame of node attributes.
+#' 
+mergeDefaultPlotOpts <- function(network, node_df){
+  nodes <- network$nodes
+  node_df %>%
+    dplyr::mutate(node_type = ifelse(network$nodeType[nodes] == "determ", 
+                                     "determ",
+                                     ifelse(network$nodeDecision[nodes], 
+                                            "decision",
+                                            ifelse(network$nodeUtility[nodes], 
+                                                   "utility",
+                                                   "variable")))) %>%
+    dplyr::left_join(., getOption("Hyde_plotOptions"),
+                     by=c("node_type" = "type")) %>%
+    dplyr::select_("-node_type")
 }
 
 #' @rdname plot.HydeNetwork
-#' @export HydePlotOptions
+#' @param node_df A data frame of node attributes
+#' @param customNodes a data frame of custom node descriptions
 #' 
-#' @param variable A named list of default parameters for standard variables.
-#' @param determ A named list of default parameteres for deterministic nodes.
-#' @param decision A named list of default parameters for decision nodes.
-#' @param utility A named list of default parameters for utility nodes.
-#' @param restorePackageDefault When \code{TRUE}, the initial package defaults
-#'   are restored.
+mergeCustomNodes <- function(node_df, customNodes)
+{
+  node_df <- dplyr::mutate(node_df, index=2)
+  customNodes <- dplyr::mutate(customNodes, index=1)
+  node_df <- dplyr::bind_rows(customNodes, node_df) %>%
+    dplyr::group_by_("node_id") %>%
+    dplyr::filter_("rank(index, ties.method='first')==1") %>%
+    dplyr::select_("-index")
+  
+  node_df[, -which(names(node_df) == "node_id")] <- 
+    lapply(node_df[, -which(names(node_df) == "node_id")],
+           function(x) ifelse(is.na(x), "", x))
+  return(node_df)
+}
+
+#' @rdname plot.HydeNetwork
+#' @param n node names from a network object
+#' @param p the list of parents from a network object
+mapEdges <- function(n, p) cbind(rep(n, length(p)),
+                                 p)
+
+#' @rdname plot.HydeNetwork
+#' @param edge_df The default edge attribute data frame
+#' @param customEdges The custom edge attribute data frame
+#' 
+mergeCustomEdges <- function(edge_df, customEdges)
+{
+  edge_df <- dplyr::mutate(edge_df, index = 2)
+  customEdges <- dplyr::mutate(customEdges, index = 1)
+  edge_df <- dplyr::bind_rows(customEdges, edge_df) %>%
+    dplyr::group_by_("edge_from", "edge_to")  %>%
+    dplyr::filter_("rank(index, ties.method='first')==1") %>%
+    dplyr::select_("-index")
+  edge_df  
+}
+
+#' @rdname plot.HydeNetwork 
+#' @param node_id The name of a node in a \code{HydeNetwork} object.
+#'   May be quoted or unquoted.
 #'   
+customNode <- function(node_id, ...){
+  node_id <- as.character(substitute(node_id))
+  nodeAttrs <- as.data.frame(c(list(node_id = node_id),
+                               list(...)), 
+                             stringsAsFactors=FALSE)
+  if (length(nodeAttrs) > 0) return(nodeAttrs)
+}
+
+#' @rdname plot.HydeNetwork
+#' @param variable,determ,decision,utility Named lists of attributes to use as 
+#'   defaults node attribute settings for each variable type.
+#' @param restorPackageDefaults A logical value.  When TRUE, the original 
+#'   package defaults are restored.
 HydePlotOptions <- function(variable = NULL,
                             determ = NULL,
                             decision = NULL,
                             utility = NULL, 
-                            restorePackageDefault = FALSE){
+                            restorePackageDefaults = FALSE){
   if (restorePackageDefault)
-    options(Hyde_plotOptions = list(fillcolor = list(variable = "white",
-                                                determ = "white",
-                                                decision = "#6BAED6",
-                                                utility = "#FFFFB2"),
-                                    shape = list(variable = "ellipse",
-                                                 determ = "ellipse",
-                                                 decision = "rect",
-                                                 utility = "rect"),
-                                    fontcolor = list(variable = "black",
-                                                     determ = "gray70",
-                                                     decision = "black",
-                                                     utility = "black"),
-                                    linecolor = list(variable = "black",
-                                                     determ = "gray70",
-                                                     decision = "black",
-                                                     utility = "black"),
-                                    edgecolor = NULL,
-                                    distortion = NULL,
-                                    fixedsize = NULL,
-                                    fontname = NULL,
-                                    fontsize = NULL,
-                                    height = NULL,
-                                    width = NULL,
-                                    sides = NULL,
-                                    skew = NULL))
+    options(Hyde_plotOptions = 
+              data.frame(type = c("variable", "determ", "decision", "utility"),
+                         fillcolor = c("white", "white", "#6BAED6", "#FFFFB2"),
+                         shape = c("ellipse", "ellipse", "rect", "rect"),
+                         fontcolor = c("black", "gray70", "black", "black"),
+                         color = c("black", "gray70", "black", "black"),
+                         style = c("filled", "filled", "filled", "filled"),
+                         stringsAsFactors=FALSE))
   else {
     current_options <- getOption("Hyde_plotOptions")
     
-    updatePlotOptions <- function(current_opts, new_opts, type){
-      for(n in names(new_opts)){
-        current_opts[n][[1]][[type]] <- if (is.null(new_opts)) NULL else new_opts[[n]]
-      }
-      return(current_opts)
-    }
+    new_options <- do.call("rbind", 
+                           lapply(list(variable, determ, decision, utility),
+                                  as.data.frame))
+    new_options$type <- c("variable", "determ", "decision", "Utility")
     
-    for (t in c("variable", "determ", "decision", "utility")){
-      if (!is.null(get(t))){
-        current_options <- updatePlotOptions(current_options, get(t), t)
-      }
-    }
+    new_options$rank <- 1
+    current_options$rank <- 2
     
-    options(Hyde_plotOptions = current_options)
+    updated_options <- dplyr::bind_rows(new_options, current_option) %>%
+      group_by_("type") %>%
+      filter_("rank(index, ties.method='first')==1") %>%
+      dplyr::select_("-index")
+    
+    options(Hyde_plotOptions = updated_options)
   }
 }
-
-#' @rdname plot.HydeNetwork
-#' @export customNode
-
-customNode <- function(...){
-  nodeAttrs <- list(...)
-  class(nodeAttrs) <- "HydeNodePlotAttributes"
-  if (length(nodeAttrs) > 0) return(nodeAttrs)
-}
-
