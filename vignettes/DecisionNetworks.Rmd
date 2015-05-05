@@ -161,12 +161,12 @@ Decision nodes, while special, can also be thought of as random variables and fe
 Note that the data are independent of how many cards the player holds - all that matters for a given hit/stand decision is the current point total. Therefore, the conditional distribution of each of the three decision nodes can be specified using a single `glm` model object. Here, we manipulate the blackjack data frame to get a single two-column data frame for use in our GLM for hit decisions, and then apply the glm object to each of the three decision nodes:
 
 ```{r}
-data(bjdata)
+data(BlackJackTrain)
 
-attach(bjdata)
+attach(BlackJackTrain)
 glmdata <- data.frame(points = c(initialPoints, pointsAfterCard3, pointsAfterCard4),
                       hit    = c(hit1,hit2,hit3))
-detach(bjdata)
+detach(BlackJackTrain)
 glmdata <- glmdata[!is.na(glmdata$hit),]
 head(glmdata)
 

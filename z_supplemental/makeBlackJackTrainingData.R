@@ -102,7 +102,7 @@ d$pointsAfterCard5[which(is.na(d$hit3))] <- NA
 d$handNum <- NULL
 
 bjdata <- d
-save("bjdata", file="bjdata.RData")
+save("bjdata", file="BlackJackTrain.RData")
 
 
 
