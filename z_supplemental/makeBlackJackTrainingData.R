@@ -27,8 +27,10 @@ handScore <- function(cards){
   return(outPts)
 }
 
-hit <- function(points,n=1){
-  x <- rbinom(n, 1, plogis(10-.8*points))
+hit <- function(points, dealerUpcard){
+  n <- length(dealerUpcard)
+  pp <- plogis(8-.7*points+2*I(dealerUpcard %in% c("9","10-K","A")))
+  x <- rbinom(n,1,pp)
   x[points>21] <- NA
   return(x)
 }
@@ -37,13 +39,14 @@ hit <- function(points,n=1){
 set.seed(42379820)
 d <- data.frame(
   handNum <- 1:n,
+  dealerUpcard <- factor(apply(rmultinom(n,1,prob=cardProbs),2,function(x) which(x==1)), 1:10, cardNames),
   card1 = factor(apply(rmultinom(n,1,prob=cardProbs),2,function(x) which(x==1)), 1:10, cardNames),
   card2 = factor(apply(rmultinom(n,1,prob=cardProbs),2,function(x) which(x==1)), 1:10, cardNames)
 )
-d <- ddply(d, .(handNum,card1,card2), function(x) handScore(list(x$card1,x$card2)))
+d <- ddply(d, .(handNum,dealerUpcard,card1,card2), function(x) handScore(list(x$card1,x$card2)))
 names(d)[ncol(d)] <- "initialPoints"
 
-d$hit1 <- hit(d$initialPoints,n)
+d$hit1 <- hit(d$initialPoints,d$dealerUpcard)
 
 #card 3
 d$card3 <- factor(apply(rmultinom(n,1,prob=cardProbs),2,function(x) which(x==1)), 1:10, cardNames)
@@ -56,7 +59,7 @@ names(tmpd)[2] <- "pointsAfterCard3"
 
 d <- merge(d, tmpd, all=FALSE);  dim(d)
 
-d$hit2 <- hit(d$pointsAfterCard3,n)
+d$hit2 <- hit(d$pointsAfterCard3,d$dealerUpcard)
 
 
 ix1 <- which(d$hit1==0)
@@ -75,7 +78,7 @@ tmpd <- ddply(d[,c("handNum","card1","card2","card3","card4")], .(handNum,card1,
 names(tmpd)[2] <- "pointsAfterCard4"
 d <- merge(d, tmpd, all=FALSE);  dim(d)
 
-d$hit3 <- hit(d$pointsAfterCard4,n)
+d$hit3 <- hit(d$pointsAfterCard4,d$dealerUpcard)
 d$pointsAfterCard4[ix2] <- NA
 d$pointsAfterCard4[which(is.na(d$hit2))] <- NA
 d$hit3[ix2] <- NA

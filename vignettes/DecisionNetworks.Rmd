@@ -34,23 +34,28 @@ For the dealer, one card (called the *upcard*) is dealt face up and the other is
 
 We have included some blackjack hand data in the package (data frame object `BlackJackTrain`) to demonstrate the process of populating these decision nodes. These data are completely fake, so results of our analysis should not be operationalized at the casino; besides, even the optimal "basic strategy" of deciding when and when not to take another card results in a net expected loss. Below is a sample (omitting card 5 data since it infrequently gets dealt):
 
-|card1 |card2 | initialPoints| hit1|card3 | pointsAfterCard3| hit2|card4 | pointsAfterCard4| hit3|
-|:-----|:-----|-------------:|----:|:-----|----------------:|----:|:-----|----------------:|----:|
-|A     |2     |            13|    1|A     |               14|    1|6     |               20|    0|
-|4     |A     |            15|    0|      |                 |     |      |                 |     |
-|9     |A     |            20|    0|      |                 |     |      |                 |     |
-|4     |2     |             6|    1|5     |               11|    0|      |                 |     |
-|4     |A     |            15|    1|10-K  |               15|    1|9     |               24|     |
-|3     |2     |             5|    1|9     |               14|    0|      |                 |     |
-|10-K  |2     |            12|    1|A     |               13|    1|4     |               17|    0|
-|8     |3     |            11|    0|      |                 |     |      |                 |     |
-|9     |10-K  |            19|    0|      |                 |     |      |                 |     |
-|A     |10-K  |            21|    0|      |                 |     |      |                 |     |
-|6     |9     |            15|    0|      |                 |     |      |                 |     |
-|2     |3     |             5|    1|4     |                9|    1|4     |               13|    0|
-|7     |4     |            11|    1|A     |               12|    1|10-K  |               22|     |
-|10-K  |10-K  |            20|    0|      |                 |     |      |                 |     |
-|4     |10-K  |            14|    0|      |                 |     |      |                 |     |
+|dealerUpcard |card1 |card2 | initialPoints| hit1|card3 | pointsAfterCard3| hit2|card4 | pointsAfterCard4| hit3|
+|:------------|:-----|:-----|-------------:|----:|:-----|----------------:|----:|:-----|----------------:|----:|
+|10-K         |6     |4     |            10|    1|2     |               12|    1|10-K  |               22|     |
+|10-K         |5     |9     |            14|    0|      |                 |     |      |                 |     |
+|3            |8     |10-K  |            18|    0|      |                 |     |      |                 |     |
+|8            |7     |10-K  |            17|    0|      |                 |     |      |                 |     |
+|9            |9     |5     |            14|    1|2     |               16|    0|      |                 |     |
+|10-K         |A     |2     |            13|    0|      |                 |     |      |                 |     |
+|6            |10-K  |10-K  |            20|    0|      |                 |     |      |                 |     |
+|7            |10-K  |8     |            18|    0|      |                 |     |      |                 |     |
+|3            |4     |5     |             9|    1|A     |               20|    0|      |                 |     |
+|10-K         |8     |5     |            13|    1|10-K  |               23|     |      |                 |     |
+|10-K         |5     |4     |             9|    1|5     |               14|    1|6     |               20|    0|
+|A            |8     |8     |            16|    0|      |                 |     |      |                 |     |
+|10-K         |10-K  |10-K  |            20|    0|      |                 |     |      |                 |     |
+|10-K         |10-K  |10-K  |            20|    0|      |                 |     |      |                 |     |
+|6            |2     |6     |             8|    1|A     |               19|    0|      |                 |     |
+|10-K         |10-K  |5     |            15|    0|      |                 |     |      |                 |     |
+|5            |A     |4     |            15|    1|5     |               20|    0|      |                 |     |
+|6            |5     |10-K  |            15|    0|      |                 |     |      |                 |     |
+|10-K         |6     |10-K  |            16|    0|      |                 |     |      |                 |     |
+|9            |6     |10-K  |            16|    1|10-K  |               26|     |      |                 |     |
 
 
 To begin the modeling, we first construct a skeleton `HydeNet` model object, (i.e., a graphical model for which node characteristics have not yet been populated. See our vignette titled "Working with HydeNetwork Objects" for a general overview of network construction.
@@ -170,6 +175,8 @@ detach(BlackJackTrain)
 glmdata <- glmdata[!is.na(glmdata$hit),]
 head(glmdata)
 
+# change this code
+modelFunction <- function()
 g <- glm(hit ~ points, data=glmdata, family="binomial")
 summary(g)$coef
 
