@@ -67,15 +67,16 @@ library(HydeNet)
 net <- HydeNetwork(~ card1.ace | card1
                    + card2.ace | card2
                    + initialPoints | card1*card2*card1.ace*card2.ace
-                   + hit1 | initialPoints*dealerUpcard
+                   + highUpcard | dealerUpcard
+                   + hit1 | initialPoints*highUpcard
                    + card3 | hit1
                    + card3.ace | card3
                    + pointsAfterCard3 | initialPoints*card3*card3.ace
-                   + hit2 | pointsAfterCard3*dealerUpcard
+                   + hit2 | pointsAfterCard3*highUpcard
                    + card4 | hit2
                    + card4.ace | card4
                    + pointsAfterCard4 | pointsAfterCard3*card4*card4.ace
-                   + hit3 | pointsAfterCard4*dealerUpcard
+                   + hit3 | pointsAfterCard4*highUpcard
                    + card5 | hit3
                    + card5.ace | card5
                    + pointsAfterCard5 | pointsAfterCard4*card5*card5.ace
@@ -84,7 +85,7 @@ net <- HydeNetwork(~ card1.ace | card1
                    + dealerFinalPoints | dealerUpcard
                    + payoff | playerFinalPoints*dealerFinalPoints)
 
-plot(net, attrs=list(node=list(fixedsize=FALSE)))
+plot(net)
 ```
 
 Notice in the above network plot that all nodes have the same representation of empty black ovals. The `plot.HydeNetwork()` function allows for enhanced visualization of decision networks (see the vignette titled "Building and Customizing HydeNet Plots" for details), and since we have not yet specified the node types (i.e., random variable, deterministic, decision, or utility), it assumes that all nodes are random variables. We therefore need to populate the network object with the node types and conditional distributions/deterministic functions.
@@ -161,10 +162,17 @@ plot(net, attrs=list(node=list(fixedsize=FALSE)))
 ## Decision Nodes
 
 
-Decision nodes, while special, can also be thought of as random variables and fed into JAGS just as typical, non-manipulable random variables are fed into JAGS. When decision nodes have parents, the implication is that the parent nodes provide *information* that is used to guide the process of decision-making for that node. Hence, these links are called *information links*. We can think of the conditional probability distribution for a decision node as a frequency (or, alternatively, a representation of belief) of observed decisions under distinct combinations of parent nodes within a population. For example, we may have data on observed hit/stand decisions in blackjack, from which a logistic regression model can estimate the relationship between point totals at certain hit decisions and probability of deciding to take another card. (Actually, this model ignores relevant information on how many aces the player holds; we ignore this for the sake of simplicity.)
+Decision nodes, while special, can also be thought of as random variables and fed into JAGS just as typical, non-manipulable random variables are fed into JAGS. When decision nodes have parents, the implication is that the parent nodes provide *information* that is used to guide the process of decision-making for that node. Hence, these links are called *information links*. We can think of the conditional probability distribution for a decision node as a frequency (or, alternatively, a representation of belief) of observed decisions under distinct combinations of parent nodes within a population. For example, we may have data on observed hit/stand decisions in blackjack, from which logistic regression models can be estimated to characterize the relationship between point totals at certain hit decisions and probability of deciding to take another card. 
+
+Below, we make such models and incorporate them into the network. We have simplified dealer upcard information into a binary variable for this decision.
 
 ```{r}
 data(BlackJackTrain)
+BlackJackTrain$highUpcard <- as.character(BlackJackTrain$dealerUpcard)
+BlackJackTrain$highUpcard <- 
+  factor(BlackJackTrain$dealerUpcard %in% c("10-K","A"),
+         0:1, c("9 or lower", "10 or higher"))
+
 
 # glm.hit1 <- glm(hit1 ~ initialPoints + I(dealerUpcard %in% c("9","10-K","A")),
 #                 data = BlackJackTrain, family="binomial")
@@ -173,12 +181,16 @@ data(BlackJackTrain)
 # glm.hit3 <- glm(hit3 ~ pointsAfterCard4 + I(dealerUpcard %in% c("9","10-K","A")),
 #                 data = BlackJackTrain, family="binomial")
 
-glm.hit1 <- glm(hit1 ~ initialPoints, data = BlackJackTrain, family="binomial")
-glm.hit2 <- glm(hit2 ~ initialPoints, data = BlackJackTrain, family="binomial")
-glm.hit3 <- glm(hit3 ~ initialPoints, data = BlackJackTrain, family="binomial")
+
+glm.hit1 <- glm(hit1 ~ initialPoints+highUpcard,
+                data = BlackJackTrain, family="binomial")
+glm.hit2 <- glm(hit2 ~ initialPoints+highUpcard,
+                data = BlackJackTrain, family="binomial")
+glm.hit3 <- glm(hit3 ~ initialPoints+highUpcard,
+                data = BlackJackTrain, family="binomial")
 
 #this doesn't work.
-#net <- setNodeModels(net, glm.hit1)#, glm.hit2, glm.hit3)
+net <- setNodeModels(net, glm.hit1, glm.hit2, glm.hit3)
 
 ```
 
