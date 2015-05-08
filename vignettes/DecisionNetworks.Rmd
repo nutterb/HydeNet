@@ -64,22 +64,18 @@ To begin the modeling, we first construct a skeleton `HydeNet` model object, (i.
 library(HydeNet)
 ```
 ```{r, fig.width=7, fig.height=10}
-net <- HydeNetwork(~ card1.ace | card1
-                   + card2.ace | card2
-                   + initialPoints | card1*card2*card1.ace*card2.ace
+net <- HydeNetwork(~ initialAces | card1*card2
+                   + initialPoints | card1*card2
                    + highUpcard | dealerUpcard
                    + hit1 | initialPoints*highUpcard
-                   + card3 | hit1
-                   + card3.ace | card3
-                   + pointsAfterCard3 | initialPoints*card3*card3.ace
+                   + acesAfterCard3 | initialAces*card3
+                   + pointsAfterCard3 | initialPoints*card3*acesAfterCard3
                    + hit2 | pointsAfterCard3*highUpcard
-                   + card4 | hit2
-                   + card4.ace | card4
-                   + pointsAfterCard4 | pointsAfterCard3*card4*card4.ace
+                   + acesAfterCard4 | acesAfterCard3*card4
+                   + pointsAfterCard4 | pointsAfterCard3*card4*acesAfterCard4
                    + hit3 | pointsAfterCard4*highUpcard
-                   + card5 | hit3
-                   + card5.ace | card5
-                   + pointsAfterCard5 | pointsAfterCard4*card5*card5.ace
+                   + acesAfterCard5 | acesAfterCard4*card5
+                   + pointsAfterCard5 | pointsAfterCard4*card5*acesAfterCard5
                    + playerFinalPoints | initialPoints*hit1*pointsAfterCard3
                                          *hit2*pointsAfterCard4*hit3*pointsAfterCard5
                    + dealerFinalPoints | dealerUpcard
@@ -108,9 +104,39 @@ net <- setNode(net, card5, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card5))
 net <- setNode(net, dealerUpcard, nodeType="dcat",
                pi=vectorProbs(p=cardProbs, dealerUpcard))
 
+#Note: node dealerFinalPoints will be defined below, following some discussion 
+#      about its conditional probability distribution.
+
 #####################################
 # Deterministic Nodes
 #####################################
+net <- setNode(net, initialAces,    "determ", define=fromFormula(),
+               nodeFormula=initialAces ~ ifelse(card1==10,1,0) + ifelse(card2==10,1,0))
+
+net <- setNode(net, acesAfterCard3, "determ", define=fromFormula(),
+               nodeFormula=acesAfterCard3 ~ initialAces + ifelse(card3==10,1,0))
+
+net <- setNode(net, acesAfterCard4, "determ", define=fromFormula(),
+               nodeFormula=acesAfterCard4 ~ acesAfterCard3 + ifelse(card4==10,1,0))
+
+net <- setNode(net, acesAfterCard5, "determ", define=fromFormula(),
+               nodeFormula=acesAfterCard5 ~ acesAfterCard4 + ifelse(card5==10,1,0))
+               
+net <- setNode(net, initialPoints, "determ", define=fromFormula(),
+               nodeFormula=initialPoints ~ card1+card2+2)
+
+# net <- setNode(net, pointsAfterCard3, "determ", define=fromFormula(),
+#                nodeFormula=pointsAfterCard3 ~ ifelse(initialPoints+card3>21,
+#                                                      ifelse(acesAfterCard3>0,))
+
+# net <- setNode(net, pointsAfterCard4, "determ", define=fromFormula(),
+#                nodeFormula=pointsAfterCard4 ~ )
+
+# net <- setNode(net, pointsAfterCard5, "determ", define=fromFormula(),
+#                nodeFormula=pointsAfterCard5 ~ 5)
+
+# net <- setNode(net, playerFinalPoints, "determ", define=fromFormula(),
+#                nodeFormula=playerFinalPoints ~ )
 
 
 ```
@@ -131,7 +157,7 @@ In the below long and ugly code block, we used logistic regression equations to 
 |10-King|0.0714|0.2134|0.1121|0.1121|0.1121|0.3442|0.0347|
 |Ace|0.2353|0.1535|0.0635|0.1582|0.1582|0.1582|0.0732|
 
-We are currently working on better and more compact ways to specify node distributions for categorical nodes for which all parents are also categorical in nature.
+We are currently working on better and more compact ways to specify node distributions for categorical nodes for which all parents are also categorical in nature. 
 
 ```{r}
 net <- setNode(net, dealerOutcome, nodeType="dcat",
@@ -170,8 +196,13 @@ Below, we make such models and incorporate them into the network. We have simpli
 data(BlackJackTrain)
 BlackJackTrain$highUpcard <- as.character(BlackJackTrain$dealerUpcard)
 BlackJackTrain$highUpcard <- 
+<<<<<<< Updated upstream
   factor(BlackJackTrain$highUpcard %in% c("10-K","A"),
          c(FALSE, TRUE), c("9 or lower", "10 or higher"))
+=======
+  factor(I(BlackJackTrain$dealerUpcard %in% c("10-K","A"))*1,
+         0:1, c("9 or lower", "10 or higher"))
+>>>>>>> Stashed changes
 
 
 # glm.hit1 <- glm(hit1 ~ initialPoints + I(dealerUpcard %in% c("9","10-K","A")),
@@ -184,16 +215,19 @@ BlackJackTrain$highUpcard <-
 
 glm.hit1 <- glm(hit1 ~ initialPoints+highUpcard,
                 data = BlackJackTrain, family="binomial")
-glm.hit2 <- glm(hit2 ~ initialPoints+highUpcard,
+glm.hit2 <- glm(hit2 ~ pointsAfterCard3+highUpcard,
                 data = BlackJackTrain, family="binomial")
-glm.hit3 <- glm(hit3 ~ initialPoints+highUpcard,
+glm.hit3 <- glm(hit3 ~ pointsAfterCard4+highUpcard,
                 data = BlackJackTrain, family="binomial")
 
+<<<<<<< Updated upstream
 #this doesn't work.
 ### BN: Should this work?  
 ###     hit2 is a child of 'pointsAfterCard3' and 'highUpcard'
 ###     hit3 is a child of 'pointsAftercard4' and 'highUpcard'
 ###     Perhaps the models should be defined to match?
+=======
+>>>>>>> Stashed changes
 net <- setNodeModels(net, glm.hit1, glm.hit2, glm.hit3)
 
 ```
@@ -219,15 +253,6 @@ net <- setNode(net, card2.ace, "determ", define=fromFormula(), nodeFormula=card2
 net <- setNode(net, card3.ace, "determ", define=fromFormula(), nodeFormula=card3.ace ~ ifelse(card3==1,1,0))
 net <- setNode(net, card4.ace, "determ", define=fromFormula(), nodeFormula=card4.ace ~ ifelse(card4==1,1,0))
 net <- setNode(net, card5.ace, "determ", define=fromFormula(), nodeFormula=card5.ace ~ ifelse(card5==1,1,0))
-net <- setNode(net, initialPoints, "determ", define=fromFormula(), nodeFormula=initialPoints~card1+card2)
-net <- setNode(net, pointsAfterCard3, "determ", define=fromFormula(),
-               nodeFormula=pointsAfterCard3 ~ initialPoints+card3)
-net <- setNode(net, pointsAfterCard4, "determ", define=fromFormula(),
-               nodeFormula=pointsAfterCard4 ~ pointsAfterCard3+card4)
-net <- setNode(net, pointsAfterCard5, "determ", define=fromFormula(),
-               nodeFormula=pointsAfterCard5 ~ pointsAfterCard4+card5)
-net <- setNode(net, playerFinalPoints, "determ", define=fromFormula(),
-               nodeFormula=playerFinalPoints ~ playerFinalPoints+3)
 
 ```
 
