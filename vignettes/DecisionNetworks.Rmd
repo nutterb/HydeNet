@@ -195,14 +195,8 @@ Below, we make such models and incorporate them into the network. We have simpli
 ```{r}
 data(BlackJackTrain)
 BlackJackTrain$highUpcard <- as.character(BlackJackTrain$dealerUpcard)
-BlackJackTrain$highUpcard <- 
-<<<<<<< Updated upstream
-  factor(BlackJackTrain$highUpcard %in% c("10-K","A"),
-         c(FALSE, TRUE), c("9 or lower", "10 or higher"))
-=======
-  factor(I(BlackJackTrain$dealerUpcard %in% c("10-K","A"))*1,
-         0:1, c("9 or lower", "10 or higher"))
->>>>>>> Stashed changes
+BlackJackTrain$highUpcard <- factor(BlackJackTrain$highUpcard %in% c("10-K","A"),
+                                    c(FALSE, TRUE), c("9 or lower", "10 or higher"))
 
 
 # glm.hit1 <- glm(hit1 ~ initialPoints + I(dealerUpcard %in% c("9","10-K","A")),
@@ -220,14 +214,6 @@ glm.hit2 <- glm(hit2 ~ pointsAfterCard3+highUpcard,
 glm.hit3 <- glm(hit3 ~ pointsAfterCard4+highUpcard,
                 data = BlackJackTrain, family="binomial")
 
-<<<<<<< Updated upstream
-#this doesn't work.
-### BN: Should this work?  
-###     hit2 is a child of 'pointsAfterCard3' and 'highUpcard'
-###     hit3 is a child of 'pointsAftercard4' and 'highUpcard'
-###     Perhaps the models should be defined to match?
-=======
->>>>>>> Stashed changes
 net <- setNodeModels(net, glm.hit1, glm.hit2, glm.hit3)
 
 ```
