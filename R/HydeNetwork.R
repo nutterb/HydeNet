@@ -1,5 +1,8 @@
 #' @name HydeNetwork
 #' @export HydeNetwork
+#' @importFrom graph nodes
+#' @importFrom gRbase dag
+#' @importFrom gRbase graphNEL2adjMAT
 #' 
 #' @title Define a Probablistic Graphical Network
 #' @description Using either a directed acyclic graph (DAG) or a list of models, 

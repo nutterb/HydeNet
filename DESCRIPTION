@@ -22,7 +22,6 @@ Description: Facilities for easy implementation of hybrid Bayesian networks
 License: MIT + file LICENSE
 Depends:
     R (>= 3.0.0),
-    gRbase,
     nnet,
     rjags
 Imports:
@@ -30,6 +29,7 @@ Imports:
     DiagrammeR (>= 0.6),
     dplyr,
     graph,
+    gRbase,
     magrittr,
     stringr,
     plyr

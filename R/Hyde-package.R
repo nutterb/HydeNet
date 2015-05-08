@@ -1,7 +1,6 @@
 #' @name Hyde-package
 #' @aliases Hyde
 #' @import nnet
-#' @import gRbase
 #' @import rjags
 #' 
 #' @title Hydbrid Decision Networks

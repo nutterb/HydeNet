@@ -1,3 +1,6 @@
+### 0.8.5 (7 May 2015
+* Moved `gRbase` from Depends: to Imports:
+
 ### 0.8.4 (3 May 2015)
 * Revamped plotting utilities to make use of the DiagrammeR package.  This makes
   the full range of GraphViz available for use.
