@@ -118,6 +118,8 @@ writeNetworkModel(autoNet, pretty=TRUE)
 ```
 
 ## A Note About Printing
+**This note applies to R versions less than 3.2.**
+
 You may notice throughout the vignettes that we tend to call the print function explicitly.  That is, we use `print(object)` instead of simply submitting `object` to the console.  The `HydeNet` objects can get pretty large, and the implicit printing can become pretty slow as a result.  Consider the following comparison:
 
 ```{r, eval=FALSE}
@@ -147,4 +149,5 @@ Time difference of 33.53736 secs
 > b-a
 Time difference of 0 secs
 ```
+
 

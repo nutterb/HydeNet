@@ -236,7 +236,7 @@ net <- setNode(net, playerFinalPoints, "determ", define=fromFormula(),
 
 
 
-```{r, eval=FALSE, fig.width=7, fig.height=10}
+```{r, eval=TRUE, fig.width=7, fig.height=10}
 net <- HydeNetwork(~ card1.ace | card1
                    + card2.ace | card2
                    + initialPoints | card1*card2*card1.ace*card2.ace
@@ -266,24 +266,29 @@ decisionNodes <- names(which(unlist(net$nodeDecision)))
 utilityNodes <- "payoff"  #names(which(unlist(net$nodeDecision)))
 determNodes <- names(which(unlist(net$nodeType)=="determ"))
 
-shapes <- rep("box",length(decisionNodes)+length(utilityNodes));
-names(shapes) <- c(decisionNodes, utilityNodes)
+plot(net)
 
-fills <- c(rep("cyan",length(decisionNodes)), rep("yellow",length(utilityNodes)))
-names(fills) <- c(decisionNodes, utilityNodes)
-
-fontcols <- rep("gray70", length(determNodes))
-names(fontcols) <- c(determNodes)
-
-cols <- rep("gray70",length(determNodes));
-names(cols) <- determNodes
-
-nodeAttribs <- list(shape=shapes, fillcolor=fills, fontcolor=fontcols, color=cols)
-
-attribs <- list(node=list(shape="ellipse", fixedsize=FALSE, fillcolor="white", style="solid"))
-#graphics.off()
-plot(net, attrs=attribs)
-#plot(net, attrs=list(node=list(fixedsize=FALSE)))
+#* WITH THE NEW PLOTTING DEFAULTS, I DON'T THINK YOU NEED THIS SECTION
+#* BUT I DIDN'T WANT TO DELETE IT, IN CASE THERE WAS SOMETHING I MISSED.
+# 
+# shapes <- rep("box",length(decisionNodes)+length(utilityNodes));
+# names(shapes) <- c(decisionNodes, utilityNodes)
+# 
+# fills <- c(rep("cyan",length(decisionNodes)), rep("yellow",length(utilityNodes)))
+# names(fills) <- c(decisionNodes, utilityNodes)
+# 
+# fontcols <- rep("gray70", length(determNodes))
+# names(fontcols) <- c(determNodes)
+# 
+# cols <- rep("gray70",length(determNodes));
+# names(cols) <- determNodes
+# 
+# nodeAttribs <- list(shape=shapes, fillcolor=fills, fontcolor=fontcols, color=cols)
+# 
+# attribs <- list(node=list(shape="ellipse", fixedsize=FALSE, fillcolor="white", style="solid"))
+# #graphics.off()
+# plot(net, attrs=attribs)
+# #plot(net, attrs=list(node=list(fixedsize=FALSE)))
 
 ```
 

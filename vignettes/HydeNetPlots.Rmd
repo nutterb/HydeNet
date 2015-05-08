@@ -35,7 +35,7 @@ When you load `HydeNet`, it will define some default settings for each of these 
 ```{r, fig.width=8, fig.height=12}
 library(HydeNet)
 data(BlackJack, package="HydeNet")
-graph::plot(BlackJack$dag)
+plot(BlackJack, useHydeDefaults=FALSE)
 ```
 
 The figure above shows every node in the network in a circle with white fill and black text. In a decision network, however, different nodes may be inherently different.  It would be helpful to be able to distinguish between random variables, deterministic nodes, decision nodes, and utility nodes.  The `plot.HydeNetwork` method uses the default settings to distinguish these types of nodes and can produce the figure below.
@@ -55,8 +55,6 @@ What we will see is:
   interest.  In this case the utility node is the payoff from the game.
 
 ```{r, fig.width=8, fig.height=12}
-#* Notice that we don't have to access the "dag" element here
-#* The plot.HydeNetwork method knows to do this already.
 plot(BlackJack)
 ```
 
@@ -65,34 +63,11 @@ We understand that it's possible that you won't find our default settings appeal
 
 The default plot settings are governed by a global option.  You can view the settings this way:
 
-```{r, eval=FALSE}
+```{r}
 getOption("Hyde_plotOptions")
 ```
 
-We haven't printed the options here because it's a big ugly list of lists that is a little bit painful to look at.  We'll admit that the process for customizing `Rgraphviz` attributes isn't something we enjoy, and it may seem counterintuitive.  Essentially each Graphviz attribute is a vector.  Each element of the vector is named where each name is a node and each element is the assignment of the attribute for that node.
-
-Let us show you an example.  For the previous plot, the `shape` attribute looks like this:
-
-```
-            card1             card2      dealerUpcard             card3 
-        "ellipse"         "ellipse"         "ellipse"         "ellipse" 
-            card4             card5 dealerFinalPoints         card1.ace 
-        "ellipse"         "ellipse"         "ellipse"         "ellipse" 
-        card2.ace     initialPoints         card3.ace  pointsAfterCard3 
-        "ellipse"         "ellipse"         "ellipse"         "ellipse" 
-        card4.ace  pointsAfterCard4         card5.ace  pointsAfterCard5 
-        "ellipse"         "ellipse"         "ellipse"         "ellipse" 
-playerFinalPoints              hit1              hit2              hit3 
-        "ellipse"            "rect"            "rect"            "rect" 
-           payoff 
-           "rect" 
-```
-
-To get the network plot, we need to construct a vector like that for `shape`, `fillcolor`, `fontcolor` and `linecolor`.  Any nodes that aren't named in a vector will adopt `Rgraphviz`'s default (a white circle with black text).
-
-But rather than put you through all of that work, we've put together some functions to make it easier to customize your plots.
-
-For now, let's assume that you only want to change the default scheme.  That is, you want the representation of each node to depend on its type.  Rather than assigning each type to an attribute, it seems more intuitive to assign the attributes to a type.  We can do this using the `HydePlotOptions` function.  To demonstrate, let's change the defaults so that:
+Let's assume that you only want to change the default scheme.  That is, you want the representation of each node to depend on its type.  Rather than assigning each type to an attribute, it seems more intuitive to assign the attributes to a type.  We can do this using the `HydePlotOptions` function.  To demonstrate, let's change the defaults so that:
 
 * random variables are in green rectangles black text
 * deterministic nodes are in black rectangles with white text
@@ -124,29 +99,42 @@ To do this, we'll need to use the `customNode` function.  It's easiest to do thi
 
 ```{r}
 plot(BlackJack,
-     hit1 = customNode(fillcolor = "purple", shape = "circle", 
-                       fontcolor = "white", height = "2"))
+     customNodes = customNode(node_id = "hit1", 
+                              fillcolor = "purple", shape = "circle", 
+                       fontcolor = "white", height = "2",
+                       style="filled"))
 ```
 
 Or if we would rather show a series of plots walking through the three decisions, we might not want to change the node appearance, but only the size.
 
 ```{r}
 plot(BlackJack,
-     hit1 = customNode(height = "2"))
+     customNodes = customNode(node_id = "hit1", height = "2"))
 plot(BlackJack,
-     hit2 = customNode(height = "2"))
+     customNodes = customNode(node_id = "hit2", height = "2"))
 plot(BlackJack,
-     hit3 = customNode(height = "2"))
+     customNodes = customNode(node_id = "hit3", height = "2"))
 ```
 
-The way that the node customization works is that it only applies custom attributes _after_ establishing the plot defaults.
+The way that the node customization works is that it only applies custom attributes _after_ establishing the plot defaults.  You may also alter the appearance of 
+multiple nodes simultaneously
+
+```{r}
+plot(BlackJack,
+     customNodes = rbind(customNode(node_id = "hit1", height="2"),
+                         customNode(node_id = "hit2", height="2"),
+                         customNode(node_id = "hit3", height="2")))
+```
 
 And, of course, if you want to use a custom node appearance without all of the `HydeNet` defaults, you may always do the following:
 
 ```{r}
 plot(BlackJack,
-     payoff = customNode(fillcolor = "green", shape = "ellipse", 
-                         height="2", width="4"),
+     customNodes = customNode(node_id = "payoff", 
+                              fillcolor = "green", 
+                              shape = "ellipse", 
+                              height="2", 
+                              width="4"),
      useHydeDefaults = FALSE)
 ```
 

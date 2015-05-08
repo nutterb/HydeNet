@@ -112,7 +112,6 @@ plot.HydeNetwork <- function(x,
   node_df <- data.frame(node_id = x$nodes,
                         stringsAsFactors = FALSE)
   if (useHydeDefaults) node_df <- mergeDefaultPlotOpts(x, node_df)
-  else node_df <- NULL
   
   if (!is.null(customNodes)) node_df <- mergeCustomNodes(node_df, customNodes)
 
@@ -159,13 +158,15 @@ mergeDefaultPlotOpts <- function(network, node_df){
 #' 
 mergeCustomNodes <- function(node_df, customNodes)
 {
-  node_df <- dplyr::mutate(node_df, index=2)
-  customNodes <- dplyr::mutate(customNodes, index=1)
-  node_df <- dplyr::bind_rows(customNodes, node_df) %>%
-    dplyr::group_by_("node_id") %>%
-    dplyr::filter_("rank(index, ties.method='first')==1") %>%
-    dplyr::select_("-index")
-  
+#   node_df <- dplyr::mutate(node_df, index=2)
+#   customNodes <- dplyr::mutate(customNodes, index=1)
+  node_df <- dplyr::full_join(customNodes, node_df,
+                              by = c("node_id" = "node_id")) 
+  if (any(grepl("[.]y", names(node_df))))
+    node_df <- dplyr::select_(node_df, "-ends_with('.y')")
+
+  names(node_df) <- gsub("[.]x", "", names(node_df))
+
   node_df[, -which(names(node_df) == "node_id")] <- 
     lapply(node_df[, -which(names(node_df) == "node_id")],
            function(x) ifelse(is.na(x), "", x))
@@ -232,20 +233,34 @@ HydePlotOptions <- function(variable = NULL,
                            lapply(list(variable, determ, decision, utility),
                                   as.data.frame,
                                   stringsAsFactors=FALSE))
-    new_options$type <- c("variable", "determ", "decision", "Utility")
+    new_options$type <- c(if (is.null(variable)) NULL else "variable", 
+                          if (is.null(determ)) NULL else "determ", 
+                          if (is.null(decision)) NULL else "decision", 
+                          if (is.null(utility)) NULL else "utility")
     
-    new_options$index <- 1
-    current_options$index <- 2
+    new_options <- dplyr::full_join(new_options, current_options,
+                                    by = c("type" = "type"))
+    shared_names <- names(new_options)[grepl("[.]x", names(new_options))]
+    if (length(shared_names) > 0)
+    {
+      for (s in shared_names)
+      {
+        new_options[, s] <- 
+          mapply(function(x, y) ifelse(is.na(x), 
+                                       y, 
+                                       x),
+                 new_options[s],
+                 new_options[gsub("[.]x", ".y", s)])
+      }
+      new_options <- dplyr::select_(new_options, "-ends_with('.y')")                                      
+    }
     
-    updated_options <- dplyr::bind_rows(new_options, current_options) %>%
-      dplyr::group_by_("type") %>%
-      dplyr::filter_("rank(index, ties.method='first')==1") %>%
-      dplyr::select_("-index")
+    names(new_options) <- gsub("[.]x", "", names(new_options))
     
     new_options[, which(names(new_options) == "type")] <- 
       lapply(new_options[, which(names(new_options) == "type"), drop=FALSE],
              function(x) ifelse(is.na(x), "", x))
     
-    options(Hyde_plotOptions = updated_options)
+    options(Hyde_plotOptions = new_options)
   }
 }
