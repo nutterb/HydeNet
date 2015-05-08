@@ -170,8 +170,8 @@ Below, we make such models and incorporate them into the network. We have simpli
 data(BlackJackTrain)
 BlackJackTrain$highUpcard <- as.character(BlackJackTrain$dealerUpcard)
 BlackJackTrain$highUpcard <- 
-  factor(BlackJackTrain$dealerUpcard %in% c("10-K","A"),
-         0:1, c("9 or lower", "10 or higher"))
+  factor(BlackJackTrain$highUpcard %in% c("10-K","A"),
+         c(FALSE, TRUE), c("9 or lower", "10 or higher"))
 
 
 # glm.hit1 <- glm(hit1 ~ initialPoints + I(dealerUpcard %in% c("9","10-K","A")),
@@ -190,6 +190,10 @@ glm.hit3 <- glm(hit3 ~ initialPoints+highUpcard,
                 data = BlackJackTrain, family="binomial")
 
 #this doesn't work.
+### BN: Should this work?  
+###     hit2 is a child of 'pointsAfterCard3' and 'highUpcard'
+###     hit3 is a child of 'pointsAftercard4' and 'highUpcard'
+###     Perhaps the models should be defined to match?
 net <- setNodeModels(net, glm.hit1, glm.hit2, glm.hit3)
 
 ```
