@@ -110,6 +110,9 @@ net <- setNode(net, dealerUpcard, nodeType="dcat",
 #####################################
 # Deterministic Nodes
 #####################################
+net <- setNode(net, highUpcard,     "determ", define=fromFormula(),
+               nodeFormula = highUpcard ~ ifelse(dealerUpcard > 8, 1, 0))
+
 net <- setNode(net, initialAces,    "determ", define=fromFormula(),
                nodeFormula = initialAces ~ ifelse(card1==10,1,0) + ifelse(card2==10,1,0))
 
@@ -296,22 +299,18 @@ net <- setNode(net, payoff, "determ", define=fromFormula(),
                )
 ```
 
-However, we also allow for utility nodes to be random variables. In that case, we might interpret them as reflecting some degree of uncertainty about their realized values. For example, we might have a dishonest dealer who forgets to pay us when we win sometimes:
-
-```
-#update model to add deterministic node 'playerWin'
-#update payoff node to represent randomness
-```
+However, the `HydeNet` package also allows for utility nodes to be random variables. In that case, we might interpret them as reflecting some degree of uncertainty about their realized values. If a child decides to steal a candy bar from the store, the utility might randomly depend on whether or not (s)he gets caught.
 
 
-## Maximum Expected Utility
+## Maximum Expected Utility Analysis
 
+In a maximum expected utility analysis, the goal is to compare different decision-making strategies, known as *policies*, in order to identify which one yields the greatest expected reward. With respect to our decision networks, this amounts to running the MCMC sampler with decision nodes set at specific values to get a representation of the joint posterior distribution of the utility nodes, and then adding their values to get a posterior distribution of total utility (from which we can get expected values, modes, etc.). We demonstrate this process below using the Blackjack network.
 
-## Policy Matrices
+We will analyze the following four strategies: never choose to "hit", always take 3 cards, always take 4 cards, and always take 5 cards.
 
 
 
-
+## Value of Information Analysis
 
 
 
