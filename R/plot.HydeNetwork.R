@@ -135,13 +135,13 @@ plot.HydeNetwork <- function(x,
 mergeDefaultPlotOpts <- function(network, node_df){
   nodes <- network$nodes
   node_df <- node_df %>%
-    dplyr::mutate(type = ifelse(network$nodeType[nodes] == "determ", 
-                                     "determ",
-                                     ifelse(network$nodeDecision[nodes], 
-                                            "decision",
-                                            ifelse(network$nodeUtility[nodes], 
-                                                   "utility",
-                                                   "variable"))))
+    dplyr::mutate(type = ifelse(network$nodeUtility[nodes], 
+                                "utility",
+                                ifelse(network$nodeDecision[nodes], 
+                                       "decision",
+                                       ifelse(network$nodeType[nodes] == "determ", 
+                                              "determ",
+                                              "variable"))))
 
   node_df <- dplyr::left_join(node_df, getOption("Hyde_plotOptions"),
                    by="type") %>%
