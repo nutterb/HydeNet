@@ -232,17 +232,17 @@ setNode <- function(network, node, nodeType,
     network$nodeModel[[node.t]] <- fit
     
     if (network$nodeType[[node.t]] == "dbern"){
-      network$nodeParams[[node.t]]$p <- writeJagsFormula(fit)  
+      network$nodeParams[[node.t]]$p <- writeJagsFormula(fit, network$nodes)  
     }
     else if (network$nodeType[[node.t]] == "dcat"){
-      network$nodeParams[[node.t]]$pi <- writeJagsFormula(fit)
+      network$nodeParams[[node.t]]$pi <- writeJagsFormula(fit, network$nodes)
     }
     else if (network$nodeType[[node.t]] == "dnorm"){
-      network$nodeParams[[node.t]]$mu <- writeJagsFormula(fit)
+      network$nodeParams[[node.t]]$mu <- writeJagsFormula(fit, network$nodes)
       network$nodeParams[[node.t]]$tau <- 1/summary(fit)$sigma
     }
     else if (network$nodeType[[node.t]] == "dpois"){
-      network$nodeParams[[node.t]]$lambda <- writeJagsFormula(fit)
+      network$nodeParams[[node.t]]$lambda <- writeJagsFormula(fit, network$nodes)
     }
                    
   }

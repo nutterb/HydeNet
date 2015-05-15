@@ -9,20 +9,22 @@
 \alias{modelToNode.xtabs}
 \title{Convert a Model Object to a Network Node}
 \usage{
-modelToNode(model, ...)
+modelToNode(model, nodes, ...)
 
-\method{modelToNode}{default}(model, ...)
+\method{modelToNode}{default}(model, nodes, ...)
 
-\method{modelToNode}{glm}(model, ...)
+\method{modelToNode}{glm}(model, nodes, ...)
 
-\method{modelToNode}{lm}(model, ...)
+\method{modelToNode}{lm}(model, nodes, ...)
 
-\method{modelToNode}{multinom}(model, ...)
+\method{modelToNode}{multinom}(model, nodes, ...)
 
-\method{modelToNode}{xtabs}(model, ...)
+\method{modelToNode}{xtabs}(model, nodes, ...)
 }
 \arguments{
 \item{model}{A model object}
+
+\item{nodes}{A vector of node names, usually as \code{network$nodes}}
 
 \item{...}{Additional arguments to be passed to other functions.  Currently ignored.}
 }

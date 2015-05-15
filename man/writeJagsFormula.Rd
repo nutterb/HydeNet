@@ -8,18 +8,20 @@
 \alias{writeJagsFormula.xtabs}
 \title{Write the JAGS Formula for a Hyde Node}
 \usage{
-writeJagsFormula(fit, ...)
+writeJagsFormula(fit, nodes, ...)
 
-\method{writeJagsFormula}{glm}(fit, ...)
+\method{writeJagsFormula}{glm}(fit, nodes, ...)
 
-\method{writeJagsFormula}{lm}(fit, ...)
+\method{writeJagsFormula}{lm}(fit, nodes, ...)
 
-\method{writeJagsFormula}{multinom}(fit, ...)
+\method{writeJagsFormula}{multinom}(fit, nodes, ...)
 
 \method{writeJagsFormula}{xtabs}(fit, ...)
 }
 \arguments{
 \item{fit}{a model object}
+
+\item{nodes}{a vector of node names, usually passed from \code{network$nodes}}
 
 \item{...}{Additional arguments to be passed to other methods}
 }
@@ -47,10 +49,10 @@ Methods for different model objects can be written so that
 \examples{
 data(PE, package="HydeNet")
 fit <- lm(d.dimer ~ pregnant + pe, data=PE)
-writeJagsFormula(fit)
+writeJagsFormula(fit, nodes=c("d.dimer", "pregnant", "pe"))
 
 fit.glm <- glm(death ~ pe + treat, data=PE, family="binomial")
-writeJagsFormula(fit.glm)
+writeJagsFormula(fit.glm, nodes=c("death", "pe", "treat"))
 }
 \author{
 Jarrod Dalton and Benjamin Nutter

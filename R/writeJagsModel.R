@@ -61,7 +61,7 @@ writeJagsModel <- function(network, node){
     
     if (node_params['p'] %in% c(fromData(), fromFormula())){
       if (node_params['p'] == fromData())
-        node_params['p'] <- writeJagsFormula(fit)
+        node_params['p'] <- writeJagsFormula(fit, network$nodes)
       else if (node_params['p'] == fromFormula())
         node_params['p'] <- rToJags(network$nodeFormula[[node_str]])
     
@@ -83,7 +83,7 @@ writeJagsModel <- function(network, node){
       pi <- do.call(network$nodeFitter[[node_str]],
                     list(formula = network$nodeFormula[[node_str]],
                          data=if (is.null(network$nodeData[[node_str]])) network$data else network$nodeData[[node_str]]))
-      pi <- writeJagsFormula(pi)
+      pi <- writeJagsFormula(pi, network$nodes)
       model_code <- 
         c(pi,  
           paste0(node_str, " ~ ",
@@ -108,7 +108,7 @@ writeJagsModel <- function(network, node){
     
     if (node_params['mu'] %in% c(fromData(), fromFormula())){
       if (node_params['mu'] == fromData())
-        node_params['mu'] <- writeJagsFormula(fit)
+        node_params['mu'] <- writeJagsFormula(fit, network$nodes)
   
       else if (node_params['mu'] == fromFormula())
         node_params['mu'] <- rToJags(network$nodeFormula[[node_str]])
@@ -140,7 +140,7 @@ writeJagsModel <- function(network, node){
     
     if (node_params['lambda'] %in% c(fromData(), fromFormula())){
       if (node_params['lambda'] == fromData())
-        node_params['lambda'] <- writeJagsFormula(fit)
+        node_params['lambda'] <- writeJagsFormula(fit, network$nodes)
     
       else if (node_params['lambda'] == fromFormula())
         node_params['lambda'] <- rToJags(network$nodeFormula[[node_str]])

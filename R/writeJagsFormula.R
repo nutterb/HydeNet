@@ -7,6 +7,7 @@
 #'   the other node models to generate the complete network.
 #'   
 #' @param fit a model object
+#' @param nodes a vector of node names, usually passed from \code{network$nodes}
 #' @param ... Additional arguments to be passed to other methods
 #' 
 #' @details Methods for different model objects can be written so that 
@@ -31,19 +32,19 @@
 #' @examples
 #' data(PE, package="HydeNet")
 #' fit <- lm(d.dimer ~ pregnant + pe, data=PE)
-#' writeJagsFormula(fit)
+#' writeJagsFormula(fit, nodes=c("d.dimer", "pregnant", "pe"))
 #' 
 #' fit.glm <- glm(death ~ pe + treat, data=PE, family="binomial")
-#' writeJagsFormula(fit.glm)
+#' writeJagsFormula(fit.glm, nodes=c("death", "pe", "treat"))
 
-writeJagsFormula <- function(fit, ...) UseMethod("writeJagsFormula")
+writeJagsFormula <- function(fit, nodes, ...) UseMethod("writeJagsFormula")
 
 #' @rdname writeJagsFormula
 #' @export
 #' @importFrom stringr str_trim
 #' 
 
-writeJagsFormula.glm <- function(fit, ...){
+writeJagsFormula.glm <- function(fit, nodes, ...){
   if (fit$family$family == "gaussian" & fit$family$link == "identity") 
     return(writeJagsFormula.lm(fit))
   
@@ -51,7 +52,7 @@ writeJagsFormula.glm <- function(fit, ...){
   
   regex <- factorRegex(fit)
   
-  mdl <- makeJagsReady(mdl, regex)
+  mdl <- makeJagsReady(mdl, regex, nodes)
   
   #* rhs = right hand side
   rhs <- paste(round(mdl$estimate, getOption("Hyde_maxDigits")), 
@@ -78,12 +79,12 @@ writeJagsFormula.glm <- function(fit, ...){
 #' @importFrom stringr str_trim
 #' 
 
-writeJagsFormula.lm <- function(fit, ...){
+writeJagsFormula.lm <- function(fit, nodes, ...){
   mdl <- broom::tidy(fit)[, c("term", "estimate")] 
   
   regex <- factorRegex(fit)
   
-  mdl <- makeJagsReady(mdl, regex)
+  mdl <- makeJagsReady(mdl, regex, nodes)
   
   #* rhs = right hand side
   rhs <- paste(round(mdl$estimate, getOption("Hyde_maxDigits")), 
@@ -100,7 +101,27 @@ writeJagsFormula.lm <- function(fit, ...){
 #' @import nnet
 #'
 
-writeJagsFormula.multinom <- function(fit, ...){
+writeJagsFormula.multinom <- function(fit, nodes, ...){
+#   mdl <- broom::tidy(fit, exponentiate=FALSE)[, c("y.level", "term", "estimate")] 
+#   
+#   regex <- factorRegex(fit)
+#   
+#   mdl <- makeJagsReady(mdl, regex)
+#   mdl <- dplyr::arrange(mdl, y.level, term_name)
+#   
+#   right_side <- function(l, m=mdl)
+#   {
+#     m <- m[m$y.level == l, ]
+#     paste(round(m$estimate, getOption("Hyde_maxDigits")), 
+#           ifelse(m$jagsVar == "(Intercept)", "", "*"),
+#           ifelse(m$jagsVar == "(Intercept)", "", m$jagsVar), 
+#           collapse=" + ")
+#   }
+#   
+#   sapply(unique(as.character(mdl$y.level)), right_side)
+         
+  
+  
   if (is.null(fit$model)) fit <- update(fit, model=TRUE)
   fm <- as.character(fit$call$formula)
   out_fm <- paste0("pi.", fm[2])

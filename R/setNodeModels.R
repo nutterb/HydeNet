@@ -41,7 +41,7 @@ setNodeModels <- function(network, ...){
   models <- list(...)
   if (length(models) == 0) stop("No objects passed in '...' argument.")
   
-  Attrs <- lapply(models, modelToNode)
+  Attrs <- lapply(models, modelToNode, nodes=network$nodes)
   #* assign names to list elements
   for(i in 1:length(Attrs)){
     names(Attrs)[i] <- Attrs[[i]]$nodes  

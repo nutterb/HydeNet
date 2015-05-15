@@ -25,7 +25,7 @@ Depends:
     nnet,
     rjags
 Imports:
-    broom,
+    broom (>= 0.3.7),
     DiagrammeR (>= 0.6),
     dplyr,
     graph,

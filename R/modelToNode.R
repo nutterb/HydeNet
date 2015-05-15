@@ -8,6 +8,7 @@
 #'   
 #' @param model A model object
 #' @param ... Additional arguments to be passed to other functions.  Currently ignored.
+#' @param nodes A vector of node names, usually as \code{network$nodes}
 #' 
 #' @description For models built with \code{xtabs}, although a data frame may be
 #'   passed when building the model, it is not stored in the object.  Thus,
@@ -15,12 +16,12 @@
 #'   the JAGS code is built appropriate from the object and this should be of
 #'   little concern.
 
-modelToNode <- function(model, ...) UseMethod("modelToNode")
+modelToNode <- function(model, nodes, ...) UseMethod("modelToNode")
 
 #' @rdname modelToNode
 #' @export
 
-modelToNode.default <- function(model, ...){
+modelToNode.default <- function(model, nodes, ...){
   fitter <- tail(as.character(as.list(model$call)[[1]]), 1)
   if (!fitter %in% c("lm", "glm", "multinom", "xtabs"))
     stop(paste0("The Hyde package only accepts models built by the following functions:\n",
@@ -30,14 +31,22 @@ modelToNode.default <- function(model, ...){
 #' @rdname modelToNode
 #' @export
 
-modelToNode.glm <- function(model, ...){
+modelToNode.glm <- function(model, nodes, ...){
+  if (missing(nodes))
+    nodes <- nodeFromFunction(names(attributes(terms(model))$dataClasses))
   list(nodes = as.character(terms(model))[2],
-       parents = names(attributes(terms(model))$dataClasses)[-1],
+       parents = if (length(names(attributes(terms(model))$dataClasses)[-1]) == 0)
+                      NULL
+                     else 
+                       matchVars(names(attributes(terms(model))$dataClasses)[-1],
+                                 nodes),
        nodeType = "dbern",
        nodeFormula = model$call$formula,
        nodeFitter = as.character(model$call)[1],
        nodeFitterArgs = as.list(model$call)[-c(1, which(names(as.list(model$call)) %in% c("formula", "data")))],
-       nodeParams = list(p = gsub("[[:print:]]+~", "", writeJagsFormula(model))),
+       nodeParams = list(p = gsub("[[:print:]]+~", "", 
+                                  writeJagsFormula(model, 
+                                                   nodes))),
        nodeDecision = FALSE,
        nodeUtility = FALSE,
        fromData = TRUE,
@@ -51,14 +60,22 @@ modelToNode.glm <- function(model, ...){
 #' @rdname modelToNode
 #' @export
 
-modelToNode.lm <- function(model, ...){
+modelToNode.lm <- function(model, nodes, ...){
+  if (missing(nodes))
+    nodes <- nodeFromFunction(names(attributes(terms(model))$dataClasses))
   list(nodes = as.character(terms(model))[2],
-       parents = names(attributes(terms(model))$dataClasses)[-1],
+       parents = if (length(names(attributes(terms(model))$dataClasses)[-1]) == 0)
+                     NULL
+                    else 
+                       matchVars(names(attributes(terms(model))$dataClasses)[-1],
+                                 nodes),
        nodeType = "dnorm",
        nodeFormula = model$call$formula,
        nodeFitter = as.character(model$call)[1],
        nodeFitterArgs = as.list(model$call)[-c(1, which(names(as.list(model$call)) %in% c("formula", "data")))],
-       nodeParams = list(mu = gsub("[[:print:]]+~", "", writeJagsFormula(model)),
+       nodeParams = list(mu = gsub("[[:print:]]+~", "", 
+                                   writeJagsFormula(model,
+                                                    nodes)),
                          tau = 1/summary(model)$sigma),
        nodeDecision = FALSE,
        nodeUtility = FALSE,
@@ -73,14 +90,22 @@ modelToNode.lm <- function(model, ...){
 #' @rdname modelToNode
 #' @export
 
-modelToNode.multinom <- function(model, ...){
+modelToNode.multinom <- function(model, nodes, ...){
+  if (missing(nodes))
+    nodes <- nodeFromFunction(names(attributes(terms(model))$dataClasses))
   list(nodes = as.character(terms(model))[2],
-       parents = names(attributes(terms(model))$dataClasses)[-1],
+       parents = if (length(names(attributes(terms(model))$dataClasses)[-1]) == 0)
+                       NULL
+                     else 
+                       matchVars(names(attributes(terms(model))$dataClasses)[-1],
+                                 nodes),
        nodeType = "dcat",
        nodeFormula = model$call$formula,
        nodeFitter = as.character(model$call)[1],
        nodeFitterArgs = as.list(model$call)[-c(1, which(names(as.list(model$call)) %in% c("formula", "data")))],
-       nodeParams = list(pi = gsub("[[:print:]]+~", "", writeJagsFormula(model))),
+       nodeParams = list(pi = gsub("[[:print:]]+~", "", 
+                                   writeJagsFormula(model, 
+                                                    nodes))),
        nodeDecision = FALSE,
        nodeUtility = FALSE,
        fromData = TRUE,
@@ -94,14 +119,16 @@ modelToNode.multinom <- function(model, ...){
 #' @rdname modelToNode
 #' @export
 
-modelToNode.xtabs <- function(model, ...){
+modelToNode.xtabs <- function(model, nodes, ...){
+  if (missing(nodes)) 
+    nodes <- nodeFromFunction(names(attributes(model)$dimnames))
   list(nodes = names(attributes(model)$dimnames),
        parents = NULL,
        nodeType = "dcat",
        nodeFormula = attributes(model)$call$formula,
        nodeFitter = as.character(attributes(model)$call)[1],
        nodeFitterArgs = as.list(attributes(model)$call)[-c(1, which(names(as.list(attributes(model)$call)) %in% c("formula", "data")))],
-       nodeParams = list(pi = writeJagsFormula(model)),
+       nodeParams = list(pi = writeJagsFormula(model, nodes)),
        nodeDecision = FALSE,
        nodeUtility = FALSE,
        fromData = FALSE,
