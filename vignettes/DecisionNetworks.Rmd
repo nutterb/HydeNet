@@ -84,7 +84,7 @@ net <- HydeNetwork(~ initialAces | card1*card2
 plot(net)
 ```
 
-Notice in the above network plot that all nodes have the same representation of empty black ovals. The `plot.HydeNetwork()` function allows for enhanced visualization of decision networks (see the vignette titled "Building and Customizing HydeNet Plots" for details), and since we have not yet specified the node types (i.e., random variable, deterministic, decision, or utility), it assumes that all nodes are random variables. Once we populate the network object with the node types and conditional distributions/deterministic functions, we will regenerate the plot.
+Notice in the above network plot that all nodes have the same representation of empty black ovals. The `plot.HydeNetwork()` function allows for enhanced visualization of decision networks (see the vignette titled "Building and Customizing HydeNet Plots" for details; `vignette("HydeNetPlots", package="HydeNet")`), and since we have not yet specified the node types (i.e., random variable, deterministic, decision, or utility), it assumes that all nodes are random variables. Once we populate the network object with the node types and conditional distributions/deterministic functions, we will regenerate the plot.
 
 First, we will populate the random variable and deterministic nodes using `setNode()` and `setNodeModels()`. Note that the deterministic node calculations are tedious due to the fact that an ace may mean 1 or 11 points depending on the other cards in the hand; we include the code for completeness but note that understanding the calculations are not critical to the general topic of decision networks.
 

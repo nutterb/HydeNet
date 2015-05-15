@@ -11,14 +11,12 @@ output: html_vignette
 
 Visualizing your graphical network will be critical to explaining the relationships between the variables in your model. While the printed output explicitly defines the nature of the relationships, the visual representation usually makes it easier to see how all the pieces fit together and evaluate if all of the important relationships have been assembled correctly.
 
-The `HydeNet` package utilize the functionality in the `Rgraphviz` package to quickly illustrate the relationships. `HydeNet` also provides additional tools to address the inherent differences between random variables, deterministic nodes, decision nodes, and utility nodes.  Finally, with `HydeNet`, tools are available to easily customize the appearance of nodes to suit your needs.
+The `HydeNet` package utilizes the functionality GraphViz package to quickly illustrate the relationships. `HydeNet` also provides additional tools to address the inherent differences between random variables, deterministic nodes, decision nodes, and utility nodes.  Finally, with `HydeNet`, tools are available to easily customize the appearance of nodes to suit your needs.
 
-### A note on `Rgraphviz`
-GraphViz, or Graphical Visualization Software, is "a way of representing structural information as diagrams of abstract graphs and networks" [1].  It is open source software that `Rgraphviz` utilizes through available libraries and APIs.  
+### A note on `GraphViz`
+GraphViz, or Graphical Visualization Software, is "a way of representing structural information as diagrams of abstract graphs and networks" [1].  It is open source software that the `DiagrammeR` package utilizes through available libraries and APIs.  
 
-We have chosen `Rgraphviz` because of the speed at which it can build network plots.  However, `Rgraphviz` -- at least in our experience -- can be a tedious system to customize and `Rgraphviz` doesn't make use of all of the functionality available through Graphviz.  We have implemented as much of the functionality for customizing individual nodes as we can, but not all features will be responsive depending on what is available through `Rgraphviz`.  As `Rgraphviz` continues to develop and offer more features, `HydeNet` will be able to offer those features as well.
-
-One last note: we have not implemented methods for modifying edges or overall plot attributes.  Those can be manipulated by passing arguments to the `plot` method.  To learn more about customizing `Rgraphviz` attributes, you can look at the documentation by entering `?GraphvizAttributes` in the console.
+We only cover a very small subset of the capabilities available through the `DiagrammeR` package. A great many customizations may be accomplished, but it is left to the user to research how to make those customizations beyond the basics provided here.
 
 ## Basic Graphical Network Plots
 To illustrate the graphical representations of `HydeNetwork` objects, we will use the `BlackJack` data set that comes as part of the package.  `BlackJack` is a hybrid decision network that simulates the card game of the same name [2].  We won't construct the network here because the code is fairly lengthy.  However, the code to construct the object can be reviewed by typing `?BlackJack` into the console.
@@ -30,7 +28,7 @@ The key aspects of this network are that it contains
 * three decision nodes
 * one utility node
 
-When you load `HydeNet`, it will define some default settings for each of these nodes, but before we show you those settings, let's take a look at what the `Rgraphviz` would return if we chose not to use anything but its defaults.
+When you load `HydeNet`, it will define some default settings for each of these nodes, but before we show you those settings, let's take a look at what the GraphViz would return if we chose not to use anything but its defaults.
 
 ```{r, fig.width=8, fig.height=12}
 library(HydeNet)
@@ -134,7 +132,8 @@ plot(BlackJack,
                               fillcolor = "green", 
                               shape = "ellipse", 
                               height="2", 
-                              width="4"),
+                              width="4",
+                              style="filled"),
      useHydeDefaults = FALSE)
 ```
 

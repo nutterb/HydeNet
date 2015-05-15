@@ -1,4 +1,9 @@
-### 0.8.5 (7 May 2015
+### 0.8.6 (15 May 2015)
+* Changed behavior of `setNode` to retain current settings for decision and utility nodes
+* Updated `BlackJack` network object to be consistent with the object defined in 
+  the Decision Nodes vignette.
+
+### 0.8.5 (7 May 2015)
 * Moved `gRbase` from Depends: to Imports:
 * Repaired a bug in `plot.HydeNetwork` that prevented plotting without defaults
 * Updated the `HydeNetPlots` vignette to accommodate new plotting features.

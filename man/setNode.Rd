@@ -7,8 +7,9 @@
 \title{Set Node Relationships}
 \usage{
 setNode(network, node, nodeType, nodeFitter, nodeFormula, fitterArgs = list(),
-  decision = FALSE, utility = FALSE, fromData = !is.null(network$data),
-  ..., validate = TRUE, fitModel = getOption("Hyde_fitModel"))
+  decision = "current", utility = "current",
+  fromData = !is.null(network$data), ..., validate = TRUE,
+  fitModel = getOption("Hyde_fitModel"))
 
 fromData()
 
@@ -32,13 +33,26 @@ node and its parents.  It must use as a term every parent of \code{node}.}
 yet have any effect as I haven't yet decided out where to store this and
 how to implement the fitting.}
 
-\item{decision}{Logical.  If \code{TRUE}, the node will be considered a
+\item{decision}{A value of either \code{"current"} or a logical value.
+If \code{"current"}, the current value of the setting is retained.  This allows
+decision nodes set by \code{setDecisionNode} to retain the classification as a
+decision node if \code{setNode} is run after \code{setDecisionNode}.
+If \code{TRUE}, the node will be considered a
 decision node in \code{compileDecisionNetwork}.  This is only a valid
-option when the node is of type \code{"dbern"} or \code{"dcat"}.}
+option when the node is of type \code{"dbern"} or \code{"dcat"}. Note: if any
+character value other than \code{"current"} is given, \code{setNode} will assume
+you intended \code{"current"}.}
 
-\item{utility}{Logical. If \code{TRUE}, the node will be considered a
+\item{utility}{A value of either \code{"current"} or a logical value.
+If \code{"current"}, the current value of the setting is retained.  This allows
+utility nodes set by \code{setUtilityNode} to retain the classification as a
+utility node if \code{setNode} is run after \code{setUtilityNode}.
+If \code{TRUE}, the node will be considered a
 utility node.  This is only a valid option when the node is of type
-\code{"determ"} and it has no children.}
+\code{"determ"} and it has no children.
+Note: if any
+character value other than \code{"current"} is given, \code{setNode} will assume
+you intended \code{"current"}.}
 
 \item{fromData}{Logical.  Determines if a node's relationship is calculated
 from the data object in \code{network}.  Defaults to \code{TRUE} whenever

@@ -5,64 +5,155 @@
 #'
 #' @format A \code{HydeNetwork} object constructed using the code shown in 
 #' the example.  The network has seven random nodes, three ten deterministic
-#' nodes, three decision nodes, and one utility node.
+#' nodes, three decision nodes, and one utility node.  This is (almost) the same 
+#' network used in `vignette("DecisionNetworks", package="HydeNet")`.
 #' 
 #' @examples
 #' \dontrun{
 #' BlackJack <- 
-#'   HydeNetwork(~ card1.ace | card1 + 
-#'                 card2.ace | card2 + 
-#'                 initialPoints | card1 * card2 * card1.ace * card2.ace + 
-#'                 hit1 | initialPoints * dealerUpcard + 
-#'                 card3 | hit1 + 
-#'                 card3.ace | card3 + 
-#'                 pointsAfterCard3 | initialPoints * card3 * card3.ace + 
-#'                 hit2 | pointsAfterCard3 * dealerUpcard + 
-#'                 card4 | hit2 + 
-#'                 card4.ace | card4 + 
-#'                 pointsAfterCard4 | pointsAfterCard3 * card4 * card4.ace + 
-#'                 hit3 | pointsAfterCard4*dealerUpcard + 
-#'                 card5 | hit3 + 
-#'                 card5.ace | card5 + 
-#'                 pointsAfterCard5 | pointsAfterCard4 * card5 * card5.ace + 
-#'                 playerFinalPoints | initialPoints * hit1 * 
-#'                 pointsAfterCard3 * hit2 * 
-#'                 pointsAfterCard4 * hit3 * 
-#'                 pointsAfterCard5 + 
-#'                 dealerFinalPoints | dealerUpcard + 
-#'                 payoff | playerFinalPoints * dealerFinalPoints)
-#'                 
-#' BlackJack <- setNode(BlackJack, node = card1.ace, nodeType = "determ", 
-#'                      define = fromFormula(), 
-#'                      nodeFormula = card1.ace ~ ifelse(card1==1,1,0))
-#' BlackJack <- setNode(BlackJack, node = card2.ace, nodeType = "determ", 
-#'                      define = fromFormula(), 
-#'                      nodeFormula = card2.ace ~ ifelse(card2==1,1,0))
-#' BlackJack <- setNode(BlackJack, node = card3.ace, nodeType = "determ", 
-#'                      define = fromFormula(), 
-#'                      nodeFormula = card3.ace ~ ifelse(card3==1,1,0))
-#' BlackJack <- setNode(BlackJack, node = card4.ace, nodeType = "determ", 
-#'                      define = fromFormula(), 
-#'                      nodeFormula = card4.ace ~ ifelse(card4==1,1,0))
-#' BlackJack <- setNode(BlackJack, node = card5.ace, nodeType = "determ", 
-#'                      define = fromFormula(), 
-#'                      nodeFormula = card5.ace ~ ifelse(card5==1,1,0))
-#' BlackJack <- setNode(BlackJack, node = initialPoints, nodeType = "determ", 
-#'                      define = fromFormula(), 
-#'                      nodeFormula = initialPoints~card1+card2)
-#' BlackJack <- setNode(BlackJack, node = pointsAfterCard3, nodeType = "determ", 
-#'                      define = fromFormula(),
-#'                      nodeFormula = pointsAfterCard3 ~ initialPoints+card3)
-#' BlackJack <- setNode(BlackJack, node = pointsAfterCard4, nodeType = "determ", 
-#'                      define = fromFormula(),
-#'                      nodeFormula = pointsAfterCard4 ~ pointsAfterCard3+card4)
-#' BlackJack <- setNode(BlackJack, node = pointsAfterCard5, nodeType = "determ", 
-#'                      define = fromFormula(),
-#'                      nodeFormula = pointsAfterCard5 ~ pointsAfterCard4+card5)
-#' BlackJack <- setNode(BlackJack, node = playerFinalPoints, nodeType = "determ", 
-#'                      define = fromFormula(),
-#'                      nodeFormula = playerFinalPoints ~ playerFinalPoints+3)
-#'
+#'        HydeNetwork(~ initialAces | card1*card2
+#'                    + initialPoints | card1*card2
+#'                    + highUpcard | dealerUpcard
+#'                    + hit1 | initialPoints*highUpcard
+#'                    + acesAfterCard3 | initialAces*card3
+#'                    + pointsAfterCard3 | card1*card2*card3*acesAfterCard3
+#'                    + hit2 | pointsAfterCard3*highUpcard
+#'                    + acesAfterCard4 | acesAfterCard3*card4
+#'                    + pointsAfterCard4 | card1*card2*card3*card4*acesAfterCard4
+#'                    + hit3 | pointsAfterCard4*highUpcard
+#'                    + acesAfterCard5 | acesAfterCard4*card5
+#'                    + pointsAfterCard5 | card1*card2*card3*card4*card5*acesAfterCard5
+#'                    + playerFinalPoints | initialPoints*hit1*pointsAfterCard3
+#'                    *hit2*pointsAfterCard4*hit3*pointsAfterCard5
+#'                    + dealerFinalPoints | dealerUpcard
+#'                    + payoff | playerFinalPoints*dealerFinalPoints)
+#' cardProbs  <- c(rep(1/13,8), 4/13, 1/13)  # probs. for 2, 3, ..., 9, (10-K), A
+#' 
+#' BlackJack <- setNode(BlackJack, card1, nodeType="dcat",  
+#'                      pi=vectorProbs(p=cardProbs, card1))
+#' BlackJack <- setNode(BlackJack, card2, nodeType="dcat",  
+#'                      pi=vectorProbs(p=cardProbs, card2))
+#' BlackJack <- setNode(BlackJack, card3, nodeType="dcat",  
+#'                      pi=vectorProbs(p=cardProbs, card3))
+#' BlackJack <- setNode(BlackJack, card4, nodeType="dcat",  
+#'                      pi=vectorProbs(p=cardProbs, card4))
+#' BlackJack <- setNode(BlackJack, card5, nodeType="dcat",  
+#'                      pi=vectorProbs(p=cardProbs, card5))
+#' 
+#' BlackJack <- setNode(BlackJack, dealerUpcard, nodeType="dcat",
+#'                pi=vectorProbs(p=cardProbs, dealerUpcard))
+#' 
+#' #Note: node dealerFinalPoints will be defined below, following some discussion 
+#' #      about its conditional probability distribution.
+#' 
+#' #####################################
+#' # Deterministic Nodes
+#' #####################################
+#' BlackJack <- setNode(BlackJack, highUpcard,     
+#'                "determ", define=fromFormula(),
+#'                nodeFormula = highUpcard ~ ifelse(dealerUpcard > 8, 1, 0))
+#' 
+#' BlackJack <- setNode(BlackJack, initialAces,    
+#'                "determ", define=fromFormula(),
+#'                nodeFormula = initialAces ~ ifelse(card1==10,1,0) + 
+#'                               ifelse(card2==10,1,0))
+#' 
+#' BlackJack <- setNode(BlackJack, acesAfterCard3, 
+#'                "determ", define=fromFormula(),
+#'                nodeFormula = acesAfterCard3 ~ initialAces + ifelse(card3==10,1,0))
+#' 
+#' BlackJack <- setNode(BlackJack, acesAfterCard4, 
+#'                "determ", define=fromFormula(),
+#'                nodeFormula = acesAfterCard4 ~ acesAfterCard3 + ifelse(card4==10,1,0))
+#' 
+#' BlackJack <- setNode(BlackJack, acesAfterCard5, 
+#'                "determ", define=fromFormula(),
+#'                nodeFormula = acesAfterCard5 ~ acesAfterCard4 + ifelse(card5==10,1,0))
+#' 
+#' BlackJack <- setNode(BlackJack, initialPoints, 
+#'                "determ", define=fromFormula(),
+#'                nodeFormula = initialPoints ~ card1+card2+2)
+#' 
+#' BlackJack <- setNode(BlackJack, pointsAfterCard3, "determ", define=fromFormula(),
+#'                nodeFormula = pointsAfterCard3 ~
+#'                  ifelse(acesAfterCard3 == 3,
+#'                         13,
+#'                         ifelse(acesAfterCard3 == 2,
+#'                                card1 + card2 + card3 + 3 - 10,
+#'                                ifelse(acesAfterCard3 == 1,
+#'                                       ifelse(card1 + card2 + card3 + 3 > 22,
+#'                                              card1 + card2 + card3 + 3 - 10,
+#'                                              card1 + card2 + card3 + 3),
+#'                                       card1 + card2 + card3 + 3
+#'                                )
+#'                         )
+#'                  )
+#' )
+#' 
+#' BlackJack <- setNode(BlackJack, pointsAfterCard4, "determ", define=fromFormula(),
+#'                nodeFormula = pointsAfterCard4 ~
+#'                  ifelse(acesAfterCard4 == 4,
+#'                         14,
+#'                         ifelse(acesAfterCard4 == 3,
+#'                                ifelse(card1 + card2 + card3 + card4 + 4 > 38,
+#'                                       card1 + card2 + card3 + card4 + 4 - 30,
+#'                                       card1 + card2 + card3 + card4 + 4 - 20
+#'                                ),
+#'                                ifelse(acesAfterCard4 > 0,
+#'                                       ifelse(card1 + card2 + card3 + card4 + 4 > 22,
+#'                                              card1 + card2 + card3 + card4 + 4 - 10,
+#'                                              card1 + card2 + card3 + card4 + 4
+#'                                       ),
+#'                                       card1 + card2 + card3 + card4 + 4
+#'                                )
+#'                         )
+#'                  )
+#' )
+#' 
+#' BlackJack <- 
+#'   setNode(BlackJack, pointsAfterCard5, "determ", define=fromFormula(),
+#'           nodeFormula = pointsAfterCard5 ~ 
+#'             ifelse(acesAfterCard5 == 5,
+#'               15,
+#'               ifelse(acesAfterCard5 == 4,
+#'                 ifelse(card1 + card2 + card3 + card4 + card5 + 5 > 51,
+#'                   card1 + card2 + card3 + card4 + card5 + 5 - 40,
+#'                   card1 + card2 + card3 + card4 + card5 + 5 - 30
+#'                 ),
+#'                 ifelse(acesAfterCard5 == 3,
+#'                   ifelse(card1 + card2 + card3 + card4 + card5 + 5 > 51,
+#'                     card1 + card2 + card3 + card4 + card5 + 5 - 30,
+#'                     card1 + card2 + card3 + card4 + card5 + 5 - 20
+#'                   ),
+#'                   ifelse(acesAfterCard5 == 2,
+#'                     ifelse(card1 + card2 + card3 + card4 + card5 + 5 > 31,
+#'                       card1 + card2 + card3 + card4 + card5 + 5 - 20,
+#'                       card1 + card2 + card3 + card4 + card5 + 5 - 10
+#'                     ),
+#'                     ifelse(acesAfterCard5 > 0,
+#'                       ifelse(card1 + card2 + card3 + card4 + card5 + 5 > 22,
+#'                         card1 + card2 + card3 + card4 + card5 + 5 - 10,
+#'                         card1 + card2 + card3 + card4 + card5 + 5
+#'                       ),
+#'                       card1 + card2 + card3 + card4 + card5 + 5
+#'                     )
+#'                   )
+#'                 )
+#'               )
+#'             )
+#' )
+#' 
+#' BlackJack <- setNode(BlackJack, playerFinalPoints, "determ", define=fromFormula(),
+#'                nodeFormula = playerFinalPoints ~ 
+#'                  ifelse(hit1 == 0,
+#'                         initialPoints,
+#'                         ifelse(hit2 == 0,
+#'                                pointsAfterCard3,
+#'                                ifelse(hit3 == 0, pointsAfterCard4, pointsAfterCard5)
+#'                         )
+#'                  )
+#' )
+#' 
 #' BlackJack <- setDecisionNodes(BlackJack, hit1, hit2, hit3)
 #' BlackJack <- setUtilityNodes(BlackJack, payoff)
 #' }

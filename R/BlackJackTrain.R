@@ -4,6 +4,7 @@
 #'
 #' @format A data frame with 10000 rows and 7 variables:
 #' \describe{
+#'   \item{dealerUpcard}{The card in the dealer's hand visible to all players}
 #'   \item{card1}{Value of the first card}
 #'   \item{card2}{Value of the second card}
 #'   \item{initialPoints}{Total points with the two cards}
