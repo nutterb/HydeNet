@@ -172,6 +172,12 @@ setNode <- function(network, node, nodeType,
 
   if (validate){
     valid <- validateParameters(params, network$nodeType[[node.t]]) 
+    
+    if (any(sapply(params, is.character)))
+    {
+      valid[sapply(params, is.character)] <- TRUE
+      message("Validation has been ignored for parameters defined with character strings")
+    }
 
     if (!all(valid)){
       not_valid <- which(!valid)

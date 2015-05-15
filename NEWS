@@ -1,5 +1,8 @@
 ### 0.8.6 (15 May 2015)
-* Changed behavior of `setNode` to retain current settings for decision and utility nodes
+* Changed behavior of `setNode` to retain current settings for decision and 
+  utility nodes (Issue #53)
+* Added a message to indicate that character strings defining parameters
+  in `setNode` are not validated (Issue #24).
 * Updated `BlackJack` network object to be consistent with the object defined in 
   the Decision Nodes vignette.
 
