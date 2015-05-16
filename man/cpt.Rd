@@ -4,10 +4,11 @@
 \alias{cpt}
 \title{Compute a conditional probablity table for a factor given other factors}
 \usage{
-cpt(formula, data, wt)
+cpt(vars, data, wt)
 }
 \arguments{
-\item{formula}{a formula with the following structure: \emph{response ~ var1 + var2 + ...}}
+\item{vars}{either a formula or a list containing the names of the variables
+used to compute the conditional probability table. See details.}
 
 \item{data}{a data frame containing all the factors represented by the \code{formula}
 parameter.}
@@ -19,17 +20,30 @@ The function \code{cpt} operates on sets of factors. Specifically,
   it computes the conditional probability distribution of one of the factors
   given other factors, and stores the result in a multidimensional \code{array}.
 }
+\details{
+If a \code{formula} object is entered for the \code{vars} parameter, the
+  formula must have the following structure: \emph{response ~ var1 + var2 + etc.}.
+  The other option is to pass a named \code{list} containing two elements \code{y}
+  and \code{x}. Element \code{y} is a character string containing the name of the
+  factor variable in \code{data} to be used as the dependent variable, and
+  element \code{x} is a character vector containing the name(s) of the factor
+  variable(s) to be used as independent (or conditioning) variables.
+}
 \examples{
 # a very imbalanced dice example
 
 n <- 50000
 data <- data.frame(
-di1=as.factor(1:6 \%*\% rmultinom(n,1,prob=c(.4,.3,.15,.10,.03,.02))),
-di2=as.factor(1:6 \%*\% rmultinom(n,1,prob=rev(c(.4,.3,.15,.10,.03,.02)))),
-di3=as.factor(1:6 \%*\% rmultinom(n,1,prob=c(.15,.10,.02,.3,.4,.03)))
+  di1 = as.factor(1:6 \%*\% rmultinom(n,1,prob=c(.4,.3,.15,.10,.03,.02))),
+  di2 = as.factor(1:6 \%*\% rmultinom(n,1,prob=rev(c(.4,.3,.15,.10,.03,.02)))),
+  di3 = as.factor(1:6 \%*\% rmultinom(n,1,prob=c(.15,.10,.02,.3,.4,.03)))
 )
-cpt <- cpt(di3 ~ di1 + di2, data)
-plyr::aaply(cpt, c(1,2), sum)
+
+cpt1 <- cpt(di3 ~ di1 + di2, data)
+plyr::aaply(cpt1, c(1,2), sum)
+
+l <- list(y = "di3", x = c("di1","di2"))
+all(cpt(l, data) == cpt1)
 }
 \author{
 Jarrod Dalton and Benjamin Nutter
