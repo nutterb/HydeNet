@@ -2,9 +2,12 @@
 % Please edit documentation in R/cpt.R
 \name{cpt}
 \alias{cpt}
-\title{Compute a conditional probablity table for a factor given other factors}
+\alias{inputCPT}
+\title{Compute a conditional probability table for a factor given other factors}
 \usage{
 cpt(vars, data, wt)
+
+inputCPT(vars, factorLevels, reduce = TRUE)
 }
 \arguments{
 \item{vars}{either a formula or a list containing the names of the variables
@@ -14,6 +17,20 @@ used to compute the conditional probability table. See details.}
 parameter.}
 
 \item{wt}{(optional) a numeric vector of observation weights.}
+
+\item{factorLevels}{(optional) a named list with the following structure:
+Variable names for the factors specified in \code{vars} comprise the names
+of the list elements, and each list element is a character vector containing
+the levels of the respective factor. See examples.}
+
+\item{reduce}{set to \code{TRUE} if \code{inputCPT()} is to compute probabilities
+  for the first level of the dependent variable as the complement of the
+  inputted probabilities corresponding to the other levels of the dependent
+  variable. For example, \code{reduce = TRUE} with a binary dependent variable
+  \code{y} (say, with levels \code{'no'} and \code{'yes'}) will ask for the
+  probabilities of \code{'yes'} at each combination of the independent variables,
+  and compute the probability of \code{'no'} as their respective complements.
+  See details.}
 }
 \description{
 The function \code{cpt} operates on sets of factors. Specifically,
@@ -28,6 +45,19 @@ If a \code{formula} object is entered for the \code{vars} parameter, the
   factor variable in \code{data} to be used as the dependent variable, and
   element \code{x} is a character vector containing the name(s) of the factor
   variable(s) to be used as independent (or conditioning) variables.
+
+  In \code{inputCPT()}, when the parameter \code{reduce} is set to \code{FALSE},
+  any non-negative number (e.g., cell counts) is accepted as input. Conditional
+  probabilities are then calculated via a normalization procedure. However, when
+  \code{reduce} is set to \code{TRUE}, a) only probabilities in [0,1] are accepted
+  and b) all inputted probabilities for each specific combination of independent
+  variable values must not sum to a value greater than 1 (or the calculated
+  probability for the first level of the dependent variable would be negative).
+
+  The \code{cpt()} function with a weight vector passed to parameter \code{wt}
+  works analogously to \code{inputCPT(reduce = FALSE)}, i.e., it accepts any
+  non-negative vector, and computes the conditional probability array by
+  normalizing sums of weights.
 }
 \examples{
 # a very imbalanced dice example
@@ -40,10 +70,24 @@ data <- data.frame(
 )
 
 cpt1 <- cpt(di3 ~ di1 + di2, data)
-plyr::aaply(cpt1, c(1,2), sum)
+cpt1[di1 = 1, di2 = 4, ]  # Pr(di3 | di1 = 1, di2 = 4)
+cpt1["1","4",]
+cpt1[1,4,]
+
+plyr::aaply(cpt1, c(1,2), sum) # card(di1)*card(di2) matrix of ones
 
 l <- list(y = "di3", x = c("di1","di2"))
 all(cpt(l, data) == cpt1)
+
+\dontrun{
+inputCPT(wetGrass ~ rain + morning)
+
+inputCPT(wetGrass ~ rain + morning,
+         factorLevels <- list(wetGrass = c("dry","moist","VeryWet"),
+                              rain     = c("nope","yep"),
+                              morning  = c("NO","YES")),
+         reduce = FALSE)
+}
 }
 \author{
 Jarrod Dalton and Benjamin Nutter
