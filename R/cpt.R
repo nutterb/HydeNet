@@ -1,7 +1,7 @@
 #' @name cpt
 #' @export cpt
 #' 
-#' @title Compute a conditional probablity table for a factor given other factors
+#' @title Compute a conditional probability table for a factor given other factors
 #' @description The function \code{cpt} operates on sets of factors. Specifically,
 #'   it computes the conditional probability distribution of one of the factors
 #'   given other factors, and stores the result in a multidimensional \code{array}. 
@@ -33,7 +33,11 @@
 #' )
 #' 
 #' cpt1 <- cpt(di3 ~ di1 + di2, data)
-#' plyr::aaply(cpt1, c(1,2), sum)
+#' cpt1[di1 = 1, di2 = 4, ]  # Pr(di3 | di1 = 1, di2 = 4)
+#' cpt1["1","4",]
+#' cpt1[1,4,]
+#' 
+#' plyr::aaply(cpt1, c(1,2), sum) # card(di1)*card(di2) matrix of ones
 #' 
 #' l <- list(y = "di3", x = c("di1","di2"))
 #' all(cpt(l, data) == cpt1)
@@ -150,12 +154,28 @@ cpt <- function(vars, data, wt){
   if(err.flag)  stop(paste(err.msg, collapse="\n"))
   
   vars  <- c(dependentVar,independentVars)  
-  data  <- data.frame(data[,vars], wt)  
-  joint <- plyr::daply(data, vars, function(df) sum(df$wt), .drop_i=FALSE)
-  cpt   <- plyr::aaply(joint, seq_along(vars)[-1], function(x) x/sum(x))
+  # I'D LIKE TO USE THE VECTORS vars, dependentVar, AND independentVars
+  # IN THE CALLS TO THE dplyr FUNCTIONS, BUT DON'T KNOW HOW. 
+  # THE dplyr FUNCTIONS WANT VARIABLE NAMES BUT I HAVE CHARACTER
+  # STRINGS. HOW DO YOU DO THIS?
+
+  data        <- dplyr::bind_cols(dplyr::tbl_df(data[,vars]),
+                                  dplyr::tbl_df(data.frame(wt=wt)))
   
-  names(dimnames(cpt))[length(c(dependentVar,independentVars))] <- dependentVar
+  joint       <- data %>% dplyr::group_by(di3,di1,di2) %>%  # using 'vars' doesn't work
+                       dplyr::summarise(wt = sum(wt))
+  
+  marginal    <- joint %>% dplyr::group_by(di1,di2) %>% # using 'independentVars' doesn't work
+                       dplyr::summarise(sumWt = sum(wt))
+  
+  conditional <- dplyr::left_join(joint,marginal) %>%
+                       dplyr::mutate(p = wt / sumWt) %>% 
+                       dplyr::select(-c(wt,sumWt))
+  
+  # using 'c(independentVars,dependentVar)' doesn't work:
+  cpt <- plyr::daply(conditional, .(di1,di2,di3), function(x) x$p) 
+  cpt[is.na(cpt)] <- 0
+
   class(cpt) <- "cpt"
-  
   return(cpt)
 }
