@@ -6,6 +6,12 @@
 #'   it computes the conditional probability distribution of one of the factors
 #'   given other factors, and stores the result in a multidimensional \code{array}. 
 #'   
+#'   \code{inputCPT()} is a utility function aimed at facilitating the process of
+#'   populating small conditional probability distributions, i.e., those for which
+#'   the response variable doesn't have too many levels, there are relatively few
+#'   independent variables, and the independent variables also don't have too many
+#'   levels. 
+#'   
 #' @param vars either a formula or a list containing the names of the variables 
 #'   used to compute the conditional probability table. See details.
 #' @param data a data frame containing all the factors represented by the \code{formula}

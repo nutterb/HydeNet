@@ -36,6 +36,12 @@ the levels of the respective factor. See examples.}
 The function \code{cpt} operates on sets of factors. Specifically,
   it computes the conditional probability distribution of one of the factors
   given other factors, and stores the result in a multidimensional \code{array}.
+
+  \code{inputCPT()} is a utility function aimed at facilitating the process of
+  populating small conditional probability distributions, i.e., those for which
+  the response variable doesn't have too many levels, there are relatively few
+  independent variables, and the independent variables also don't have too many
+  levels.
 }
 \details{
 If a \code{formula} object is entered for the \code{vars} parameter, the
