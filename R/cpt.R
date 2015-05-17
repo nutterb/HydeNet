@@ -25,7 +25,7 @@
 #' @examples
 #' # a very imbalanced dice example
 #' 
-#' n <- 50000 
+#' n <- 50000
 #' data <- data.frame(
 #'   di1 = as.factor(1:6 %*% rmultinom(n,1,prob=c(.4,.3,.15,.10,.03,.02))),
 #'   di2 = as.factor(1:6 %*% rmultinom(n,1,prob=rev(c(.4,.3,.15,.10,.03,.02)))),
@@ -153,27 +153,24 @@ cpt <- function(vars, data, wt){
   if(wrn.flag) warning(paste(wrn.msg, collapse="\n"))
   if(err.flag)  stop(paste(err.msg, collapse="\n"))
   
-  vars  <- c(dependentVar,independentVars)  
-  # I'D LIKE TO USE THE VECTORS vars, dependentVar, AND independentVars
-  # IN THE CALLS TO THE dplyr FUNCTIONS, BUT DON'T KNOW HOW. 
-  # THE dplyr FUNCTIONS WANT VARIABLE NAMES BUT I HAVE CHARACTER
-  # STRINGS. HOW DO YOU DO THIS?
+  vars  <- c(dependentVar, independentVars)  
+  ..vars <- lapply(vars, as.symbol)
+  ..independentVars <- lapply(independentVars, as.symbol)
 
-  data        <- dplyr::bind_cols(dplyr::tbl_df(data[,vars]),
-                                  dplyr::tbl_df(data.frame(wt=wt)))
+  data     <- dplyr::bind_cols(dplyr::tbl_df(data[,vars]),
+                               dplyr::tbl_df(data.frame(wt = wt)))
   
-  joint       <- data %>% dplyr::group_by(di3,di1,di2) %>%  # using 'vars' doesn't work
-                       dplyr::summarise(wt = sum(wt))
+  joint    <- data %>% dplyr::group_by_(.dots = ..vars) %>%  
+                  dplyr::summarise(wt = sum(wt))
   
-  marginal    <- joint %>% dplyr::group_by(di1,di2) %>% # using 'independentVars' doesn't work
-                       dplyr::summarise(sumWt = sum(wt))
+  marginal <- joint %>% dplyr::group_by_(.dots = ..independentVars) %>% 
+                  dplyr::summarise(sumWt = sum(wt))
   
-  conditional <- dplyr::left_join(joint,marginal) %>%
-                       dplyr::mutate(p = wt / sumWt) %>% 
-                       dplyr::select(-c(wt,sumWt))
+  cpt      <- dplyr::left_join(joint, marginal, by = independentVars) %>%
+                  dplyr::mutate(p = wt / sumWt) %>% 
+                  dplyr::select(-c(wt, sumWt)) %>%
+                  plyr::daply(c(vars[-1], vars[1]), function(x) x$p)
   
-  # using 'c(independentVars,dependentVar)' doesn't work:
-  cpt <- plyr::daply(conditional, .(di1,di2,di3), function(x) x$p) 
   cpt[is.na(cpt)] <- 0
 
   class(cpt) <- "cpt"
