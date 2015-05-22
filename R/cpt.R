@@ -209,13 +209,13 @@ cpt <- function(vars, data, wt){
                                dplyr::tbl_df(data.frame(wt = wt)))
   
   joint    <- data %>% dplyr::group_by_(.dots = ..vars) %>%  
-                  dplyr::summarise(wt = sum(wt))
+                  dplyr::summarise_(wt = ~sum(wt))
   
   marginal <- joint %>% dplyr::group_by_(.dots = ..independentVars) %>% 
-                  dplyr::summarise(sumWt = sum(wt))
+                  dplyr::summarise_(sumWt = ~sum(wt))
   
   cpt      <- dplyr::left_join(joint, marginal, by = independentVars) %>%
-                  dplyr::mutate(p = wt / sumWt) %>% 
+                  dplyr::mutate_(p = ~ wt / sumWt) %>% 
                   dplyr::select(-c(wt, sumWt)) %>%
                   plyr::daply(c(vars[-1], vars[1]), function(x) x$p)
   
