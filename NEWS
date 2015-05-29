@@ -1,3 +1,8 @@
+### 0.8.7 (29 May 2015)
+* `cpt` function is added to assist in developing multidimensional conditional
+  probability tables.
+* Improvements to `setNode` validation.
+
 ### 0.8.6 (15 May 2015)
 * An additional function called `nodeFromFormula` is used to generate most likely
   node names from terms in model formulas that are used in functions and other 

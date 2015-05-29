@@ -1,7 +1,5 @@
 #' @name Hyde-package
 #' @aliases Hyde
-#' @import nnet
-#' @import rjags
 #' 
 #' @title Hydbrid Decision Networks
 #' @description Facilities for easy implementation of hybrid Bayesian networks 

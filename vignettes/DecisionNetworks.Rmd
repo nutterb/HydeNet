@@ -93,16 +93,28 @@ First, we will populate the random variable and deterministic nodes using `setNo
 # Random Variable Nodes
 #####################################
 
+# Note: The calls to 'setNode' below are going to generate messages
+#       that validation has been ignored.  'setNode' assumes that when
+#       you pass a character string as a parameter definition, you 
+#       are passing JAGS code.  See the Validation section of the 
+#       'setNode' documentation for more information.
+#       After the first call, we'll turn off validation
+
 cardProbs  <- c(rep(1/13,8), 4/13, 1/13)  # probs. for 2, 3, ..., 9, (10-K), A
 
 net <- setNode(net, card1, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card1))
-net <- setNode(net, card2, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card2))
-net <- setNode(net, card3, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card3))
-net <- setNode(net, card4, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card4))
-net <- setNode(net, card5, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card5))
+net <- setNode(net, card2, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card2),
+               validate=FALSE)
+net <- setNode(net, card3, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card3),
+               validate=FALSE)
+net <- setNode(net, card4, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card4),
+               validate=FALSE)
+net <- setNode(net, card5, nodeType="dcat",  pi=vectorProbs(p=cardProbs, card5),
+               validate=FALSE)
 
 net <- setNode(net, dealerUpcard, nodeType="dcat",
-               pi=vectorProbs(p=cardProbs, dealerUpcard))
+               pi=vectorProbs(p=cardProbs, dealerUpcard),
+               validate=FALSE)
 
 #Note: node dealerFinalPoints will be defined below, following some discussion 
 #      about its conditional probability distribution.
