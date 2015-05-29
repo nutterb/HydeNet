@@ -151,6 +151,9 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
                          if (!x %in% names(data)) return(NULL)
                          else if (is.numeric(data[, x])) return("lm")
                          else if (is.factor(data[, x]) & is.null(parents[[x]])) return("xtabs")
+                         else if (is.factor(data[, x]) & 
+                                  all(vapply(parents[[x]], function(p) is.factor(data[, p]), logical(1))))
+                           return("cpt")
                          else if (is.factor(data[, x]) & nlevels(data[, x]) == 2) return("glm")
                          else if (is.factor(data[, x]) & nlevels(data[, x]) > 2) return("multinom")
                          else return("glm")

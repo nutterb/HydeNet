@@ -28,6 +28,33 @@ modelToNode.default <- function(model, nodes, ...){
                 "  lm, glm (family=\"binomial\" only), multinom, xtabs"))
 }
 
+modelToNode.cpt <- function(model, nodes, ...)
+{
+  if (missing(nodes))
+    nodes <- names(dimnames(model))
+  list(nodes = tail(names(dimnames(model)), 1),
+       parents = if (length(dimnames(model)) == 1)
+         NULL
+       else 
+         names(dimnames(model))[-length(names(dimnames(model)))],
+       nodeType = "dcat",
+       nodeFormula = as.formula(paste0(tail(names(dimnames(model)), 1),
+                                       " ~ ",
+                                       paste0(names(dimnames(model))[-length(names(dimnames(model)))],
+                                              collapse = " + "))),
+       nodeFitter = "cpt",
+       nodeFitterArgs = list(data = attributes(model)$model,
+                             wt = tail(names(attributes(model)$model), 1)),
+       nodeParams = list(p = gsub("[[:print:]]+~", "", 
+                                  writeJagsFormula(model, 
+                                                   nodes))),
+       nodeDecision = FALSE,
+       nodeUtility = FALSE,
+       fromData = TRUE,
+       nodeData = attributes(model)$model,
+       nodeModel = model)
+}
+
 #' @rdname modelToNode
 #' @export
 

@@ -2,6 +2,10 @@
 
 S3method(HydeNetwork,formula)
 S3method(HydeNetwork,list)
+S3method(cpt,formula)
+S3method(cpt,list)
+S3method(inputCPT,formula)
+S3method(inputCPT,list)
 S3method(modelToNode,default)
 S3method(modelToNode,glm)
 S3method(modelToNode,lm)

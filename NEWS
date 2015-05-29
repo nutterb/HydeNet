@@ -1,9 +1,15 @@
 ### 0.8.7 (29 May 2015)
 * `cpt` function is added to assist in developing multidimensional conditional
-  probability tables.
+  probability tables. `cpt` and `cptInput` are generics with methods for `list`
+  and `formula`.  Their structure is undergoing some growing pains right now, 
+  so expect more changes in the future.
 * Improvements to `setNode` validation.
 * Improvements to efficiency of `compileDecisionModel`.
-* Consolidated all data documentation into a single file
+* Consolidated all data documentation into a single file.
+* `HydeNetwork` chooses `cpt` as the fitter for variables where the node is
+  a factor and all parents are factors.
+* Added `modelToNode.cpt`.  This is untested as of yet and may be buggy.  Final
+  changes are pending the finalization of the `cpt` objects.
 
 ### 0.8.6 (15 May 2015)
 * An additional function called `nodeFromFormula` is used to generate most likely
