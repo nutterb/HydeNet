@@ -67,7 +67,8 @@ from the data, the functions \code{fromData} and \code{fromFormula} may
 be used as placeholders.}
 
 \item{validate}{Logical.  Toggles validation of parameters given in \code{...}.
-When passing raw JAGS code (ie, character strings), this should be turned off,
+When passing raw JAGS code (ie, character strings), this will be ignored
+(with a message),
 as the validation is applicable to numerical/formula values.}
 
 \item{fitModel}{Logical. Toggles if the model is fit within the function call.
@@ -82,8 +83,7 @@ The relationship between a node and its parents must be defined
   of some sort).
 }
 \details{
-#'
-  The functions \code{fromFormula()} and \code{fromData()} help to control
+The functions \code{fromFormula()} and \code{fromData()} help to control
   how \code{Hyde} determines the values of parameters passed to JAGS.  If the
   parameters passed in \code{params} argument are to be calculated from the
   data or inferred from the formula, these functions may be used as placeholders
@@ -97,6 +97,27 @@ The relationship between a node and its parents must be defined
   (especially if you are working interactively).  Using \code{fitModel=TRUE}
   will cause the model to be fit and the JAGS code for the parameters to be
   stored in the \code{nodeParams} attribute.
+}
+\section{Validation}{
+
+The validation of parameters is performed by comparing the values provided with
+the limits defined in the \code{jagsDists$paramLogic} variable. (look at
+\code{data(jagsDists, data='HydeNet')}.  For most node types, validation will
+be peformed for numeric variables.  For deterministic variables, the validation
+will only check that the parameter definition is a formula.
+
+It is possible to pass character strings as definitions, but when this is done,
+\code{HydeNet} assumes you are passing JAGS code.  Unfortunately, \code{HydeNet}
+doesn't have to capability to validate JAGS code, so if there is an error in
+the character string definition, it won't show up until you try to compile the
+network.  If you pass a character string as a parameter and leave
+\code{validate = TRUE}, a message will be printed to indicate that validation
+is being ignored.  This message can be avoided by using \code{validate = FALSE}
+
+The two exceptions to this rule are when you pass \code{fromFormula()} and
+\code{fromData()} as the parameter definition.  These will skip the validation
+without warning, since the definition will be built by \code{HydeNet} and be
+proper JAGS code (barring any bugs, of course).
 }
 \examples{
 data(PE, package="HydeNet")

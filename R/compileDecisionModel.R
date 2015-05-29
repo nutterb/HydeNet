@@ -39,7 +39,7 @@
 #' @seealso \code{\link{policyMatrix}} \code{\link{compileJagsModel}}
 #' 
 #' @examples
-#' #' data(PE, package="HydeNet")
+#' data(PE, package="HydeNet")
 #' Net <- HydeNetwork(~ wells + 
 #'                      pe | wells + 
 #'                      d.dimer | pregnant*pe + 
@@ -107,7 +107,24 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
                       l
                     })
   
+  
+  jags.code <- compileJagsModel(network, ...)
+  
   lapply(options,
-         function(o, ...) compileJagsModel(network, data=o, ...),
+         function(o, j, ...)
+         {
+           cHN <- list(jags = rjags::jags.model(textConnection(paste0(j$jags$model(),
+                                                                      collapse="\n")),
+                                                data = o,
+                                                ...),
+                       observed = o,
+                       dag = j$dag,
+                       factorRef = j$factorRef)
+           class(cHN) <- c("compiledHydeNetwork")
+           cHN
+         },
+         jags.code,
          ...)
+  
+  
 }
