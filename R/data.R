@@ -1,3 +1,22 @@
+#' Blackjack Dealer Outcome Probabilities
+#'
+#' A dataset containing the conditional probability of various dealer
+#' outcomes given the "upcard". (The dealer and player each get two
+#' cards; only one of the dealer's cards is shown, and this is called
+#' the "upcard")
+#'
+#' @format A data frame with 70 rows and 3 variables:
+#' \describe{
+#'   \item{dealerUpcard}{dealer upcard}
+#'   \item{dealerOutcome}{outcome of dealer's hand, under the rule that
+#'   cards are drawn until the dealer's hand total is at least 17}
+#'   \item{probability}{conditional probability of dealerOutcome given
+#'   dealerUpcard}
+#'   ...
+#' }
+#' @source \url{https://www.blackjackinfo.com/dealer-outcome-probabilities}
+"BJDealer"
+
 #' Black Jack Hybrid Decision Network
 #'
 #' An object of class \code{HydeNetwork} establishing a graphical model for a game
@@ -159,3 +178,77 @@
 #' }
 #' 
 "BlackJack"
+
+#' Black Jack Network Training Dataset
+#'
+#' These are simulated data on 1,000 Black Jack hands.
+#'
+#' @format A data frame with 10000 rows and 7 variables:
+#' \describe{
+#'   \item{dealerUpcard}{The card in the dealer's hand visible to all players}
+#'   \item{card1}{Value of the first card}
+#'   \item{card2}{Value of the second card}
+#'   \item{initialPoints}{Total points with the two cards}
+#'   \item{hit1}{Binary variable indicating if a hit was taken}
+#'   \item{card3}{Value of the third card}
+#'   \item{pointsAfterCard3}{Total points with three cards}
+#'   \item{hit2}{Binary variable indicating if a hit was taken}
+#'   \item{card4}{Value of the fourth card}
+#'   \item{pointsAfterCard4}{Total points with four cards}
+#'   \item{hit3}{Binary variable indicating if a hit was taken}
+#'   \item{card5}{Value of the fifth card}
+#'   \item{pointsAfterCard5}{Total points with five cards}
+#' }
+#' @source 
+#' Bicycle Cards, "Blackjack," 
+#' Retrieved from http://www.bicyclecards.com/card-games/rule/blackjack
+
+"BlackJackTrain"
+
+#' JAGS Probability Distributions.
+#'
+#' A dataset listing the JAGS probability distributions and their parameters
+#'
+#' @format A data frame with 30 rows and 7 variables:
+#' \describe{
+#'   \item{DistName}{Distribution Name}
+#'   \item{FnName}{Function Name}
+#'   \item{xLow}{Minimum value for x, the random variable}
+#'   \item{xHigh}{Maximum value for x, the random variable}
+#'   \item{Parameters}{Names of the parameters}
+#'   \item{paramLimit}{Limits on the parameter}
+#'   \item{paramLogic}{The text of a logical check used in \code{setNode} to 
+#'     ensure stated parameters are valid.}
+#' }
+#' @source \url{http://people.math.aau.dk/~kkb/Undervisning/Bayes14/sorenh/docs/jags_user_manual.pdf}
+"jagsDists"
+
+#' JAGS Functions Compatible with R.
+#'
+#' A dataset listing the JAGS functions and their R equivalents.
+#'
+#' @format A data frame with 30 rows and 3 variables:
+#' \describe{
+#'   \item{jags_function}{JAGS function name}
+#'   \item{r_function}{R function Name}
+#'   \item{r_package}{R package where the function is found.}
+#' }
+#' @source \url{http://people.math.aau.dk/~kkb/Undervisning/Bayes14/sorenh/docs/jags_user_manual.pdf}
+"jagsFunctions"
+
+#' Pulmonary Embolism Dataset
+#'
+#' These are simulated data on 10,000 cases with suspected pulmonary embolism at a hospital.
+#'
+#' @format A data frame with 10000 rows and 7 variables:
+#' \describe{
+#'   \item{wells}{Wells score (integer ranging from 1 to 10 indicating the degree to which PE is suspected based on clinical review of symptoms)}
+#'   \item{pregnant}{Factor indicating pregnancy (No, Yes)}
+#'   \item{pe}{Factor indicating pulmonary embolism has occurred (No,Yes)}
+#'   \item{angio}{Result of pulmonary angiography test (Negative, Positive)}
+#'   \item{d.dimer}{Numeric result of diagnostic blood test called D-Dimer.}
+#'   \item{treat}{Factor indicating whether or not treatment for PE was administered (No,Yes)}
+#'   \item{death}{Factor indicating patient mortality (No,Yes)}
+#' }
+#' @source Simulated data - not from real patients.
+"PE"

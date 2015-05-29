@@ -69,6 +69,8 @@
 #'   \url{http://graphviz.org/content/attrs}
 #' 
 #' @examples
+#' \dontrun{
+#' #* Plots may open in a browser.
 #' data(BlackJack, package="HydeNet")
 #' plot(BlackJack)
 #' 
@@ -101,6 +103,7 @@
 #'                  style = "wedged",
 #'                  height = "3",
 #'                  fillcolor = c("red:orange:yellow:green:blue:purple"))))
+#' }
 
 
 plot.HydeNetwork <- function(x, 

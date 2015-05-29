@@ -45,7 +45,7 @@ Nodes at which a decision can be made, such as the decision to
   models.
 }
 \examples{
-#' data(PE, package="HydeNet")
+data(PE, package="HydeNet")
 Net <- HydeNetwork(~ wells +
                      pe | wells +
                      d.dimer | pregnant*pe +

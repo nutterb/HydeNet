@@ -80,6 +80,8 @@ Generate and customize plots of a \code{HydeNetwork}
   Individual nodes may be define with \code{customNode}.
 }
 \examples{
+\dontrun{
+#* Plots may open in a browser.
 data(BlackJack, package="HydeNet")
 plot(BlackJack)
 
@@ -112,6 +114,7 @@ plot(BlackJack,
                  style = "wedged",
                  height = "3",
                  fillcolor = c("red:orange:yellow:green:blue:purple"))))
+}
 }
 \author{
 Jarrod Dalton and Benjamin Nutter

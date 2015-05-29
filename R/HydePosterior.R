@@ -84,14 +84,13 @@ HydePosterior <- function(cHN, variable.names, n.iter, thin=1, ...,
   else{ 
     codas <- lapply(1:length(cHN),
                     function(j, ...){
-                      rjags::coda.samples(cHN[[j]]$jags[[1]],
+                      rjags::coda.samples(cHN[[j]]$jags,
                                     variable.names = variable.names,
                                     n.iter = n.iter,
                                     thin = thin,
                                     ...)
                     },
                     ...)
-  
     observed <- do.call("rbind", lapply(cHN,
                                         function(x) x$observed))
     
