@@ -85,19 +85,9 @@ compileJagsModel <- function(network, data=NULL, ...){
   else factorRef <- NULL
   
   if (is.list(data)) data <- as.data.frame(data)
-  
-  jags <- if (is.null(data)) 
-    rjags::jags.model(textConnection(writeNetworkModel(network)),
-                      data = sys.frame(sys.parent()), ...)
-    else lapply(1:nrow(data),
-                function(r, network, data, ...){
-                  rjags::jags.model(textConnection(writeNetworkModel(network)),
-                                    data = data[r, , drop=FALSE], ...)
-                },
-         network, data, ...)
-  
-#   jags <- rjags::jags.model(textConnection(writeNetworkModel(network)), 
-#                     data = if(is.null(data)) sys.frame(sys.parent()) else data, ...)
+
+  jags <- rjags::jags.model(textConnection(writeNetworkModel(network)), 
+                    data = if(is.null(data)) sys.frame(sys.parent()) else data, ...)
   
   #* cHN for compiled Hyde Network
   cHN <- list(jags=jags, observed=data, dag=network$dag, factorRef=factorRef)
