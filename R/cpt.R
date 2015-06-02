@@ -242,6 +242,7 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   
   model <- data[, c(names(dimnames(cpt)), wt_text)]
   if (is.null(wt_text)) model <- cbind(model, wt)
+  
   attr(cpt, "model") <- model
   
   class(cpt) <- "cpt"
