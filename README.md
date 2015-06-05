@@ -5,8 +5,8 @@ Hybrid Bayesian Networks Using R and JAGS
 
 Facilities for easy implementation of hybrid Bayesian networks
 using R. Bayesian networks are directed acyclic graphs representing joint
-probability distributions, where each node represents a random
-variable and each edge represents conditionality. The full joint
+probability distributions, where each node represents a random variable 
+and each edge represents conditionality. The full joint
 distribution is therefore factorized as a product of conditional densities, 
 where each node is assumed to be independent of its non-desendents given 
 information on its parent nodes. Since exact, closed-form algorithms 
