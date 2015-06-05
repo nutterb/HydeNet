@@ -15,6 +15,9 @@ env:
 r_github_packages:
   - Rexamine/stringi
 
+r_packages:
+  - rjags
+
 notifications:
   email:
     on_success: change
