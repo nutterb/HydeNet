@@ -41,6 +41,19 @@ writeJagsFormula <- function(fit, nodes, ...) UseMethod("writeJagsFormula")
 
 #' @rdname writeJagsFormula
 #' @export
+#' 
+
+writeJagsFormula.cpt <- function(fit, nodes, ...)
+{
+  form <- paste0(tail(names(dimnames(fit)), 1),
+                 " ~ ",
+                 paste0(names(dimnames(fit))[-length(names(dimnames(fit)))],
+                        collapse = " + "))
+  rToJags(as.formula(form)) 
+}
+
+#' @rdname writeJagsFormula
+#' @export
 #' @importFrom stringr str_trim
 #' 
 

@@ -2,6 +2,7 @@
 % Please edit documentation in R/writeJagsFormula.R
 \name{writeJagsFormula}
 \alias{writeJagsFormula}
+\alias{writeJagsFormula.cpt}
 \alias{writeJagsFormula.glm}
 \alias{writeJagsFormula.lm}
 \alias{writeJagsFormula.multinom}
@@ -9,6 +10,8 @@
 \title{Write the JAGS Formula for a Hyde Node}
 \usage{
 writeJagsFormula(fit, nodes, ...)
+
+\method{writeJagsFormula}{cpt}(fit, nodes, ...)
 
 \method{writeJagsFormula}{glm}(fit, nodes, ...)
 

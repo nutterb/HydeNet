@@ -245,6 +245,6 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   
   attr(cpt, "model") <- model
   
-  class(cpt) <- "cpt"
+  class(cpt) <- c("cpt", "array")
   return(cpt)
 }

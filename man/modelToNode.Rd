@@ -2,6 +2,7 @@
 % Please edit documentation in R/modelToNode.R
 \name{modelToNode}
 \alias{modelToNode}
+\alias{modelToNode.cpt}
 \alias{modelToNode.default}
 \alias{modelToNode.glm}
 \alias{modelToNode.lm}
@@ -12,6 +13,8 @@
 modelToNode(model, nodes, ...)
 
 \method{modelToNode}{default}(model, nodes, ...)
+
+\method{modelToNode}{cpt}(model, nodes, ...)
 
 \method{modelToNode}{glm}(model, nodes, ...)
 

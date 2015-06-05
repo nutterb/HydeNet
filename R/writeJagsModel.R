@@ -78,7 +78,14 @@ writeJagsModel <- function(network, node){
   
   #*** Type 'dcat'
   else if (network$nodeType[[node_str]] == "dcat"){
-    if (fromData() %in% node_params){
+    if (network$nodeFitter[[node_str]] == "cpt"){
+      model_code <-
+        paste0(c(paste0("probs.", node_str, " <- probArray.", node_str, "[",
+                        paste0("pi.", network$parents[[node_str]], collapse = ", "),
+                        ",]"),
+                 paste0(node_str, " ~ dcat(probs.", node_str, ")")),
+               collapse = "\n   ")
+    } else if (fromData() %in% node_params){
       node_params["pi"] <- paste0("pi.", node_str)
       pi <- do.call(network$nodeFitter[[node_str]],
                     list(formula = network$nodeFormula[[node_str]],
@@ -91,11 +98,12 @@ writeJagsModel <- function(network, node){
                  "(",
                  paste(node_params, collapse=", "),
                  ")"))
-      
-    } 
-    else model_code <- paste0(network$nodeParams[[node_str]]['pi'], "\n",
+      }
+      else{
+        model_code <- paste0(network$nodeParams[[node_str]]['pi'], "\n",
                               node_str, " ~ ", network$nodeType[[node_str]],
                               "(pi.", node_str, ")")
+    }
   }
   
   #*** Type 'dnorm'

@@ -28,6 +28,9 @@ modelToNode.default <- function(model, nodes, ...){
                 "  lm, glm (family=\"binomial\" only), multinom, xtabs"))
 }
 
+#' @rdname modelToNode
+#' @export
+
 modelToNode.cpt <- function(model, nodes, ...)
 {
   if (missing(nodes))
