@@ -80,10 +80,10 @@ writeJagsModel <- function(network, node){
   else if (network$nodeType[[node_str]] == "dcat"){
     if (network$nodeFitter[[node_str]] == "cpt"){
       model_code <-
-        paste0(c(paste0("probs.", node_str, " <- probArray.", node_str, "[",
-                        paste0("pi.", network$parents[[node_str]], collapse = ", "),
+        paste0(c(paste0("pi.", node_str, " <- cpt.", node_str, "[",
+                        paste0(network$parents[[node_str]], collapse = ","),
                         ",]"),
-                 paste0(node_str, " ~ dcat(probs.", node_str, ")")),
+                 paste0(node_str, " ~ dcat(pi.", node_str, ")")),
                collapse = "\n   ")
     } else if (fromData() %in% node_params){
       node_params["pi"] <- paste0("pi.", node_str)

@@ -1,3 +1,10 @@
+### 0.8.8 (5 June 2015)
+* `setNodeModel` and `writeJagsFormula` methods are complete.
+* `writeJagsModel` now accommodates `cpt` objects
+* `compileJagsNetwork` retrieves `cpt` objects to include in the 
+  `data` argument, allowing JAGS to compile without the user having to 
+  remember to assign the `cpt` object to the data.
+
 ### 0.8.7 (29 May 2015)
 * `cpt` function is added to assist in developing multidimensional conditional
   probability tables. `cpt` and `cptInput` are generics with methods for `list`

@@ -84,10 +84,16 @@ compileJagsModel <- function(network, data=NULL, ...){
   }
   else factorRef <- NULL
   
-  if (is.list(data)) data <- as.data.frame(data)
+  cpt_arrays <- unlist(network$nodeFitter) == "cpt"
+  cpt_arrays <- names(cpt_arrays)[cpt_arrays]
+  cpt_arrays <- network$nodeModel[cpt_arrays]
+  names(cpt_arrays) <- paste0("cpt.", names(cpt_arrays))
+  # return(cpt_arrays)
+  
 
   jags <- rjags::jags.model(textConnection(writeNetworkModel(network)), 
-                    data = if(is.null(data)) sys.frame(sys.parent()) else data, ...)
+                    data = if(is.null(data) & length(cpt_arrays) == 0) 
+                      sys.frame(sys.parent()) else c(data, cpt_arrays), ...)
   
   #* cHN for compiled Hyde Network
   cHN <- list(jags=jags, observed=data, dag=network$dag, factorRef=factorRef)
