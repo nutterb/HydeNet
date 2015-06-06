@@ -102,6 +102,7 @@ cpt.formula <- function(formula, data, wt, ...)
 #' @export 
 cpt.list <- function(x, data, wt, ...)
 {
+  
   err.flag <- 0
   err.msg <- ""
   

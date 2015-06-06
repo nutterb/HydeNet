@@ -195,8 +195,8 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
       }
     } else noNegativeProbs <- TRUE
   } #end while(!noNegativeProbs) loop
-  
-  return(cpt(vars = list(y = dependentVar, x = independentVars), 
+
+  return(cpt(x = list(y = dependentVar, x = independentVars), 
              data = data, wt = data$wt))
 } #end function inputCPT()
 
