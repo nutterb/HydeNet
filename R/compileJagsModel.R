@@ -85,9 +85,11 @@ compileJagsModel <- function(network, data=NULL, ...){
   else factorRef <- NULL
   
   cpt_arrays <- unlist(network$nodeFitter) == "cpt"
-  cpt_arrays <- names(cpt_arrays)[cpt_arrays]
-  cpt_arrays <- network$nodeModel[cpt_arrays]
-  names(cpt_arrays) <- paste0("cpt.", names(cpt_arrays))
+  if(length(cpt_arrays) > 0){
+    cpt_arrays <- names(cpt_arrays)[cpt_arrays]
+    cpt_arrays <- network$nodeModel[cpt_arrays]
+    names(cpt_arrays) <- paste0("cpt.", names(cpt_arrays))
+  }
   # return(cpt_arrays)
   
 
