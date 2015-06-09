@@ -79,7 +79,7 @@ net <- HydeNetwork(~ initialAces | card1*card2
                    + playerFinalPoints | initialPoints*hit1*pointsAfterCard3
                                          *hit2*pointsAfterCard4*hit3*pointsAfterCard5
                    + dealerOutcome | dealerUpcard
-                   + payoff | playerFinalPoints*dealerOutcome)
+                   )#+ payoff | playerFinalPoints*dealerOutcome)
 
 plot(net)
 ```
@@ -232,7 +232,6 @@ dealerOutcome.cpt <- cpt(dealerOutcome ~ dealerUpcard,
                          wt   = BJDealer$probability)
 round(dealerOutcome.cpt,3)
 net <- setNodeModels(net, dealerOutcome.cpt)
-writeNetworkModel(net, pretty=TRUE)
 ```
 
 With this work completed, we will now proceed to designating the decision and utility nodes and populating their node distributions (or functions, in the case of deterministic nodes).
@@ -283,26 +282,37 @@ net <- setNodeModels(net, glm.hit1, glm.hit2, glm.hit3)
 
 Alternatively, decision nodes can be deterministic in nature. In this case, we interpret the function which sets the value of these nodes depending on the value(s) of its parent node(s) as a deterministic strategy that is chosen by the actor. Within the blackjack network, we might envision such a strategy by the following rule, which would be applicable to all three hit decisions in the network: choose 'hit' when the current point total is less than 15.
 
-**Utility nodes** are restricted to have no child nodes. Typically, utility nodes are deterministic functions of their parent nodes. In the blackjack example, for instance, we would assign the payoff as follows:
+**Utility nodes** are restricted to be deterministic nodes with no descendents. In the blackjack example, for instance, we would assign the payoff utility node as follows:
 
 ```
-net <- setNode(net, payoff, "determ", define=fromFormula(),
-               nodeFormula = payoff ~ 
-                  ifelse(playerFinalPoints > 21,
-                     -1,
-                     ifelse(dealerOutcome > 21,
-                        1,
-                        ifelse(playerFinalPoints > dealerOutcome,
-                           1,
-                           ifelse(playerFinalPoints == dealerOutcome, 0, -1)
-                        )
-                     )
-                  )
-               )
+#net <- setNode(net, payoff, "determ", define=fromFormula(),
+#               nodeFormula = payoff ~ 
+#                  ifelse(playerFinalPoints > 21,
+#                     -1,
+#                     ifelse(dealerOutcome == "Bust",
+#                        1,
+#                        ifelse(playerFinalPoints > dealerOutcome,
+#                           1,
+#                           ifelse(playerFinalPoints == dealerOutcome, 0, -1)
+#                        )
+#                     )
+#                  )
+#               )
 ```
 
-However, the `HydeNet` package also allows for utility nodes to be random variables. In that case, we might interpret them as reflecting some degree of uncertainty about their realized values. If a child decides to steal a candy bar from the store, the utility might randomly depend on whether or not (s)he gets caught.
+The network model is now fully specified. This can be treated as an ordinary Bayesian network, ignoring the fact that some nodes represent decisions or utilites. For example, we can compile the network and feed it to JAGS with some evidence to obtain a MCMC sample of the joint posterior distribution of the unobserved nodes:
 
+```{r}
+evidence <- list(card1 = 3)
+compiledNet <- compileJagsModel(net, data = evidence,
+                                n.chains = 3,
+                                n.adapt = 5000)
+
+post <- HydePosterior(compiledNet,
+                      variable.names = c("card1","card2","card3","dealerUpcard","dealerOutcome"), n.iter=10000)
+post <- bindPosterior(post)
+
+```
 
 ## Maximum Expected Utility Analysis
 
