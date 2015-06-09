@@ -78,8 +78,8 @@ net <- HydeNetwork(~ initialAces | card1*card2
                    + pointsAfterCard5 | card1*card2*card3*card4*card5*acesAfterCard5
                    + playerFinalPoints | initialPoints*hit1*pointsAfterCard3
                                          *hit2*pointsAfterCard4*hit3*pointsAfterCard5
-                   + dealerFinalPoints | dealerUpcard
-                   + payoff | playerFinalPoints*dealerFinalPoints)
+                   + dealerOutcome | dealerUpcard
+                   + payoff | playerFinalPoints*dealerOutcome)
 
 plot(net)
 ```
@@ -116,7 +116,7 @@ net <- setNode(net, dealerUpcard, nodeType="dcat",
                pi=vectorProbs(p=cardProbs, dealerUpcard),
                validate=FALSE)
 
-#Note: node dealerFinalPoints will be defined below, following some discussion 
+#Note: node dealerOutcome will be defined below, following some discussion 
 #      about its conditional probability distribution.
 
 #####################################
@@ -221,7 +221,7 @@ net <- setNode(net, playerFinalPoints, "determ", define=fromFormula(),
 
 ```
 
-Node distributions for all random variable & deterministic nodes are now specified, other than `dealerFinalPoints`. We have included a dataset containing the conditional probability distribution of `dealerOutcome` given `dealerUpcard` in the data frame `BJDealer` (*source: https://www.blackjackinfo.com/dealer-outcome-probabilities. Accessed 2015-04-24.*). (These conditional probabilities assume that the dealer is drawing from a deck of infinite size.)
+Node distributions for all random variable & deterministic nodes are now specified, other than `dealerOutcome`. We have included a dataset containing the conditional probability distribution of `dealerOutcome` given `dealerUpcard` in the data frame `BJDealer` (*source: https://www.blackjackinfo.com/dealer-outcome-probabilities. Accessed 2015-04-24.*). (These conditional probabilities assume that the dealer is drawing from a deck of infinite size.)
 
 We will use the `cpt()` function to obtain an array that contains the conditional probabilities of `dealerOutcome` given `dealerUpcard`. This array has class `cpt` and can be fed into JAGS via `setNodeModels`:
 
@@ -231,6 +231,8 @@ dealerOutcome.cpt <- cpt(dealerOutcome ~ dealerUpcard,
                          data = BJDealer,
                          wt   = BJDealer$probability)
 round(dealerOutcome.cpt,3)
+net <- setNodeModels(net, dealerOutcome.cpt)
+writeNetworkModel(net, pretty=TRUE)
 ```
 
 With this work completed, we will now proceed to designating the decision and utility nodes and populating their node distributions (or functions, in the case of deterministic nodes).
@@ -288,11 +290,11 @@ net <- setNode(net, payoff, "determ", define=fromFormula(),
                nodeFormula = payoff ~ 
                   ifelse(playerFinalPoints > 21,
                      -1,
-                     ifelse(dealerFinalPoints > 21,
+                     ifelse(dealerOutcome > 21,
                         1,
-                        ifelse(playerFinalPoints > dealerFinalPoints,
+                        ifelse(playerFinalPoints > dealerOutcome,
                            1,
-                           ifelse(playerFinalPoints == dealerFinalPoints, 0, -1)
+                           ifelse(playerFinalPoints == dealerOutcome, 0, -1)
                         )
                      )
                   )
