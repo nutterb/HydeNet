@@ -17,11 +17,37 @@ output:
     toc: no
 ---
 
+<a name="top"></a>
+
+**[Introduction]**  
+**[Example -- Pulmonary Embolism]**  
+**[Creating "Skeleton" HydeNetwork Objects]**  
+**[Creating HydeNetwork Objects With a Training Dataset]**  
+**[Creating HydeNetwork Objects With a List of Models]**  
+ --- *[A Note on Factor Conversion]*  
+**[Specifying Distributions for Individual Nodes]**  
+ --- *[Univariate Distributions for Root Nodes]*  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;> [Binary Root Nodes]  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;> [Normally-distributed Root Nodes]  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;> [Multicategory Root Nodes]  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;> [Other Univariate Distributions]  
+**[Regression Equations]**  
+ --- *[Ordinary Least Squares (OLS)]*  
+ --- *[Logistic Regression]*  
+**[Using **`R`** Model Objects]**  
+ --- *[Warning About Limited Scope of `writeJagsModel` Methods]*  
+ --- *[Conditional Probability Tables (CPTs)]*  
+**[Deterministic Nodes]**  
+**[Modifying the Graph Structure]**  
+
+
+##Introduction
+
 Setting up Bayesian network models with **`HydeNet`** generally involves two components -- specifying the **network structure** and specifying the **(conditional) probability distribution of each node** (given any parent nodes). Network structure is specified within the `HydeNetwork()` function, while node distributions can be set using either `HydeNetwork()`, `setNode()`, or `setNodeModels()`. Generally, `HydeNetwork()` would be used to simultaneously define the distributions for all the nodes in the network in a single function call, while `setNode()` and `setNodeModels()` are used to define the distribution of a specific node in an existing `HydeNetwork` object. Also, `HydeNetwork()` offers a relatively limited set of options in terms of the nature of the specified distributions, while the other two functions offer more flexibility.
 
-`HydeNetwork()` can be called in three different ways. The first involves explicit specification by the user of the network structure (according to the formula syntax implemented in `gRbase::dag()`) but no specification of a training dataset or models to populate node distributions. This results in a "skeleton" `HydeNetwork` object. The second technique involves the same explicit specification of the network structure, but also passing a training dataset. In this case, conditional probability distributions for all the nodes in the network are estimated, using frequency tabulation, linear regression, logistic regression, or multinomial logistic regression, depending on the classes (and number of levels, for factors) of the variables in the data frame and the user-specified network structure. For this, we use the functions `xtabs()`, `lm()`, `glm(..., family="binomial")`, and `nnet::multinom()` respectively.
+`HydeNetwork()` can be called in three different ways. The first involves explicit specification by the user of the network structure (according to the formula syntax implemented in `gRbase::dag()`) but no specification of a training dataset or models to populate node distributions. This results in a "skeleton" `HydeNetwork` object. The second technique involves the same explicit specification of the network structure, but also passing a training dataset. In this case, conditional probability distributions for all the nodes in the network are estimated, using frequency tabulation, linear regression, logistic regression, or multinomial logistic regression, depending on the classes (and number of levels, for factors) of the variables in the data frame and the user-specified network structure. 
 
-The third way to invoke `HydeNetwork()` is to pass a "bag of models", or more specifically a list argument containing one or more model objects as elements. In this method, the network structure is automatically built using the names of the response and explanatory variables within each of the models included in the list argument.  Permissible model classes include `xtabs`, `lm`, `glm`, and `multinom`. Note that at this time the `glm` class only works with `family="binomial"`; defining a node's distribution using other families is possible, however, using `setNode()`.
+The third way to invoke `HydeNetwork()` is to pass a "bag of models", or more specifically a list argument containing one or more model objects as elements. In this method, the network structure is automatically built using the names of the response and explanatory variables within each of the models included in the list argument.  Permissible model classes include `xtabs`, `cpt`, `lm`, `glm`, and `multinom`. Note that, in the `HydeNet` package, we have included the `cpt` model class. This stands for *conditional probablity table*, and is intended to facilitate the specification of categorical node distributions for which all parent nodes are also categorical. See `help("cpt")` for details and see below for examples. Note also that at this time the `glm` class only works with `family="binomial"`; defining a node's distribution using other families is possible, however, using `setNode()`.
 
 In any of the above three cases, but especially in the first case (i.e., when `HydeNetwork()` is used with neither a training data nor a list of model objects to populate node distributions), the distributions for each node in the network can be manually specified, one-by-one. This is accomplished with either the `setNode()` function or the `setNodeModels()` function. As we discuss below, we have implemented a multitude of techniques for specifying node distributions with these functions.
 
@@ -33,15 +59,19 @@ library(HydeNet)
 
 In the above output, the required packages for **`HydeNet`** are listed. In addition, this package uses JAGS, which is stand-alone software for implementing Markov Chain Monte Carlo simulation. JAGS is called from `R` via a package called `rjags`.  See `help("rjags-package")` for details.
 
+[[Link to top]](#top)
+
 ##Example -- Pulmonary Embolism
 
 The network we will study involves the diagnosis and treatment of pulmonary embolism, or PE (node **pe**).  PE is a condition where the arteries carrying blood to the lungs get blocked, typically by a blood clot that dislodged from a vein in the leg. There are two commonly-used tests for diagnosing PE. One is a blood test called D-dimer (node **d.dimer**), and the other is pulmonary angiography (node **angio**). For each, the probability of positive and negative test values depends on the status of PE. In other words, the conditional distribution function for each test node can be defined using the sensitivity and specificity of each test. The D-dimer test also is affected by pregnancy (node **pregnant**), with higher false positive rates.  Clinicians prior beliefs about the likelihood of PE are captured in a score (node **wells**). Since PE cannot directly be observed, the likelihood of a patient receiving treatment (node **treat**) depends on the test results. And the likelihood of survival through hospital discharge (node **death**) depends on both the status of the disease and whether or not the patient received treatment.  
+
+[[Link to top]](#top)
 
 ## Creating "Skeleton" HydeNetwork Objects
 
 A graphical representation of the PE network can be constructed based on an unpopulated **HydeNetwork** object (i.e., a "base" object for which node distributions have not yet been specified):
 
-```{r}
+```{r, fig.width=7}
 net <- HydeNetwork(~ wells
                    + pe | wells
                    + d.dimer | pregnant*pe
@@ -49,13 +79,8 @@ net <- HydeNetwork(~ wells
                    + treat | d.dimer*angio
                    + death | pe*treat)
 
-attribs <- list(node = list(shape="ellipse", fillcolor="#FDAE6B"))
-
-plot(net, attrs=attribs)
+plot(net)
 ```
-
-
-Note that the `attribs` object and use of the `attrs` parameter in the `plot()` call use the Rgraphviz package. See `vignette(topic="Rgraphviz", package = "Rgraphviz")` for details.
 
 The **HydeNetwork** object we created, called `net`, is worth exploring:
 
@@ -65,16 +90,19 @@ net
 
 Since we haven't given `HydeNetwork()` information on conditional probability distributions for the nodes in the network, we have a skeleton object where each node is distributed as normal given its parent nodes.  The parameters `mu` and `tau` are to this point unspecified (note: in JAGS, the mean and *precision* are specified for the normal distribution - the precision parameter $\tau$ is equal to $1/\sigma^2$).
 
+[[Link to top]](#top)
+
 ##Creating HydeNetwork Objects With a Training Dataset
 
-Using `HydeNetwork()` with a training dataset implements the following default node-specific model classes, depending on the class of the node (in other words, the class of the variable in the training dataset) and whether or not the node has parents:
+Using `HydeNetwork()` with a training dataset implements the following default node-specific model classes, depending on the class of the node (in other words, the class of the variable in the training dataset), whether or not the node has parent nodes, and if so, the classes of the parent nodes:
 
-|Parents? |Node Class                        |Model Type                     |Function                     |
-|:--------|:---------------------------------|:------------------------------|:----------------------------|
-|No       |`factor` with any number of levels|Tabulation                     |`xtabs()`                    |
-|Yes      |`factor` with 2 levels            |Logistic Regression            |`glm(..., family="binomial")`|
-|Yes      |`factor` with 3+ levels           |Multinomial Logistic Regression|`nnet::multinom()`           |
-|Yes or No|`numeric` or `integer`            |Ordinary Least Squares         |`lm()`                       |
+|Node Class                        |Parents |Model Type                     |Function                     |
+|:---------------------------------|:--------|:------------------------------|:----------------------------|
+|`factor` with any number of levels|None     |Tabulation                     |`stats::xtabs()`                    |
+|`factor` with any number of levels|All of class `factor`|Conditional Probabilility Table |`HydeNet::cpt()`                    |
+|Binary `factor`|At least 1 `numeric` or `integer`|Logistic Regression            |`stats::glm(..., family="binomial")`|
+|`factor` with 3+ levels           |At least 1 `numeric` or `integer`|Multinomial Logistic Regression|`nnet::multinom()`           |
+|`numeric` or `integer`            |---|Ordinary Least Squares         |`stats::lm()`                       |
 
 The syntax for building a Bayesian network using training data is rather simple:
 
@@ -98,7 +126,9 @@ glm(treat ~ d.dimer+angio, data=PE, family="binomial")$coef
 xtabs(~PE$pregnant) / nrow(PE)
 ```
 
-##Creating HydeNetwork Objects With a "Bag of Models"
+[[Link to top]](#top)
+
+##Creating HydeNetwork Objects With a List of Models
 
 The same network can be constructed by feeding `HydeNetwork()` a list of model objects:
 
@@ -107,9 +137,9 @@ g1 <- lm(wells ~ 1, data=PE)
 g2 <- glm(pe ~ wells, data=PE, family="binomial")
 g3 <- lm(d.dimer ~ pe + pregnant, data=PE)
 g4 <- xtabs(~ pregnant, data=PE)
-g5 <- glm(angio ~ pe, data=PE, family="binomial")
+g5 <- cpt(angio ~ pe, data=PE)
 g6 <- glm(treat ~ d.dimer + angio, data=PE, family="binomial")
-g7 <- glm(death ~ pe + treat, data=PE, family="binomial")
+g7 <- cpt(death ~ pe + treat, data=PE)
 
 bagOfModels <- list(g1,g2,g3,g4,g5,g6,g7)
 
@@ -117,17 +147,19 @@ bagNet <- HydeNetwork(bagOfModels)
 writeNetworkModel(bagNet, pretty=TRUE)
 ```
 
-The advantage of this approach is increased flexibility in specifying the model parameterization for each node (e.g., inclusion of nonlinear effects and/or interactions).
+The advantage of this approach is that it allows for somewhat increased flexibility in specifying the model parameterization for each node (e.g., inclusion of nonlinear effects and/or interactions). However, we caution that all these models ultimately get translated to JAGS code, and this translation is relatively limited in terms of the types of model parameterizations supported. We discuss this issue in greater detail below, under the heading "[Warning About Limited Scope of `writeJagsModel` Methods]".
 
-##A Note on Factor Conversion
+####A Note on Factor Conversion
 
-JAGS uses integers to represent levels of factors. Levels of factors are retained as a list element (called `factorRef`) in the output of `compileJagsModel()`. Please see our vignette titled "Obtaining Posterior Distributions for HydeNet Objects"
+JAGS uses integers to represent levels of factors. Levels of factors are retained as a list element (called `factorRef`) in the output of `compileJagsModel()`. In the function `bindPosterior()`, we have facilitated the process of converting posterior MCMC samples into a single data frame with an option to re-label factors.  This process is demonstrated in our 'Getting Started with HydeNet' vignette.
 
-#WHAT IS THE RIGHT WAY TO DESCRIBE THE IMPLICIT CONVERSION OF FACTORS PREGNANT AND PE BY JAGS IN THE ABOVE MODEL?
+[[Link to top]](#top)
 
 ##Specifying Distributions for Individual Nodes
 
 Below, we describe the usage of `setNode()` and `setNodeModels()`.
+
+[[Link to top]](#top)
 
 ###Univariate Distributions for Root Nodes
 
@@ -190,6 +222,7 @@ net <- setNode(net, wells,
                nodeType = "dcat",
                pi = "pi.wells[1] <- 0.15; pi.wells[2] <- 0.66; pi.wells[3] <- 0.19")
 ```
+
 
 #### Other Univariate Distributions
 
@@ -259,9 +292,7 @@ Finally, note that there is built-in error handling when parameters are outside 
 net <- setNode(net, d.dimer, nodeType = "dpois", lambda=-10)
 ```
 
-
-
-
+[[Link to top]](#top)
 
 ###Regression Equations
 
@@ -280,8 +311,6 @@ net$nodeType$d.dimer
 net$nodeParams$d.dimer
 net$nodeFormula$d.dimer
 ```
-
-#*WHAT IS THE RIGHT WAY TO DESCRIBE THE IMPLICIT CONVERSION OF FACTORS PREGNANT AND PE BY JAGS IN THE ABOVE MODEL?*
 
 Or, alternatively, one may directly specify JAGS code for the parameters as character strings. Below, we do this for `mu`:
 
@@ -339,7 +368,7 @@ jagsFunctions
 |trunc         |floor      |base      |
 
 
-#### Logistic regression nodes 
+#### Logistic Regression 
 
 If the intercept and slope coefficients of a logistic regression model are known, one may define a Bernoulli-distributed node using the `ilogit` function in JAGS (inverse logit):
 
@@ -351,10 +380,11 @@ net <- setNode(net, treat, nodeType="dbern",
 ```
 
 
+[[Link to top]](#top)
 
 ### Using **`R`** Model Objects
 
-Above, we showed how `HydeNetwork()` can be used with a list of model objects to populate both the graph and the corresponding node distributions. In a similar fashion, certain `R` model classes can be used to populate the distribution for individual nodes in an existing `HydeNetwork` object. This is achieved using the `setNodeModels()` function. Currently, `setNodeModels()` is compatible with the following model classes: `lm`, `glm`, (`family="binomial"` only) and `multinom`.
+Above, we showed how `HydeNetwork()` can be used with a list of model objects to populate both the graph and the corresponding node distributions. In a similar fashion, certain `R` model classes can be used to populate the distribution for individual nodes in an existing `HydeNetwork` object. This is achieved using the `setNodeModels()` function. Currently, `setNodeModels()` is compatible with the following model classes: `xtabs`, `cpt`, `lm`, `glm`, (`family="binomial"` only) and `multinom`.
 
 Above, we constructed a `HydeNetwork` object called `bagNet` for the PE network by passing a list of model objects.  Suppose we wanted to modify one of the models and repopulate the network, e.g., by introducing an interaction term.  This is achieved with the following code:
 
@@ -382,11 +412,84 @@ The supported parameterizations include the following:
 * Two-way interactions
 * Polynomial terms involving continuous/integer predictors
 
-### Deterministic Nodes
+####Conditional Probability Tables (CPTs)
+
+When a given node as well as all of its parent nodes are categorical (or binary) in nature, the conditional distribution of that node is also fully categorical. We have included two functions --- `cpt()` and `inputCPT()` --- which facilitate the process of populating the conditional distributions for such nodes.
+
+Each of these two functions produce an object of class `cpt`, which is a *k-*dimensional array (with *k* equal to the number of parent nodes) with a specific structure: the last dimension corresponds to the child node and the array, when summed across this dimension, is equal to a *(k-1)-*dimensional array of ones. It therefore is an array containing conditional distributions of the child node for each combination of parent nodes.
+
+The function `cpt()` will compute this array given an input dataset and a formula which represents the conditional probability structure.  In the code below, the variable `death` is the child node and the variables `pe` and `treat` are the parent nodes.
+
+```{r}
+h <- cpt(death ~ pe + treat, data=PE)
+```
+
+`inputCPT()` is similar, although instead of using an input dataset to estimate the conditional distributions, it runs through a dialogue to manually specify the conditional densities.  This can be useful for small conditional probability tables, such as the conditional probability of a diagnostic test being positive given disease status:
+
+```{r, eval=FALSE}
+h <- inputCPT(test ~ disease)
+```
+```
+------------------------------------------------------------------
+Enter Factor Levels for node 'test':
+
+If this is a binary variable, enter '<yn>' as a shortcut.
+When finished, enter '<z>'.
+To repeat entry of the last inputted factor level, enter '<b>'.
+To start over entirely, enter '<s>'
+------------------------------------------------------------------
+Level 1 of 'test':   ---
+Level 2 of 'test':   +++
+Level 3 of 'test':   <z>
+------------------------------------------------------------------
+Enter Factor Levels for node 'disease':
+
+If this is a binary variable, enter '<yn>' as a shortcut.
+When finished, enter '<z>'.
+To repeat entry of the last inputted factor level, enter '<b>'.
+To start over entirely, enter '<s>'
+------------------------------------------------------------------
+Level 1 of 'disease':   Healthy
+Level 2 of 'disease':   Diseased
+Level 3 of 'disease':   <z>
+------------------------------------------------------------------
+NOTE: parameter 'reduce' is set to TRUE in inputCPT().
+      Conditional probabilities Pr(test=--- | disease)
+      will be calculated as the complement of the
+      inputted probabilities Pr(test != --- | disease).
+------------------------------------------------------------------
+Enter the following conditional probabilities:
+Use '<q>' to halt execution.
+To go back one step and re-enter, enter '<b>'.
+------------------------------------------------------------------
+Pr(test=+++ | Healthy ):   0.23
+Pr(test=+++ | Diseased):   0.85
+```
+```{r, eval=FALSE}
+print(h)
+```
+```
+          test
+disease     ---  +++
+  Healthy  0.77 0.23
+  Diseased 0.15 0.85
+attr(,"model")
+   disease test   wt
+1  Healthy  +++ 0.23
+2 Diseased  +++ 0.85
+3  Healthy  --- 0.77
+4 Diseased  --- 0.15
+attr(,"class")
+[1] "cpt"   "array"
+```
+
+[[Link to top]](#top)
+
+## Deterministic Nodes
 
 In many cases, the user may desire to specify nodes that are non-random in nature. For example, we might construct a network for the first roll of dice within a game of craps.  In craps, if the "shooter" (the person rolling the dice) rolls a 2, 3, or 12, you immediately lose. If the "shooter" rolls a 7 or 11, you immediately win. Anything else and the "point" gets set (and then the shooter rolls again).
 
-```{r}
+```{r, fig.width=3}
 craps <- HydeNetwork(~ d1 + d2 + firstRollOutcome | d1*d2)
 
 craps <- setNode(craps, d1, nodeType="dcat", pi = vectorProbs(p = rep(1/6,6), d1))
@@ -394,7 +497,7 @@ craps <- setNode(craps, d2, nodeType="dcat", pi = vectorProbs(p = rep(1/6,6), d2
 
 #craps <- setNode(firstRollOutcome, outcome, ???????)
 
-plot(craps, attrs=list(node = list(shape="ellipse", fillcolor="green", fixedSize=0)))
+plot(craps)
 
 writeNetworkModel(craps, pretty=TRUE)
 ```
@@ -405,17 +508,19 @@ writeNetworkModel(craps, pretty=TRUE)
 We have implemented a series of "helper" deterministic functions to facilitate model specification.  These include `and()` (intersection of binary parent nodes), `or()` (union of parent nodes), and `xor()` (exclusive or of parent nodes).
 -->
 
+[[Link to top]](#top)
+
 ##Modifying the Graph Structure
 
 Nodes and/or links may be added or removed from an existing `HydeNetwork` object, using an `update` method we have implemented for `HydeNetwork` objects. Syntactically, this function acts in a similar fashion to `update.lm()`, in that you add or subtract terms from the model equation.  Suppose that a new diagnostic test for PE was invented and we wish to incorporate it into the PE network.  We can achieve this by the following code:
 
-```{r}
+```{r, fig.width=7}
 net2 <- update(net, . ~ . + newTest | pe
                           + treat | newTest
                           - pregnant)
 
 
-plot(net2, attrs=list(node = list(shape="ellipse", fillcolor="#FDAE6B")))
+plot(net2)
 
 ```
 

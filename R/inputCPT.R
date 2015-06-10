@@ -111,7 +111,7 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
     }
     factorLevels <- factorLevels[variables]
     if(!all(unlist(lapply(factorLevels, is.character)))) {
-      stop("Incompatible 'factorLevels' argument. See help('readCPTFromConsole').")
+      stop("Incompatible 'factorLevels' argument. See help('inputCPT()').")
     }
   }
   facValWidths <- unlist(lapply(factorLevels, function(x) max(nchar(x))))
@@ -122,7 +122,7 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
   
   if(reduce){
     cat(hbar,
-        "NOTE: parameter 'reduce' is set to TRUE in readCPTFromConsole().\n",
+        "NOTE: parameter 'reduce' is set to TRUE in inputCPT().\n",
         "      Conditional probabilities Pr(",dependentVar,"=",
         factorLevels[[dependentVar]][1]," | ", paste(independentVars,collapse=", "),
         ") will be calculated\n",
@@ -151,7 +151,7 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
       while(!valid.IO){
         formattedIndepVarLvls <- data[i, independentVars]
         formattedIndepVarLvls <- format(unlist(formattedIndepVarLvls),
-                                        width=facValWidths[names(formattedIndepVarLvls)])
+                                        width=facValWidths[-1])
         prompt <- paste("Pr(",dependentVar,"=", formattedDepVarLvls[i], " | ",
                         paste(apply(cbind(names(data[i,independentVars]),
                                           formattedIndepVarLvls),
