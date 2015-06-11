@@ -412,6 +412,8 @@ The supported parameterizations include the following:
 * Two-way interactions
 * Polynomial terms involving continuous/integer predictors
 
+[[Link to top]](#top)
+
 ####Conditional Probability Tables (CPTs)
 
 When a given node as well as all of its parent nodes are categorical (or binary) in nature, the conditional distribution of that node is also fully categorical. We have included two functions --- `cpt()` and `inputCPT()` --- which facilitate the process of populating the conditional distributions for such nodes.
@@ -490,17 +492,32 @@ attr(,"class")
 In many cases, the user may desire to specify nodes that are non-random in nature. For example, we might construct a network for the first roll of dice within a game of craps.  In craps, if the "shooter" (the person rolling the dice) rolls a 2, 3, or 12, you immediately lose. If the "shooter" rolls a 7 or 11, you immediately win. Anything else and the "point" gets set (and then the shooter rolls again).
 
 ```{r, fig.width=3}
-craps <- HydeNetwork(~ d1 + d2 + firstRollOutcome | d1*d2)
+craps <- HydeNetwork(~ d1 + d2 + diceSum | d1*d2
+                       + firstRollOutcome | diceSum)
 
-craps <- setNode(craps, d1, nodeType="dcat", pi = vectorProbs(p = rep(1/6,6), d1))
-craps <- setNode(craps, d2, nodeType="dcat", pi = vectorProbs(p = rep(1/6,6), d2))
+craps <- setNode(craps, d1, nodeType="dcat",
+                 pi = vectorProbs(p = rep(1/6,6), d1),
+                 validate = FALSE)
+craps <- setNode(craps, d2, nodeType="dcat",
+                 pi = vectorProbs(p = rep(1/6,6), d2),
+                 validate = FALSE)
 
-#craps <- setNode(firstRollOutcome, outcome, ???????)
+craps <- setNode(craps, diceSum, nodeType = "determ",
+                 define = fromFormula(),
+                 nodeFormula = diceSum ~ di1 + di2)
+
+craps <- setNode(craps, firstRollOutcome, nodeType = "determ",
+                 define = fromFormula(),
+                 nodeFormula = firstRollOutcome ~ 
+                                 ifelse(diceSum < 4 | diceSum > 11, -1,
+                                    ifelse(diceSum == 7 | diceSum == 11, 1,0)))
 
 plot(craps)
 
 writeNetworkModel(craps, pretty=TRUE)
 ```
+
+The formulas follow the same rules as described above in the [Regression Equations] section.
 
 <!--
 #### "Helper" Deterministic Functions
@@ -534,3 +551,4 @@ First, while the graph has changed -- and now node `treat` has three parents -- 
 
 Second, a warning message indicates that a parent node (`pregnant`) has been removed. Since that node was involved in characterizing the distribution of its child node(s) (`d.dimer`), the function by default removes the distribution from all child nodes still existing in the network.  The user then is required to use either `setNode()` or `setNodeModels()` to repopulate the distribution(s) for the affected node(s).
 
+[[Link to top]](#top)
