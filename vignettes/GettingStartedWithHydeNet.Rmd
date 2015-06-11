@@ -3,9 +3,9 @@
 %\VignetteIndexEntry{An overview of global options and recommendations}
 -->
 ---
-title: "Getting Started with HydeNet"
+title: "Getting Started with `HydeNet`"
 author: "Jarrod Dalton and Benjamin Nutter"
-date: "3 Feb 2015"
+date: "11 Jun 2015"
 output:
   html_document:
     fig_caption: yes
@@ -17,11 +17,27 @@ output:
     toc: no
 ---
 
-## Installing JAGS
+`HydeNet` is a package intended to facilitate modeling of hybrid Bayesian networks and influence diagrams (a.k.a. decision networks). A Bayesian network, formally defined, is a joint probability distribution for a set of random variables for which the set of conditional independencies can be represented using a directed acyclic graph. Each node represents a random variable, and each link represents the direction of influence between two nodes. The probability distribution for any given node is defined as conditional (only) on its parent nodes, and every node is conditionally independent from all of its non-descendants given data on its parent nodes.
+
+Bayesian networks are powerful *dynamic inference* models that allow for updating predictions of unobserved nodes in the network as evidence is collected. They can be constructed using expert knowledge, or by using *structure learning* algorithms. `HydeNet` assumes the first approach: all networks are manually constructed through collaboration with subject matter experts. Users interested in structure learning problems --- which are popular in -omics applications, for example --- are encouraged to try the [`bnlearn` package](http://www.jstatsoft.org/v35/i03) by Marco Scutari.
+
+Influence diagrams (or decision networks) are extended Bayesian networks which incorporate two additional types of nodes: decision nodes and utility nodes. Decision nodes are assumed to be manipulable by the actor, while utility nodes are deterministic functions of one or more parent nodes which produce numeric outputs. When there are multiple decision nodes in the network, specific combinations of decision node values are referred to as *policies*. We can use these networks to study the distribution of utility as it relates to various decision-making policies, and to conduct value-of-information analyses.
+
+Packages exist for **exact** inference on standard Bayesian networks (with no decision or utility nodes) when the networks fit any of the following criteria:
+
+* All nodes are discrete/categorical in nature
+* All nodes are Gaussian in nature
+* All nodes are either Gaussian or discrete/categorical in nature (i.e., conditional linear gaussian models)
+
+**[packages]**
+
+Importantly, exact inference on Bayesian networks is an *NP*-hard problem. When networks become large, either in the number of parameters in the number of nodes, exact inference algorithms such as junction tree are computationally expensive. In these situations, **approximate** inference may be an appealing alternative. Several methods for approximate inference on Bayesian networks exist. Most popular are Markov Chain Monte Carlo sampling and the EM algorithm. `HydeNet` implements Markov Chain Monte Carlo inference through an interface to [JAGS](http://mcmc-jags.sourceforge.net/). Fundamentally, HydeNet works by writing a JAGS script according to the structure and parameterization of your graphical model, and calling JAGS with that script. 
+
+## `HydeNet` Installation
+
 If you don't already have JAGS installed, you will receive an error when `HydeNet` tries to load the `rjags` package.  `rjags` searches your system for an installation of JAGS and throws an error if none is found.  You will need to [download and install JAGS](http://sourceforge.net/projects/mcmc-jags/files/) before using `HydeNet`.
 
-## Installing `HydeNet`
-Installing `HydeNet` from CRAN (once available) is straight forward and can be done with the usual
+Installing `HydeNet` from CRAN is straightforward and can be done with the usual syntax:
 ```{r, eval=FALSE}
 install.packages("HydeNet")
 ```
@@ -33,10 +49,19 @@ setRepositories(ind=1:2)
 devtools::install_github("nutterb/HydeNet")
 ```
 
+## A Simple Bayesian Network Analysis
+
+First we load the library: 
+
+```{r}
+library(HydeNet)
+```
+
+
 ## Global `HydeNet` Options
 There are a couple of global options `HydeNet` establishes that you should be aware of.  
 
-#### Hyde_fitModel
+### `Hyde_fitModel`
 The `Hyde_fitModel` controls the behavior of `setNode` function.  If `FALSE`, the model described by the arguments will not be fit until the JAGS model statement is written by `writeNetworkModel`.  
 
 The option can be set by using the code below.  The default setting is `FALSE`.
@@ -49,7 +74,6 @@ Realistically, the time spent to fit the model will be spent one way or another,
 all at once when calling `writeNetworkModel`, set the option to `FALSE`.  Your printed output when reviewing a network will appear as follows:
 
 ```{r, echo=FALSE}
-library(HydeNet)
 data(PE, package='HydeNet')
 autoNet <- HydeNetwork(~ wells
                        + pe | wells
@@ -61,6 +85,8 @@ autoNet <- HydeNetwork(~ wells
 autoNet <- setNode(autoNet, treat,
                    nodeFormula = treat ~ poly(d.dimer, 2) + angio,
                    p = fromData())
+```
+```{r, echo=FALSE}
 print(autoNet, treat)
 ```
 
@@ -85,7 +111,7 @@ print(autoNet, treat)
 ```
 
 
-#### Hyde_maxDigits
+### `Hyde_maxDigits`
 This options, set to 5 by default, controls the number of decimal places printed in the JAGS model code.  It can be increased or decreased depending on the level of precision you need or want in your estimates.
 
 ```{r}
