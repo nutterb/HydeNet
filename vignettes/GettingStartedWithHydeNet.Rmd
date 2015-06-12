@@ -21,17 +21,17 @@ output:
 
 Bayesian networks are powerful dynamic inference models that allow for updating predictions of unobserved nodes in the network as evidence is collected. They can be constructed using expert knowledge, or by using *structure learning* algorithms. `HydeNet` assumes the first approach: all networks are manually constructed through collaboration with subject matter experts. Users interested in structure learning problems --- which are popular in -omics applications, for example --- are encouraged to try the [`bnlearn` package](http://www.jstatsoft.org/v35/i03) by Marco Scutari.
 
-Influence diagrams (or decision networks) are extended Bayesian networks which incorporate two additional types of nodes: decision nodes and utility nodes. Decision nodes are assumed to be manipulable by the actor, while utility nodes are deterministic functions of one or more parent nodes which produce numeric outputs. When there are multiple decision nodes in the network, specific combinations of decision node values are referred to as *policies*. We can use these networks to study the distribution of utility as it relates to various decision-making policies, and to conduct value-of-information analyses.
+Influence diagrams (or decision networks) are extended Bayesian networks which incorporate two additional types of nodes: decision nodes and utility nodes. Decision nodes are assumed to be manipulable by the actor, while utility nodes are deterministic functions of one or more parent nodes which produce numeric outputs. When there are multiple decision nodes in the network, specific combinations of decision node values are referred to as *policies*. We can use these networks to study the distribution of utility as it relates to various decision-making policies, and to conduct value-of-information analyses. An overview of using `HydeNet` for decision network analysis is provided in the **"Decision Networks"** vignette.
 
-Packages exist for **exact** inference on standard Bayesian networks (with no decision or utility nodes) when the networks fit any of the following criteria:
+Packages exist for **exact** inference on standard Bayesian networks (e.g., `gRain`, `gRim`) when the networks do not have decision/utility nodes and fit any of the following criteria:
 
 * All nodes are discrete/categorical in nature
 * All nodes are Gaussian in nature
 * All nodes are either Gaussian or discrete/categorical in nature (i.e., conditional linear gaussian models)
 
-**[packages]**
+Exact inference on Bayesian networks is an *NP*-hard problem. When networks become large, either in the number of parameters in the number of nodes, exact inference algorithms such as junction tree are computationally expensive. In these situations, **approximate** inference may be an appealing alternative. Several methods for approximate inference on Bayesian networks exist. Popular methods include Markov Chain Monte Carlo sampling, application of the EM algorithm, and logic sampling (which is implemented in [`bnlearn`](http://www.jstatsoft.org/v35/i03)). `HydeNet` implements Markov Chain Monte Carlo inference through an interface to [JAGS](http://mcmc-jags.sourceforge.net/).
 
-Exact inference on Bayesian networks is an *NP*-hard problem. When networks become large, either in the number of parameters in the number of nodes, exact inference algorithms such as junction tree are computationally expensive. In these situations, **approximate** inference may be an appealing alternative. Several methods for approximate inference on Bayesian networks exist. Most popular are Markov Chain Monte Carlo sampling and the EM algorithm. `HydeNet` implements Markov Chain Monte Carlo inference through an interface to [JAGS](http://mcmc-jags.sourceforge.net/). Fundamentally, HydeNet works by writing a JAGS script according to the structure and parameterization of your graphical model, and calling JAGS with that script. 
+Fundamentally, HydeNet works by writing a JAGS script according to the structure and parameterization of your graphical model, and calling JAGS with that script. 
 
 ## `HydeNet` Installation
 
@@ -64,7 +64,7 @@ mtcars2 <- transform(mtcars,
 
 ### Network Construction
 
-The first step in the analysis is to set up the network structure. This is done using the `HydeNetwork()` function. Syntax is the same as for the `dag()` command in the `gRbase` library:
+The first step in the analysis is to set up the network structure. This is done using the `HydeNetwork()` function. The `formula` method for `HydeNetwork()` uses syntax similar to the `dag()` command in the `gRbase` library:
 
 ```{r}
 carNet <- HydeNetwork(~ cyl
@@ -113,15 +113,48 @@ The functions `compileJagsModel()` and `compileDecisionModel()` essentially retu
 carNet1 <- compileJagsModel(carNet)
 ```
 
-Evidence on individual nodes can also be entered with `compileJagsModel()`, thus facilitating dynamic inference as data are observed. See the description of the `data` argument in `help(rjags::jags.model)` for details. Note that, here, we reference the observation of a 6-cylinder car (the 3rd level of factor `mtcars2$cyl`) by its numeric code.
+Evidence on individual nodes can also be entered with `compileJagsModel()`, thus facilitating dynamic inference as data are observed. See the description of the `data` argument in `help(rjags::jags.model)` for details. Note that, here, we reference the observation of an 8-cylinder vehicle (the 3rd level of factor `mtcars2$cyl`) by its numeric code. (JAGS uses integers to represent factor levels; we store the mappings from factor levels to integers as a list element called `factorRef` in the `compiledHydeNetwork` objects.)
 
 ```{r}
 carNet2 <- compileJagsModel(carNet, data=list(cyl=3))
+carNet2$factorRef
 ```
 
 
-
 ## MCMC Inference
+
+MCMC sampling is performed by calling `HydePosterior()`. This function calls `coda.samples()` from the `rjags` library and returns an augmented `mcmc.list` object.  MCMC diagnostics and inference from this point onward are performed in the same manner as would typically be done when using `rjags`.
+
+```{r}
+post1 <- HydePosterior(carNet1,
+                       variable.names = c("cyl","hp","mpg"),
+                       n.iter = 10000)
+
+post2 <- HydePosterior(carNet2,
+                       variable.names = c("cyl","hp","mpg"),
+                       n.iter = 10000)
+
+str(post1, max.level = 3)
+plot(post1$codas[,c("hp","mpg")])
+```
+
+We have included a convenience function called `bindPosterior()` than can be used to combine multiple chains' samples into a single data frame with all factors re-mapped to their original non-numeric values.
+
+Below, we apply the function to obtain posterior densities under each of the two scenarios (no observation of other nodes and after observation of cyl = "8", respectively):
+
+```{r}
+bp1 <- bindPosterior(post1)
+bp2 <- bindPosterior(post2)
+
+head(bp1)
+head(bp2) #notice cyl = "8" for all samples
+
+plot(density(bp1$hp), ylim=c(0,0.06), main = "hp");
+lines(density(bp2$hp), col="red", lty=5)
+
+plot(density(bp1$mpg), main = "mpg");
+lines(density(bp2$mpg), col="red", lty=5)
+```
 
 ## Global `HydeNet` Options
 There are a couple of global options `HydeNet` establishes that you should be aware of.  
