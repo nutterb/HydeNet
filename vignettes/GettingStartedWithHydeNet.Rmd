@@ -105,13 +105,19 @@ HydeNet:::writeJagsModel(carNet, node = "mpg")
 writeNetworkModel(carNet, pretty = TRUE)
 ```
 
-In practice, though, the function `compileJagsModel()` (or `compileDecisionModel()`, if the network contains decision and utility nodes) will typically be called. This function is a wrapper for the `jags.model()` function in the `rjags` library which, in addition to the JAGS model script, passes any conditional probability tables from the network model into JAGS as arrays.
+In practice, though, the function `compileJagsModel()` (or `compileDecisionModel()`, if the network contains decision and utility nodes) will typically be called. This function is a wrapper for the `jags.model()` function in the `rjags` library which, in addition to the JAGS model script, passes any conditional probability tables from the network model into JAGS as arrays. (Note: all other arguments to `jags.model()`, such as the number of chains initial values, and the number of iterations for adaptation are passed through to the function.)
+
+The functions `compileJagsModel()` and `compileDecisionModel()` essentially return augmented objects of class `jags`. We label these objects with the class `compiledHydeNetwork`.
 
 ```{r}
 carNet1 <- compileJagsModel(carNet)
 ```
 
-Evidence on individual nodes can also be entered with compileJagsModel()`, thus facilitating dynamic inference as data are observed. See the description of the `data` argument in `help(rjags::jags.model)` for details.
+Evidence on individual nodes can also be entered with `compileJagsModel()`, thus facilitating dynamic inference as data are observed. See the description of the `data` argument in `help(rjags::jags.model)` for details. Note that, here, we reference the observation of a 6-cylinder car (the 3rd level of factor `mtcars2$cyl`) by its numeric code.
+
+```{r}
+carNet2 <- compileJagsModel(carNet, data=list(cyl=3))
+```
 
 
 
