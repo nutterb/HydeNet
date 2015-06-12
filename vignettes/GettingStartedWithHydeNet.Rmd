@@ -1,6 +1,6 @@
 <!--
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{An overview of global options and recommendations}
+%\VignetteIndexEntry{Getting Started with HydeNet}
 -->
 ---
 title: "Getting Started with `HydeNet`"
@@ -19,7 +19,7 @@ output:
 
 `HydeNet` is a package intended to facilitate modeling of hybrid Bayesian networks and influence diagrams (a.k.a. decision networks). A Bayesian network, formally defined, is a joint probability distribution for a set of random variables for which the set of conditional independencies can be represented using a directed acyclic graph. Each node represents a random variable, and each link represents the direction of influence between two nodes. The probability distribution for any given node is defined as conditional (only) on its parent nodes, and every node is conditionally independent from all of its non-descendants given data on its parent nodes.
 
-Bayesian networks are powerful *dynamic inference* models that allow for updating predictions of unobserved nodes in the network as evidence is collected. They can be constructed using expert knowledge, or by using *structure learning* algorithms. `HydeNet` assumes the first approach: all networks are manually constructed through collaboration with subject matter experts. Users interested in structure learning problems --- which are popular in -omics applications, for example --- are encouraged to try the [`bnlearn` package](http://www.jstatsoft.org/v35/i03) by Marco Scutari.
+Bayesian networks are powerful dynamic inference models that allow for updating predictions of unobserved nodes in the network as evidence is collected. They can be constructed using expert knowledge, or by using *structure learning* algorithms. `HydeNet` assumes the first approach: all networks are manually constructed through collaboration with subject matter experts. Users interested in structure learning problems --- which are popular in -omics applications, for example --- are encouraged to try the [`bnlearn` package](http://www.jstatsoft.org/v35/i03) by Marco Scutari.
 
 Influence diagrams (or decision networks) are extended Bayesian networks which incorporate two additional types of nodes: decision nodes and utility nodes. Decision nodes are assumed to be manipulable by the actor, while utility nodes are deterministic functions of one or more parent nodes which produce numeric outputs. When there are multiple decision nodes in the network, specific combinations of decision node values are referred to as *policies*. We can use these networks to study the distribution of utility as it relates to various decision-making policies, and to conduct value-of-information analyses.
 
@@ -31,7 +31,7 @@ Packages exist for **exact** inference on standard Bayesian networks (with no de
 
 **[packages]**
 
-Importantly, exact inference on Bayesian networks is an *NP*-hard problem. When networks become large, either in the number of parameters in the number of nodes, exact inference algorithms such as junction tree are computationally expensive. In these situations, **approximate** inference may be an appealing alternative. Several methods for approximate inference on Bayesian networks exist. Most popular are Markov Chain Monte Carlo sampling and the EM algorithm. `HydeNet` implements Markov Chain Monte Carlo inference through an interface to [JAGS](http://mcmc-jags.sourceforge.net/). Fundamentally, HydeNet works by writing a JAGS script according to the structure and parameterization of your graphical model, and calling JAGS with that script. 
+Exact inference on Bayesian networks is an *NP*-hard problem. When networks become large, either in the number of parameters in the number of nodes, exact inference algorithms such as junction tree are computationally expensive. In these situations, **approximate** inference may be an appealing alternative. Several methods for approximate inference on Bayesian networks exist. Most popular are Markov Chain Monte Carlo sampling and the EM algorithm. `HydeNet` implements Markov Chain Monte Carlo inference through an interface to [JAGS](http://mcmc-jags.sourceforge.net/). Fundamentally, HydeNet works by writing a JAGS script according to the structure and parameterization of your graphical model, and calling JAGS with that script. 
 
 ## `HydeNet` Installation
 
@@ -51,12 +51,71 @@ devtools::install_github("nutterb/HydeNet")
 
 ## A Simple Bayesian Network Analysis
 
-First we load the library: 
+First we load the library, and do some preliminary manipulation of the `mtcars` data frame:
 
 ```{r}
 library(HydeNet)
+
+mtcars2 <- transform(mtcars,
+                     cyl = factor(cyl),
+                     gear=factor(gear),
+                     am = factor(am))
 ```
 
+### Network Construction
+
+The first step in the analysis is to set up the network structure. This is done using the `HydeNetwork()` function. Syntax is the same as for the `dag()` command in the `gRbase` library:
+
+```{r}
+carNet <- HydeNetwork(~ cyl
+                      + disp | cyl
+                      + hp | disp
+                      + wt
+                      + gear
+                      + mpg | disp*hp*wt*gear,
+                      data=mtcars2)
+```
+
+In the above, we have passed the training data frame `mtcars2` to be used for populating the parameters of the network. But, there are several ways to populate the node distributions:
+
+1) automatically, by calling `HydeNetwork()` with a training dataset (as in the above);
+2) manually, by calling `HydeNetwork()` with a list of model objects; and 
+3) manually, by specifying only the network structure in the call to `HydeNetwork()` and then subsequently using the functions `setNode()` and `setNodeModels()` to specify distributions for each individual node.
+
+In the automatic approach, estimation of the conditional probability distribution for each node (given its parent nodes) is performed using different models, depending on the nature of the node and the nature of its parent nodes. For example, conditional distributions of categorical nodes with all categorical parents are estimated using tabulation (see `help('cpt')`), while conditional distributions for categorical nodes with at least one continuous parent node are estimated using `glm(, family="binomial")`.
+
+There are many options for manual specification of node distributions. Please refer to our **"Working with HydeNet Objects"** vignette for all the details on how to use `HydeNetwork()`, `setNode()` and `setNodeModels()` to create and populate network objects.
+
+### Network Visualization
+
+We have implemented a plot method for `HydeNetwork` objects, using the [`diagrammeR`](http://cran.r-project.org/web/packages/DiagrammeR/index.html) library by Knut Sveidqvist et al. While not implemented in this simple example, there are different default node shapes and colors for random variable nodes, deterministic nodes, decision nodes and utility nodes. See our **"Building and Customizing HydeNet Plots"** vignette for details on customization.
+
+```{r, fig.width = 5}
+plot(carNet)
+```
+
+## Interfacing with JAGS
+
+`HydeNet` interfaces with JAGS through the `rjags` package. Given a fully-specified `HydeNetwork` model, the function `writeNetworkModel()` will create the JAGS model script (by calling the `writeJagsModel()` function for each node, which creates each node's portion of the script).  Here's an example (note, as indicated by the need to use a triple colon, that `writeJagsModel()` is not an exported function to the `HydeNet` namespace):
+
+```{r}
+HydeNet:::writeJagsModel(carNet, node = "cyl")
+HydeNet:::writeJagsModel(carNet, node = "mpg")
+
+writeNetworkModel(carNet, pretty = TRUE)
+```
+
+In practice, though, the function `compileJagsModel()` (or `compileDecisionModel()`, if the network contains decision and utility nodes) will typically be called. This function is a wrapper for the `jags.model()` function in the `rjags` library which, in addition to the JAGS model script, passes any conditional probability tables from the network model into JAGS as arrays.
+
+```{r}
+carNet1 <- compileJagsModel(carNet)
+```
+
+Evidence on individual nodes can also be entered with compileJagsModel()`, thus facilitating dynamic inference as data are observed. See the description of the `data` argument in `help(rjags::jags.model)` for details.
+
+
+
+## MCMC Inference
 
 ## Global `HydeNet` Options
 There are a couple of global options `HydeNet` establishes that you should be aware of.  
