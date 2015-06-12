@@ -15,7 +15,7 @@
 #' 
 #' @details \code{compileJagsModel} is a partial wrapper for 
 #'   \code{jags.model}. Running \code{compileJagsModel(network)} is 
-#'   equivalent to running \code{jgas.model(textConnection(writeNetworkModel(network)))}.
+#'   equivalent to running \code{jags.model(textConnection(writeNetworkModel(network)))}.
 #'   
 #' @return Returns a \code{compiledHydeNetwork} object.  The \code{jags} element
 #'   of this object is suitable to pass to \code{coda.samples}.  Otherwise, 
@@ -56,6 +56,7 @@ compileJagsModel <- function(network, data=NULL, ...){
   
   if (!is.null(network$data)){
     .factors <- names(network$data)[sapply(network$data, is.factor)]
+    .factors <- .factors[.factors %in% network$nodes]
   
     factorRef <- as.list(network$data[, .factors, drop=FALSE])
   
@@ -85,7 +86,7 @@ compileJagsModel <- function(network, data=NULL, ...){
   else factorRef <- NULL
   
   cpt_arrays <- unlist(network$nodeFitter) == "cpt"
-  if(length(cpt_arrays) > 0){
+  if(any(cpt_arrays)){
     cpt_arrays <- names(cpt_arrays)[cpt_arrays]
     cpt_arrays <- network$nodeModel[cpt_arrays]
     names(cpt_arrays) <- paste0("cpt.", names(cpt_arrays))
