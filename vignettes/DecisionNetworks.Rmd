@@ -79,7 +79,7 @@ net <- HydeNetwork(~ initialAces | card1*card2
                    + playerFinalPoints | initialPoints*hit1*pointsAfterCard3
                                          *hit2*pointsAfterCard4*hit3*pointsAfterCard5
                    + dealerOutcome | dealerUpcard
-                   )#+ payoff | playerFinalPoints*dealerOutcome)
+                   + payoff | playerFinalPoints*dealerOutcome)
 
 plot(net)
 ```
@@ -285,33 +285,44 @@ Alternatively, decision nodes can be deterministic in nature. In this case, we i
 **Utility nodes** are restricted to be deterministic nodes with no descendents. In the blackjack example, for instance, we would assign the payoff utility node as follows:
 
 ```
-#net <- setNode(net, payoff, "determ", define=fromFormula(),
-#               nodeFormula = payoff ~ 
-#                  ifelse(playerFinalPoints > 21,
-#                     -1,
-#                     ifelse(dealerOutcome == "Bust",
-#                        1,
-#                        ifelse(playerFinalPoints > dealerOutcome,
-#                           1,
-#                           ifelse(playerFinalPoints == dealerOutcome, 0, -1)
-#                        )
-#                     )
-#                  )
-#               )
+net <- setNode(net, payoff, "determ", define=fromFormula(),
+         nodeFormula = payoff ~
+                         ifelse(playerFinalPoints > 21, -1,
+                           ifelse(playerFinalPoints == 21,
+                             ifelse(dealerOutcome == 1, 0,
+                               ifelse(dealerOutcome == 7, 0, 1)),
+                             ifelse(dealerOutcome == 2,
+                               ifelse(playerFinalPoints < 22, 1, -1),
+                               ifelse(dealerOutcome == 3,
+                                 ifelse(playerFinalPoints == 17, 0,
+                                 ifelse(playerFinalPoints > 17, 1, -1)),
+                                 ifelse(dealerOutcome == 4,
+                                   ifelse(playerFinalPoints == 18, 0,
+                                     ifelse(playerFinalPoints > 18, 1, -1)),
+                                   ifelse(dealerOutcome == 5,
+                                     ifelse(playerFinalPoints == 19, 0,
+                                       ifelse(playerFinalPoints > 19, 1, -1)),
+                                     ifelse(playerFinalPoints == 20, 0,
+                                       ifelse(playerFinalPoints > 20, 1, -1)))))))))
+
 ```
 
 The network model is now fully specified. This can be treated as an ordinary Bayesian network, ignoring the fact that some nodes represent decisions or utilites. For example, we can compile the network and feed it to JAGS with some evidence to obtain a MCMC sample of the joint posterior distribution of the unobserved nodes:
 
 ```{r}
+trackedVars <- c("dealerUpcard","playerFinalPoints","dealerOutcome","payoff")
 evidence <- list(card1 = 3)
 compiledNet <- compileJagsModel(net, data = evidence,
                                 n.chains = 3,
                                 n.adapt = 5000)
 
 post <- HydePosterior(compiledNet,
-                      variable.names = c("card1","card2","card3","dealerUpcard","dealerOutcome"), n.iter=10000)
+                      variable.names = trackedVars,
+                      n.iter=10000)
 post <- bindPosterior(post)
-
+post$dealerOutcome <- factor(post$dealerOutcome,1:7,
+                             levels(BJDealer$dealerOutcome))
+dplyr::sample_n(post, 30)
 ```
 
 ## Maximum Expected Utility Analysis
