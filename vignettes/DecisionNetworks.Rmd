@@ -284,7 +284,7 @@ Alternatively, decision nodes can be deterministic in nature. In this case, we i
 
 **Utility nodes** are restricted to be deterministic nodes with no descendents. In the blackjack example, for instance, we would assign the payoff utility node as follows:
 
-```
+```{r}
 net <- setNode(net, payoff, "determ", define=fromFormula(),
          nodeFormula = payoff ~
                          ifelse(playerFinalPoints > 21, -1,
