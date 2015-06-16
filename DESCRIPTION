@@ -26,7 +26,7 @@ Depends:
     rjags
 Imports:
     broom (>= 0.3.7),
-    DiagrammeR (>= 0.6),
+    DiagrammeR (>= 0.7),
     plyr,
     dplyr,
     graph,
