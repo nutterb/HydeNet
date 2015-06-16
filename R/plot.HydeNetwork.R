@@ -2,8 +2,8 @@
 #' @aliases plot.HydeNetwork plotHydeNetwork
 #' @export 
 #' @importFrom DiagrammeR create_edges
-#' @importFrom DiagrammeR graphviz_graph
-#' @importFrom DiagrammeR graphviz_render
+#' @importFrom DiagrammeR create_graph
+#' @importFrom DiagrammeR render_graph
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr filter
 #' @importFrom dplyr left_join
@@ -29,7 +29,7 @@
 #' @param customEdges a data frame giving custom settings for edges (arrows)
 #'   between nodes.
 #' @param ... for the \code{plot} method, additional arguments to be passed to 
-#'   \code{DiagrammeR::graphviz_graph}.  For \code{customNode}, 
+#'   \code{DiagrammeR::render_graph}.  For \code{customNode}, 
 #'   named node attributes to assign to a node's plotting characteristics.
 #' @param useHydeDefaults A logical value indicating if the default plot
 #'   parameters in \code{options("Hyde_plotOptions")} should be applied
@@ -125,9 +125,9 @@ plot.HydeNetwork <- function(x,
   
   if (!is.null(customEdges)) mergeCustomEdges(edge_df, customEdges)
 
-  DiagrammeR::graphviz_graph(nodes_df = as.data.frame(node_df),
+  DiagrammeR::create_graph(nodes_df = as.data.frame(node_df),
                              edges_df = edge_df) %>%
-    DiagrammeR::graphviz_render()
+    DiagrammeR::render_graph()
   
 }
 

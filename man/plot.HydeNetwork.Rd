@@ -41,7 +41,7 @@ The customizations provided here will override the default settings.}
 between nodes.}
 
 \item{...}{for the \code{plot} method, additional arguments to be passed to
-\code{DiagrammeR::graphviz_graph}.  For \code{customNode},
+\code{DiagrammeR::render_graph}.  For \code{customNode},
 named node attributes to assign to a node's plotting characteristics.}
 
 \item{useHydeDefaults}{A logical value indicating if the default plot

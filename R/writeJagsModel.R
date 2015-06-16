@@ -78,7 +78,7 @@ writeJagsModel <- function(network, node){
   
   #*** Type 'dcat'
   else if (network$nodeType[[node_str]] == "dcat"){
-    if (length(network$nodeFitter[[node_str]]) > 0 && network$nodeFitter[[node_str]] == "cpt"){
+    if (!is.null(network$nodeFitter[[node_str]]) && network$nodeFitter[[node_str]] == "cpt"){
       model_code <-
         paste0(c(paste0("pi.", node_str, " <- cpt.", node_str, "[",
                         paste0(network$parents[[node_str]], collapse = ","),
