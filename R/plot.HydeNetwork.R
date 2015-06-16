@@ -120,8 +120,8 @@ plot.HydeNetwork <- function(x,
 
   edge_table <- do.call("rbind", mapply(mapEdges, x$nodes, x$parents))
   
-  edge_df <- DiagrammeR::create_edges(edge_from = edge_table[, 2], 
-                                      edge_to = edge_table[, 1])
+  edge_df <- DiagrammeR::create_edges(from = edge_table[, 2], 
+                                      to = edge_table[, 1])
   
   if (!is.null(customEdges)) mergeCustomEdges(edge_df, customEdges)
 
