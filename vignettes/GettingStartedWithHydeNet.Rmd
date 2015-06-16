@@ -113,11 +113,9 @@ The functions `compileJagsModel()` and `compileDecisionModel()` essentially retu
 carNet1 <- compileJagsModel(carNet)
 ```
 
-Evidence on individual nodes can also be entered with `compileJagsModel()`, thus facilitating dynamic inference as data are observed. See the description of the `data` argument in `help(rjags::jags.model)` for details. Note that, here, we reference the observation of an 8-cylinder vehicle (the 3rd level of factor `mtcars2$cyl`) by its numeric code. (JAGS uses integers to represent factor levels; we store the mappings from factor levels to integers as a list element called `factorRef` in the `compiledHydeNetwork` objects.)
-
+Evidence on individual nodes can also be entered with `compileJagsModel()`, thus facilitating dynamic inference as data are observed. See the description of the `data` argument in `help(rjags::jags.model)` for details. 
 ```{r}
-carNet2 <- compileJagsModel(carNet, data=list(cyl=3))
-carNet2$factorRef
+carNet2 <- compileJagsModel(carNet, data = list(cyl = "8") )
 ```
 
 As a matter of convenience, `HydeNet` can also translate labels into the numeric codes

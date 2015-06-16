@@ -302,8 +302,10 @@ net <- setNode(net, payoff, "determ", define=fromFormula(),
                                    ifelse(dealerOutcome == 5,
                                      ifelse(playerFinalPoints == 19, 0,
                                        ifelse(playerFinalPoints > 19, 1, -1)),
-                                     ifelse(playerFinalPoints == 20, 0,
-                                       ifelse(playerFinalPoints > 20, 1, -1)))))))))
+                                     ifelse(dealerOutcome == 6,
+                                       ifelse(playerFinalPoints == 20, 0,
+                                         ifelse(playerFinalPoints > 20, 1, -1)),
+                                       ifelse(playerFinalPoints == 21, 0, -1)))))))))
 
 ```
 
@@ -322,28 +324,48 @@ post <- HydePosterior(compiledNet,
 post <- bindPosterior(post)
 post$dealerOutcome <- factor(post$dealerOutcome,1:7,
                              levels(BJDealer$dealerOutcome))
-dplyr::sample_n(post, 30)
+dplyr::sample_n(post, 20)
+```
+
+And, we can do things like compute expected utility (under the distribution of hit decisions observed in the sample, i.e., absent any specific hit strategy) when dealt a 3:
+
+```{r}
+table(post$payoff)
+mean(post$payoff)
 ```
 
 ## Maximum Expected Utility Analysis
 
 In a maximum expected utility analysis, the goal is to compare different decision-making strategies, known as *policies*, in order to identify which one yields the greatest expected reward. With respect to our decision networks, this amounts to running the MCMC sampler with decision nodes set at specific values to get a representation of the joint posterior distribution of the utility nodes, and then adding their values to get a posterior distribution of total utility (from which we can get expected values, modes, etc.). We demonstrate this process below using the Blackjack network.
 
-We will analyze the following four strategies: never choose to "hit", always take 3 cards, always take 4 cards, and always take 5 cards.
+We will analyze the following four strategies: never choose to "hit", always take 3 cards, always take 4 cards, and always take 5 cards. Our set of discrete combinations of decision nodes can be represented by a *policy matrix*:
 
+```{r}
+policies <- data.frame(hit1 = c(0,1,1,1),
+                       hit2 = c(0,0,1,1),
+                       hit3 = c(0,0,0,1))
+```
 
+(Note: we have included a convenience function called `policyMatrix()` when all combinations of decision node values are of interest. This function is a wrapper for `expand.grid()`; see `help(policyMatrix)` for details.)
+
+In the MEU analysis, the goal is to characterize the distribution of utility under the competing policies. This amounts to sampling posterior distributions of utility nodes under varying sets of values for the decision nodes. In `HydeNet`, this is done by 1) using the function `compileDecisionModel()` to create a list of `compiledHydeNetwork` objects (one object corresponding to each policy); 2) feeding that list to `HydePosterior()` to get a list of `coda.samples` objects; and finally 3) feeding the list of `coda.samples` objects to `bindPosterior()` to get a single posterior sample matrix for each policy:
+
+```{r}
+compiledNet <- compileDecisionModel(net, policyMatrix = policies)
+str(compiledNet, 2)
+```
 
 ## Value of Information Analysis
 
 
-
+<!--
 ## Asymmetric Decision Problems
 
 decision networks are tricky business. 3 types of asymmetry in decision networks. Currently, our package only allows for fully symmetric decision networks or networks that exhibit order asymmetry. However, careful use of the package to evaluate other situations is possible. We give some general guidance below on how to think about decision processes:
 
 Decision/data process:  (A1, D1, A2, D2, ..., A_n-1, D_n-1, An)
 
-
+-->
 
 
 
