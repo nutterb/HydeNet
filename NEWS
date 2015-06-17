@@ -1,3 +1,15 @@
+### 0.8.9 (16 June 2015)
+* Incorporated minor changes for compatibility with DiagrammeR 0.7
+* Minor bug fix to `mergeCustomNodes` to prevent loss of custom settings
+* Minor changes to `HydeNetPlots` vignette
+* Minor changes to `GettingStartedWithHydeNet` vignette.
+* Removed `ObtainingPosteriorDistributions` vignette.
+* Added `VignetteBuilder` option to the description file.  For now, when reinstalling the
+  package, use the command `devtools::install_local([directory])`.  If you try to build the 
+  vignettes with the package, a strange error occurs that prevents the installation.  This 
+  error is related to the `WorkingWithHydeNetObjects` vignette, but I can't reproduce the 
+  error outside of the build command.
+
 ### 0.8.8 (5 June 2015)
 * `setNodeModel` and `writeJagsFormula` methods are complete.
 * `writeJagsModel` now accommodates `cpt` objects

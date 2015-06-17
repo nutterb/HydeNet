@@ -73,20 +73,21 @@
 #' #* Plots may open in a browser.
 #' data(BlackJack, package="HydeNet")
 #' plot(BlackJack)
-#' 
-#' HydePlotOptions(variable=list(shape = "rect", fillcolor = "green"),
-#'                 determ = list(shape = "rect", fillcolor = "black",
-#'                               fontcolor = "white", linecolor = "white"),
-#'                 decision = list(shape = "ellipse", fillcolor = "yellow",
-#'                                 linecolor = "red"),
-#'                 utility = list(shape = "circle", fillcolor = "red", 
+#'
+#' HydePlotOptions(variable=list(shape = "rect", fillcolor = "#A6DBA0"),
+#'                 determ = list(shape = "rect", fillcolor = "#E7D4E8",
+#'                               fontcolor = "#1B7837", linecolor = "#1B7837"),
+#'                 decision = list(shape = "triangle", fillcolor = "#1B7837",
+#'                                 linecolor = "white"),
+#'                 utility = list(shape = "circle", fillcolor = "#762A83", 
 #'                                fontcolor = "white"))
 #' plot(BlackJack)
 #' 
 #' HydePlotOptions(restorePackageDefaults = TRUE)
 #' 
 #' plot(BlackJack,
-#'      customNodes = customNode(fillcolor = "purple", shape = "circle", 
+#'      customNodes = customNode(payoff, 
+#'                               fillcolor = "purple", shape = "circle", 
 #'                               fontcolor = "white", height = "2",
 #'                               style="filled"))
 #' plot(BlackJack,
@@ -95,7 +96,7 @@
 #'       customNode(pointsAfterCard3,
 #'                  shape = "circle",
 #'                  style = "radial",
-#'                  fillcolor = "purple:yellow",
+#'                  fillcolor = "#1B7837:#762A83",
 #'                  fontcolor = "black",
 #'                  height = "2"),
 #'       customNode(playerFinalPoints,
@@ -164,7 +165,21 @@ mergeCustomNodes <- function(node_df, customNodes)
 #   node_df <- dplyr::mutate(node_df, index=2)
 #   customNodes <- dplyr::mutate(customNodes, index=1)
   node_df <- dplyr::full_join(customNodes, node_df,
-                              by = c("node_id" = "node_id")) 
+                              by = c("node_id" = "node_id"))
+  
+  duplicated_names.x <- names(node_df)[grepl("[.]x", names(node_df))]
+  if (length(duplicated_names.x) > 0)
+  {
+    duplicated_names.y <- gsub("[.]x", ".y", duplicated_names.x)
+    for(i in 1:length(duplicated_names.y))
+    {
+      node_df[[duplicated_names.x[i]]] <- ifelse(is.na(node_df[[duplicated_names.x[i]]]),
+                                                 node_df[[duplicated_names.y[i]]],
+                                                 node_df[[duplicated_names.x[i]]])
+    }
+  }
+  
+  
   if (any(grepl("[.]y", names(node_df))))
     node_df <- dplyr::select_(node_df, "-ends_with('.y')")
 

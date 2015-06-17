@@ -30,13 +30,13 @@ The key aspects of this network are that it contains
 
 When you load `HydeNet`, it will define some default settings for each of these nodes, but before we show you those settings, let's take a look at what the GraphViz would return if we chose not to use anything but its defaults.
 
-```{r, fig.width=8, fig.height=12}
+```{r}
 library(HydeNet)
 data(BlackJack, package="HydeNet")
 plot(BlackJack, useHydeDefaults=FALSE)
 ```
 
-The figure above shows every node in the network in a circle with white fill and black text. In a decision network, however, different nodes may be inherently different.  It would be helpful to be able to distinguish between random variables, deterministic nodes, decision nodes, and utility nodes.  The `plot.HydeNetwork` method uses the default settings to distinguish these types of nodes and can produce the figure below.
+The figure above shows every node in the network in a circle with white fill and black text. In a decision network, however, different nodes may be inherently different.  It would be helpful to be able to distinguish between random variables, deterministic nodes, decision nodes, and utility nodes.  The `plot.HydeNetwork` method uses the package's default settings to distinguish these types of nodes and can produce the figure below.
 
 What we will see is:
 
@@ -52,7 +52,7 @@ What we will see is:
   nodes are deterministic nodes with no children that are usually of special 
   interest.  In this case the utility node is the payoff from the game.
 
-```{r, fig.width=8, fig.height=12}
+```{r}
 plot(BlackJack)
 ```
 
@@ -65,7 +65,7 @@ The default plot settings are governed by a global option.  You can view the set
 getOption("Hyde_plotOptions")
 ```
 
-Let's assume that you only want to change the default scheme.  That is, you want the representation of each node to depend on its type.  Rather than assigning each type to an attribute, it seems more intuitive to assign the attributes to a type.  We can do this using the `HydePlotOptions` function.  To demonstrate, let's change the defaults so that:
+Let's assume that you only want to change the default scheme.  That is, you want the representation of each node to depend on its type.  We can assign `GraphViz` attributes to a types by using the `HydePlotOptions` function.  To demonstrate, let's change the defaults so that:
 
 * random variables are in green rectangles black text
 * deterministic nodes are in black rectangles with white text
@@ -73,12 +73,12 @@ Let's assume that you only want to change the default scheme.  That is, you want
 * utility nodes are in red circles with white text
 
 ```{r}
-HydePlotOptions(variable=list(shape = "rect", fillcolor = "green"),
-                determ = list(shape = "rect", fillcolor = "black",
-                              fontcolor = "white", linecolor = "white"),
-                decision = list(shape = "ellipse", fillcolor = "yellow",
-                                linecolor = "red"),
-                utility = list(shape = "circle", fillcolor = "red", 
+HydePlotOptions(variable=list(shape = "rect", fillcolor = "#A6DBA0"),
+                determ = list(shape = "rect", fillcolor = "#E7D4E8",
+                              fontcolor = "#1B7837", linecolor = "#1B7837"),
+                decision = list(shape = "triangle", fillcolor = "#1B7837",
+                                linecolor = "white"),
+                utility = list(shape = "circle", fillcolor = "#762A83", 
                                fontcolor = "white"))
 plot(BlackJack)
 ```
@@ -97,8 +97,8 @@ To do this, we'll need to use the `customNode` function.  It's easiest to do thi
 
 ```{r}
 plot(BlackJack,
-     customNodes = customNode(node_id = "hit1", 
-                              fillcolor = "purple", shape = "circle", 
+     customNodes = customNode(node_id = "hit1",
+                              fillcolor = "purple", shape = "circle",
                        fontcolor = "white", height = "2",
                        style="filled"))
 ```

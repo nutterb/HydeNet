@@ -33,6 +33,7 @@ Imports:
     gRbase,
     magrittr,
     stringr
+VignetteBuilder: knitr
 LazyLoad: yes
 LazyData: true
 URL: https://github.com/nutterb/Hyde,

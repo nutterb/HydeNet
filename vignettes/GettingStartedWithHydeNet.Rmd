@@ -84,11 +84,11 @@ In the above, we have passed the training data frame `mtcars2` to be used for po
 
 In the automatic approach, estimation of the conditional probability distribution for each node (given its parent nodes) is performed using different models, depending on the nature of the node and the nature of its parent nodes. For example, conditional distributions of categorical nodes with all categorical parents are estimated using tabulation (see `help('cpt')`), while conditional distributions for categorical nodes with at least one continuous parent node are estimated using `glm(, family="binomial")`.
 
-There are many options for manual specification of node distributions. Please refer to our **"Working with HydeNet Objects"** vignette for all the details on how to use `HydeNetwork()`, `setNode()` and `setNodeModels()` to create and populate network objects.
+There are many options for manual specification of node distributions. Please refer to our **"Working with HydeNet Objects"** vignette (`vignette("WorkingWithHydeNetObjects", package = "HydeNet")`)for all the details on how to use `HydeNetwork()`, `setNode()` and `setNodeModels()` to create and populate network objects.
 
 ### Network Visualization
 
-We have implemented a plot method for `HydeNetwork` objects, using the [`diagrammeR`](http://cran.r-project.org/web/packages/DiagrammeR/index.html) library by Knut Sveidqvist et al. While not implemented in this simple example, there are different default node shapes and colors for random variable nodes, deterministic nodes, decision nodes and utility nodes. See our **"Building and Customizing HydeNet Plots"** vignette for details on customization.
+We have implemented a plot method for `HydeNetwork` objects, using the [`DiagrammeR`](http://cran.r-project.org/web/packages/DiagrammeR/index.html) library by Knut Sveidqvist et al. While not implemented in this simple example, there are different default node shapes and colors for random variable nodes, deterministic nodes, decision nodes and utility nodes. See our **"Building and Customizing HydeNet Plots"** vignette (`vignette("HydeNetPlots", package = "HydeNet")`)for details on customization.
 
 ```{r, fig.width = 5}
 plot(carNet)
@@ -118,6 +118,11 @@ Evidence on individual nodes can also be entered with `compileJagsModel()`, thus
 ```{r}
 carNet2 <- compileJagsModel(carNet, data=list(cyl=3))
 carNet2$factorRef
+```
+
+As a matter of convenience, `HydeNet` can also translate labels into the numeric codes
+```{r}
+carNet3 <- compileJagsModel(carNet, data=list(cyl="8"))
 ```
 
 
