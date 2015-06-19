@@ -210,3 +210,40 @@ validateParameters <- function(params, dist){
   valid[sapply(params, function(p) p %in% c("fromData", "fromFormula"))] <- TRUE
   return(valid)
 }
+
+#' @rdname HydeUtilities
+#' 
+makeFactorRef <- function(network)
+{
+  dataList <- c(list(network$data), network$nodeData)
+  names(dataList) <- NULL
+  Ref <- do.call("c", lapply(dataList, dataframeFactors))
+  
+  types <- unlist(network$nodeType[names(Ref)])
+  types <- types[types %in% "dbern"]
+  
+  Ref[names(types)] <- 
+    lapply(Ref[names(types)], 
+           function(f){
+             f$value <- f$value - 1
+             f
+           })
+  Ref[unique(names(Ref))]
+}
+
+#' @rdname HydeUtilities
+#' @param dataframe A data frame.  The data frame will be searched for factors and
+#'   a reference table (another data frame) is returned.
+#'   
+dataframeFactors <- function(dataframe)
+{
+  if (is.null(dataframe)) return(NULL)
+  factor_vars <- names(dataframe)[sapply(dataframe, class) == "factor"]
+  reference_list <- 
+    lapply(factor_vars,
+           function(f) data.frame(value = sort(unique(as.numeric(dataframe[[f]]))),
+                                  label = levels(dataframe[[f]]),
+                                  stringsAsFactors=FALSE))
+  names(reference_list) <- factor_vars
+  reference_list
+}

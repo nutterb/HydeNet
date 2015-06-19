@@ -2,7 +2,9 @@
 % Please edit documentation in R/HydeUtilities.R
 \name{HydeUtilities}
 \alias{HydeUtilities}
+\alias{dataframeFactors}
 \alias{decisionOptions}
+\alias{makeFactorRef}
 \alias{makeJagsReady}
 \alias{matchLevelNumber}
 \alias{matchVars}
@@ -27,6 +29,10 @@ nodeFromFunction(node_fn)
 polyToPow(poly)
 
 validateParameters(params, dist)
+
+makeFactorRef(network)
+
+dataframeFactors(dataframe)
 }
 \arguments{
 \item{term}{Usually the \code{term} column from the output of
@@ -64,6 +70,9 @@ converted to the JAGS pow() function.}
 
 \item{dist}{The JAGS distribution function name.  Appropriate names are
 in the \code{FnName} column of the \code{jagsDists} data object.}
+
+\item{dataframe}{A data frame.  The data frame will be searched for factors and
+a reference table (another data frame) is returned.}
 }
 \description{
 The functions described below are unexported functions that

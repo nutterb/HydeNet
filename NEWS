@@ -1,3 +1,9 @@
+### 0.8.10 (19 June 2015)
+* Streamlined the generation of the `factorRef` element of the compiled Hyde Networks.  
+  This also allows all data frames in all nodes to be included to generate a complete list 
+  of factors throughout the network (previously, it only generated references for factors 
+  in the overall `data` element, not the `nodeData` elements.
+
 ### 0.8.9 (16 June 2015)
 * Incorporated minor changes for compatibility with DiagrammeR 0.7
 * Minor bug fix to `mergeCustomNodes` to prevent loss of custom settings

@@ -85,19 +85,20 @@ Generate and customize plots of a \code{HydeNetwork}
 data(BlackJack, package="HydeNet")
 plot(BlackJack)
 
-HydePlotOptions(variable=list(shape = "rect", fillcolor = "green"),
-                determ = list(shape = "rect", fillcolor = "black",
-                              fontcolor = "white", linecolor = "white"),
-                decision = list(shape = "ellipse", fillcolor = "yellow",
-                                linecolor = "red"),
-                utility = list(shape = "circle", fillcolor = "red",
+HydePlotOptions(variable=list(shape = "rect", fillcolor = "#A6DBA0"),
+                determ = list(shape = "rect", fillcolor = "#E7D4E8",
+                              fontcolor = "#1B7837", linecolor = "#1B7837"),
+                decision = list(shape = "triangle", fillcolor = "#1B7837",
+                                linecolor = "white"),
+                utility = list(shape = "circle", fillcolor = "#762A83",
                                fontcolor = "white"))
 plot(BlackJack)
 
 HydePlotOptions(restorePackageDefaults = TRUE)
 
 plot(BlackJack,
-     customNodes = customNode(fillcolor = "purple", shape = "circle",
+     customNodes = customNode(payoff,
+                              fillcolor = "purple", shape = "circle",
                               fontcolor = "white", height = "2",
                               style="filled"))
 plot(BlackJack,
@@ -106,7 +107,7 @@ plot(BlackJack,
       customNode(pointsAfterCard3,
                  shape = "circle",
                  style = "radial",
-                 fillcolor = "purple:yellow",
+                 fillcolor = "#1B7837:#762A83",
                  fontcolor = "black",
                  height = "2"),
       customNode(playerFinalPoints,
