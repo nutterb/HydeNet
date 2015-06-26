@@ -86,14 +86,19 @@ termName <- function(term, reg){
 #' @param network A Hyde Network Object
 
 decisionOptions <- function(node, network){
+  if (network$nodeFitter[[node]] == "cpt"){
+    D <- {if (!is.null(network$nodeData[[node]])) network$nodeData[[node]][[node]] 
+          else network$data[[node]]}
+    dist <- 1:length(unique(D))
+  }
   #* This uses a regular expression to extract the level number from
   #* the node JAGS model.  For instance
   #* pi.var[1] <- .123; pi.var[2] <- .321; ...
   #* the regular expression pulls out the numbers in between each set of [].
-  if (network$nodeType[[node]] == "dcat"){
+  else if (network$nodeType[[node]] == "dcat"){
     dist <- writeJagsModel(network, node)[1]
     dist <- unlist(strsplit(dist, ";"))
-    dist <- as.numeric(stringr::str_extract(dist, stringr::perl("(?<=[[]).*(?=[]])")))
+    dist <- as.numeric(stringr::str_extract(dist, stringr::regex("(?<=[\\[]).*(?=[\\]])")))
   }
   else if (network$nodeType[[node]] == "dbern"){
     dist <- 0:1

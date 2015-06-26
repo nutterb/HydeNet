@@ -79,12 +79,14 @@ writeJagsModel <- function(network, node){
   #*** Type 'dcat'
   else if (network$nodeType[[node_str]] == "dcat"){
     if (!is.null(network$nodeFitter[[node_str]]) && network$nodeFitter[[node_str]] == "cpt"){
-      model_code <-
-        paste0(c(paste0("pi.", node_str, " <- cpt.", node_str, "[",
-                        paste0(network$parents[[node_str]], collapse = ","),
-                        ",]"),
-                 paste0(node_str, " ~ dcat(pi.", node_str, ")")),
-               collapse = "\n   ")
+      parents <- network$parents[[node_str]]
+      bern_parent <- sapply(parents, function(p) network$nodeType[[p]] == "dbern")
+      parents[bern_parent] <- paste0("(", parents[bern_parent], "+1)")
+      
+      model_code <- paste0("pi.", node_str, " <- cpt.", node_str, "[",
+                           paste0(parents, collapse=", "), ", ]\n",
+                           "   ", node_str, " ~ dcat(pi.", node_str, ")")
+
     } else if (fromData() %in% node_params){
       node_params["pi"] <- paste0("pi.", node_str)
       pi <- do.call(network$nodeFitter[[node_str]],

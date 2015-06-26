@@ -107,15 +107,29 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
                       l
                     })
   
+  cpt_arrays <- unlist(network$nodeFitter) == "cpt"
+  if(any(cpt_arrays)){
+    cpt_arrays <- names(cpt_arrays)[cpt_arrays]
+    cpt_arrays <- network$nodeModel[cpt_arrays]
+    nms <- names(cpt_arrays)
+    cpt_arrays <- lapply(names(cpt_arrays),
+                         function(ca){
+                           cpt(network$nodeFormula[[ca]], 
+                               data = if (!is.null(network$nodeData[[ca]])) network$nodeData[[ca]]
+                               else network$data)
+                         })
+    names(cpt_arrays) <- paste0("cpt.", nms)
+  } else cpt_arrays = list()
+  # return(cpt_arrays)
   
   jags.code <- compileJagsModel(network, ...)
   
   lapply(options,
-         function(o, j, ...)
+         function(o, j, cpt_arrays, ...)
          {
            cHN <- list(jags = rjags::jags.model(textConnection(paste0(j$jags$model(),
                                                                       collapse="\n")),
-                                                data = o,
+                                                data = c(o, cpt_arrays),
                                                 ...),
                        observed = o,
                        dag = j$dag,
@@ -124,6 +138,7 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
            cHN
          },
          jags.code,
+         cpt_arrays, 
          ...)
   
   

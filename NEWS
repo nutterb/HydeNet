@@ -1,3 +1,8 @@
+### 0.8.11 (26 June 2015)
+* Fixed a bug preventing `cpt` arrays from being passed to `jags.model` in 
+  `compileDecisionModel`
+* Fixed a bug preventing bernoulli values from being passed to `cpt` arrays in the JAGS models.
+
 ### 0.8.10 (19 June 2015)
 * Streamlined the generation of the `factorRef` element of the compiled Hyde Networks.  
   This also allows all data frames in all nodes to be included to generate a complete list 

@@ -70,7 +70,7 @@ compileJagsModel <- function(network, data=NULL, ...){
       {
         msg <- c(msg,
                  paste0("Values observed in '", i, "' must be one of ",
-                        paste0(c(FactorRef[[i]]$label, FactorRef[[i]]$value), collapse = ", ")))
+                        paste0(c(factorRef[[i]]$label, factorRef[[i]]$value), collapse = ", ")))
       }
       else data[[i]] <- factorRef[[i]]$value[which(factorRef[[i]]$label == data[[i]])]
     }
@@ -115,14 +115,21 @@ compileJagsModel <- function(network, data=NULL, ...){
   if(any(cpt_arrays)){
     cpt_arrays <- names(cpt_arrays)[cpt_arrays]
     cpt_arrays <- network$nodeModel[cpt_arrays]
-    names(cpt_arrays) <- paste0("cpt.", names(cpt_arrays))
+    nms <- names(cpt_arrays)
+    cpt_arrays <- lapply(names(cpt_arrays),
+                         function(ca){
+                           cpt(network$nodeFormula[[ca]], 
+                               data = if (!is.null(network$nodeData[[ca]])) network$nodeData[[ca]]
+                                      else network$data)
+                         })
+    names(cpt_arrays) <- paste0("cpt.", nms)
   } else cpt_arrays = list()
   # return(cpt_arrays)
   
 
   jags <- rjags::jags.model(textConnection(writeNetworkModel(network)), 
-                    data = if(is.null(data) & length(cpt_arrays) == 0) 
-                      sys.frame(sys.parent()) else c(data, cpt_arrays), ...)
+                    data = if (is.null(data) & length(cpt_arrays) == 0) sys.frame(sys.parent()) 
+                             else c(data, cpt_arrays), ...)
   
   #* cHN for compiled Hyde Network
   cHN <- list(jags=jags, observed=data, dag=network$dag, factorRef=factorRef)

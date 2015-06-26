@@ -1,6 +1,6 @@
 <!--
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Working with HydeNetwork Objects}
+%\VignetteIndexEntry{Working With HydeNetwork Objects}
 -->
 ---
 title: "Working with HydeNetwork Objects"
@@ -122,6 +122,7 @@ We can see by the output that the models have all been populated, and verify tha
 ```{r}
 glm(treat ~ d.dimer+angio, data=PE, family="binomial")$coef
 ```
+
 ```{r}
 xtabs(~PE$pregnant) / nrow(PE)
 ```
@@ -167,11 +168,13 @@ Below, we describe the usage of `setNode()` and `setNodeModels()`.
 
 The most straightforward way to specify distributions for root nodes, or nodes without parents is by using `setNode` with specific distributions and parameters.  For example, returning to our original unpopulated network (object `net`), we can define a Bernoulli distribution for node **pregnant**:
 
+
 ```{r}
 net <- setNode(network = net, node = pregnant,
                nodeType = "dbern", p=.4)
 net
 ```
+
 
 In the code above, we can see that `setNode` works by returning a modified *HydeNet* object. In the output, node **pregnant** is now Bernoulli with probability of 0.4.
 
@@ -552,3 +555,5 @@ First, while the graph has changed -- and now node `treat` has three parents -- 
 Second, a warning message indicates that a parent node (`pregnant`) has been removed. Since that node was involved in characterizing the distribution of its child node(s) (`d.dimer`), the function by default removes the distribution from all child nodes still existing in the network.  The user then is required to use either `setNode()` or `setNodeModels()` to repopulate the distribution(s) for the affected node(s).
 
 [[Link to top]](#top)
+
+

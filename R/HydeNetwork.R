@@ -171,6 +171,7 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
                          if ((is.null(parents[[x]]) && !is.numeric(data[, x])) || 
                                (!is.null(parents[[x]]) && !is.numeric(data[, x]) && nlevels(data[, x]) > 2))
                            return('dcat')
+                         else if (nodeFitter[[x]] == "cpt") return('dcat')
                          else if ((is.null(parents[[x]]) && !is.numeric(data[, x])) || 
                                     (!is.null(parents[[x]]) && !is.numeric(data[, x]) && nlevels(data[, x]) == 2))
                            return('dbern')
