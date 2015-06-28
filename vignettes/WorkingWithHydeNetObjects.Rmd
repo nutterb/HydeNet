@@ -52,9 +52,10 @@ The third way to invoke `HydeNetwork()` is to pass a "bag of models", or more sp
 In any of the above three cases, but especially in the first case (i.e., when `HydeNetwork()` is used with neither a training data nor a list of model objects to populate node distributions), the distributions for each node in the network can be manually specified, one-by-one. This is accomplished with either the `setNode()` function or the `setNodeModels()` function. As we discuss below, we have implemented a multitude of techniques for specifying node distributions with these functions.
 
 We start by loading the package:
-```{r, eval=2}
+```{r, eval=c(2,3), echo=2}
 install.packages("HydeNet")
 library(HydeNet)
+options(Hyde_fitModel = FALSE)
 ```
 
 In the above output, the required packages for **`HydeNet`** are listed. In addition, this package uses JAGS, which is stand-alone software for implementing Markov Chain Monte Carlo simulation. JAGS is called from `R` via a package called `rjags`.  See `help("rjags-package")` for details.
