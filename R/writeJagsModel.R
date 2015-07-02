@@ -165,6 +165,17 @@ writeJagsModel <- function(network, node){
                          ")")
   }
   
+  else{
+    if (any(node_params %in% c(fromData(), fromFormula())))
+      stop(paste0("nodeType '", network$nodeType[[node_str]], 
+                  "' does not currently support fromData() or fromFormula()"))
+    model_code <- paste0(node_str, " ~ ", 
+                         network$nodeType[[node_str]],
+                         "(",
+                         paste(node_params, collapse=", "),
+                         ")")
+  }
+  
   
 
   #* Return model  

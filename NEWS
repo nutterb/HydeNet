@@ -1,5 +1,8 @@
-### 0.8.12 (2 July 2015)
+### 0.9.0 (2 July 2015)
 * Added imports from `utils` and `stats` to comply with new CRAN policies.
+* Adds the functionality to allow all `nodeType` specifications to properly build in
+  `writeJagsModel`. (See Issue #72)
+* Incremented to version 0.9.0 for CRAN release.
 
 ### 0.8.11 (26 June 2015)
 * Fixed a bug preventing `cpt` arrays from being passed to `jags.model` in 
