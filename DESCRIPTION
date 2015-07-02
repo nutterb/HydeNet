@@ -3,8 +3,8 @@ Type: Package
 Title: Hybrid Bayesian Networks Using R and JAGS
 Version: 0.8.11
 Date: 2015-06-26
-Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter <nutter@battelle.org>
-Maintainer: Benjamin Nutter <nutter@battelle.org>
+Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter <benjamin.nutter@gmail.com>
+Maintainer: Benjamin Nutter <benjamin.nutter@gmail.com>
 Description: Facilities for easy implementation of hybrid Bayesian networks
     using R. Bayesian networks are directed acyclic graphs representing joint
     probability distributions, where each node represents a random variable and
