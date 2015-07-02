@@ -15,8 +15,6 @@ correctly and wish to overlook this note, if possible.
 There is an additional NOTE indicating this is a new 
 submission.
 
-
-
 ## Downstream dependencies
 There are no downstream dependencies for this package
 at this time.
