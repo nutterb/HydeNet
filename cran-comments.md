@@ -3,6 +3,9 @@
 * win-builder (devel and release)
 
 ## R CMD check results
+Use of the LICENSE file has been corrected to fit with expectations. 
+I apologize for this misunderstanding.
+
 `check` on win-builder returns the NOTE:  
 
 Possibly mis-spelled words in DESCRIPTION:  
