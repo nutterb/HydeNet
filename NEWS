@@ -1,3 +1,6 @@
+### 0.8.12 (2 July 2015)
+* Added imports from `utils` and `stats` to comply with new CRAN policies.
+
 ### 0.8.11 (26 June 2015)
 * Fixed a bug preventing `cpt` arrays from being passed to `jags.model` in 
   `compileDecisionModel`

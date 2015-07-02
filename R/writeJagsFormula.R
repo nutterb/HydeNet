@@ -1,6 +1,10 @@
 #' @name writeJagsFormula
 #' @export
-#' 
+#' @importFrom stats as.formula
+#' @importFrom stats coef
+#' @importFrom stats update
+#' @importFrom utils tail
+#'  
 #' @title Write the JAGS Formula for a Hyde Node
 #' @description Based on the information provided about the node,
 #'   an appropriate JAGS model is written in text.  This is combined with 
@@ -45,11 +49,11 @@ writeJagsFormula <- function(fit, nodes, ...) UseMethod("writeJagsFormula")
 
 writeJagsFormula.cpt <- function(fit, nodes, ...)
 {
-  form <- paste0(tail(names(dimnames(fit)), 1),
+  form <- paste0(utils::tail(names(dimnames(fit)), 1),
                  " ~ ",
                  paste0(names(dimnames(fit))[-length(names(dimnames(fit)))],
                         collapse = " + "))
-  rToJags(as.formula(form)) 
+  rToJags(stats::as.formula(form)) 
 }
 
 #' @rdname writeJagsFormula
@@ -84,7 +88,7 @@ writeJagsFormula.glm <- function(fit, nodes, ...){
   }
   
   out_fm <- paste0(as.character(fit$call$formula)[2], " ~ ", rhs)
-  rToJags(as.formula(out_fm)) 
+  rToJags(stats::as.formula(out_fm)) 
 }
 
 #' @rdname writeJagsFormula
@@ -106,7 +110,7 @@ writeJagsFormula.lm <- function(fit, nodes, ...){
                collapse=" + ")
   
   out_fm <- paste0(as.character(fit$call$formula)[2], " ~ ", rhs)
-  rToJags(as.formula(out_fm)) 
+  rToJags(stats::as.formula(out_fm)) 
 }
 
 #' @rdname writeJagsFormula
@@ -135,7 +139,7 @@ writeJagsFormula.multinom <- function(fit, nodes, ...){
          
   
   
-  if (is.null(fit$model)) fit <- update(fit, model=TRUE)
+  if (is.null(fit$model)) fit <- stats::update(fit, model=TRUE)
   fm <- as.character(fit$call$formula)
   out_fm <- paste0("pi.", fm[2])
   fm <- stringr::str_trim(unlist(strsplit(fm[-(1:2)], "[+]")))
@@ -152,12 +156,12 @@ writeJagsFormula.multinom <- function(fit, nodes, ...){
     else return(x)
   }))
   
-  fm <- lapply(1:nrow(coef(fit)), 
+  fm <- lapply(1:nrow(stats::coef(fit)), 
                function(r){
-                 if (is.null(fm)) coef(fit)[r, 1]
-                 else paste0(round(coef(fit)[r, 1], getOption("Hyde_maxDigits")),
+                 if (is.null(fm)) stats::coef(fit)[r, 1]
+                 else paste0(round(stats::coef(fit)[r, 1], getOption("Hyde_maxDigits")),
                              " + ", 
-                             paste(round(coef(fit)[r, -1], getOption("Hyde_maxDigits")), 
+                             paste(round(stats::coef(fit)[r, -1], getOption("Hyde_maxDigits")), 
                                    fm, sep="*", collapse=" + "))})
   
   fm <- sapply(fm, function(x) paste0("exp(", x, ") / (1 + ", 

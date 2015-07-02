@@ -1,12 +1,14 @@
 #' @rdname cpt
 #' @export
+#' @importFrom stats terms
+#' 
 inputCPT <- function(x, factorLevels, reduce=TRUE, ...) UseMethod("inputCPT")
 
 #' @rdname cpt
 #' @export
 inputCPT.formula <- function(formula, factorLevels, reduce=TRUE, ...)
 {
-  variables       <- as.character(attr(terms(formula), "variables"))[-1]
+  variables       <- as.character(attr(stats::terms(formula), "variables"))[-1]
   dependentVar    <- variables[1]
   independentVars <- variables[-1]
   inputCPT_workhorse(variables, dependentVar, independentVars, 

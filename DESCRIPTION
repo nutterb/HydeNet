@@ -1,8 +1,8 @@
 Package: HydeNet
 Type: Package
 Title: Hybrid Bayesian Networks Using R and JAGS
-Version: 0.8.11
-Date: 2015-06-26
+Version: 0.8.12
+Date: 2015-07-2
 Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter <benjamin.nutter@gmail.com>
 Maintainer: Benjamin Nutter <benjamin.nutter@gmail.com>
 Description: Facilities for easy implementation of hybrid Bayesian networks
@@ -10,12 +10,12 @@ Description: Facilities for easy implementation of hybrid Bayesian networks
     probability distributions, where each node represents a random variable and
     each edge represents conditionality. The full joint distribution is
     therefore factorized as a product of conditional densities, where each node
-    is assumed to be independent of its non-desendents given information on its
+    is assumed to be independent of its non-descendents given information on its
     parent nodes. Since exact, closed-form algorithms are computationally
     burdensome for inference within hybrid networks that contain a combination
     of continuous and discrete nodes, particle-based approximation techniques
     like Markov Chain Monte Carlo are popular.  We provide a user-friendly
-    interface to constructing these networks and running inference using rjags.
+    interface to constructing these networks and running inference using the 'rjags' package.
     Econometric analyses (maximum expected utility under competing policies,
     value of information) involving decision and utility nodes are also
     supported.
@@ -32,7 +32,9 @@ Imports:
     graph,
     gRbase,
     magrittr,
-    stringr
+    stats,
+    stringr,
+    utils
 Suggests:
     knitr
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)

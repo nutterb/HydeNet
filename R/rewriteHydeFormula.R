@@ -1,7 +1,9 @@
 #' @name rewriteHydeFormula
 #' @importFrom dplyr group_by_
 #' @importFrom dplyr summarise
+#' @importFrom stats as.formula
 #' @importFrom stringr str_split_fixed
+#' @importFrom utils tail
 #' 
 #' @title Rewrite HydeNetwork Graph Model Formula
 #' @description This is a convenience function used to assist in the updating 
@@ -32,7 +34,7 @@
 rewriteHydeFormula <- function(old_form, new_form){
   #* Subroutine for decomposing formulae
   reduce_formula <- function(f){
-    f <- gsub("[+]", "+_+", tail(as.character(f), 1))
+    f <- gsub("[+]", "+_+", utils::tail(as.character(f), 1))
     f <- gsub("[-]", "-_-", f)
     f <- unlist(strsplit(f, "[+]_"))
     f <- unlist(strsplit(f, "[-]_"))
@@ -95,5 +97,5 @@ rewriteHydeFormula <- function(old_form, new_form){
 
   Form <- paste0("~ ", paste(Form, collapse=" + "))
   
-  as.formula(Form)
+  stats::as.formula(Form)
 }

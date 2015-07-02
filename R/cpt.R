@@ -1,5 +1,6 @@
 #' @name cpt
 #' @export cpt
+#' @importFrom stats terms
 #' 
 #' @title Compute a conditional probability table for a factor given other factors
 #' @description The function \code{cpt} operates on sets of factors. Specifically,
@@ -92,7 +93,7 @@ cpt <- function(x, data, wt, ...) UseMethod("cpt")
 #' @export
 cpt.formula <- function(formula, data, wt, ...)
 {
-  variables       <- as.character(attr(terms(formula), "variables"))[-1]
+  variables       <- as.character(attr(stats::terms(formula), "variables"))[-1]
   dependentVar    <- variables[1]
   independentVars <- variables[-1]
   cpt_workhorse(variables, dependentVar, independentVars, data, wt, ...)

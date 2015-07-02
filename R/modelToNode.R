@@ -1,5 +1,8 @@
 #' @name modelToNode
 #' @export modelToNode
+#' @importFrom stats as.formula
+#' @importFrom stats terms
+#' @importFrom utils tail
 #' 
 #' @title Convert a Model Object to a Network Node
 #' @description In cases where model objects may already be fit and established,
@@ -22,7 +25,7 @@ modelToNode <- function(model, nodes, ...) UseMethod("modelToNode")
 #' @export
 
 modelToNode.default <- function(model, nodes, ...){
-  fitter <- tail(as.character(as.list(model$call)[[1]]), 1)
+  fitter <- utils::tail(as.character(as.list(model$call)[[1]]), 1)
   if (!fitter %in% c("lm", "glm", "multinom", "xtabs"))
     stop(paste0("The Hyde package only accepts models built by the following functions:\n",
                 "  lm, glm (family=\"binomial\" only), multinom, xtabs"))
@@ -35,19 +38,19 @@ modelToNode.cpt <- function(model, nodes, ...)
 {
   if (missing(nodes))
     nodes <- names(dimnames(model))
-  list(nodes = tail(names(dimnames(model)), 1),
+  list(nodes = utils::tail(names(dimnames(model)), 1),
        parents = if (length(dimnames(model)) == 1)
          NULL
        else 
          names(dimnames(model))[-length(names(dimnames(model)))],
        nodeType = "dcat",
-       nodeFormula = as.formula(paste0(tail(names(dimnames(model)), 1),
+       nodeFormula = stats::as.formula(paste0(utils::tail(names(dimnames(model)), 1),
                                        " ~ ",
                                        paste0(names(dimnames(model))[-length(names(dimnames(model)))],
                                               collapse = " + "))),
        nodeFitter = "cpt",
        nodeFitterArgs = list(data = attributes(model)$model,
-                             wt = tail(names(attributes(model)$model), 1)),
+                             wt = utils::tail(names(attributes(model)$model), 1)),
        nodeParams = list(p = gsub("[[:print:]]+~", "", 
                                   writeJagsFormula(model, 
                                                    nodes))),
@@ -64,11 +67,11 @@ modelToNode.cpt <- function(model, nodes, ...)
 modelToNode.glm <- function(model, nodes, ...){
   if (missing(nodes))
     nodes <- nodeFromFunction(names(attributes(terms(model))$dataClasses))
-  list(nodes = as.character(terms(model))[2],
-       parents = if (length(names(attributes(terms(model))$dataClasses)[-1]) == 0)
+  list(nodes = as.character(stats::terms(model))[2],
+       parents = if (length(names(attributes(stats::terms(model))$dataClasses)[-1]) == 0)
                       NULL
                      else 
-                       matchVars(names(attributes(terms(model))$dataClasses)[-1],
+                       matchVars(names(attributes(stats::terms(model))$dataClasses)[-1],
                                  nodes),
        nodeType = "dbern",
        nodeFormula = model$call$formula,
@@ -81,7 +84,7 @@ modelToNode.glm <- function(model, nodes, ...){
        nodeUtility = FALSE,
        fromData = TRUE,
        nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
-         if (is.null(model$model)) update(model, model=TRUE)$model
+         if (is.null(model$model)) stats::update(model, model=TRUE)$model
          else model$model
        } else NULL,
        nodeModel = model)
@@ -92,12 +95,12 @@ modelToNode.glm <- function(model, nodes, ...){
 
 modelToNode.lm <- function(model, nodes, ...){
   if (missing(nodes))
-    nodes <- nodeFromFunction(names(attributes(terms(model))$dataClasses))
-  list(nodes = as.character(terms(model))[2],
-       parents = if (length(names(attributes(terms(model))$dataClasses)[-1]) == 0)
+    nodes <- nodeFromFunction(names(attributes(stats::terms(model))$dataClasses))
+  list(nodes = as.character(stats::terms(model))[2],
+       parents = if (length(names(attributes(stats::terms(model))$dataClasses)[-1]) == 0)
                      NULL
                     else 
-                       matchVars(names(attributes(terms(model))$dataClasses)[-1],
+                       matchVars(names(attributes(stats::terms(model))$dataClasses)[-1],
                                  nodes),
        nodeType = "dnorm",
        nodeFormula = model$call$formula,
@@ -111,7 +114,7 @@ modelToNode.lm <- function(model, nodes, ...){
        nodeUtility = FALSE,
        fromData = TRUE,
        nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
-         if (is.null(model$model)) update(model, model=TRUE)$model
+         if (is.null(model$model)) stats::update(model, model=TRUE)$model
          else model$model
        } else NULL,
        nodeModel = model)
@@ -122,12 +125,12 @@ modelToNode.lm <- function(model, nodes, ...){
 
 modelToNode.multinom <- function(model, nodes, ...){
   if (missing(nodes))
-    nodes <- nodeFromFunction(names(attributes(terms(model))$dataClasses))
-  list(nodes = as.character(terms(model))[2],
-       parents = if (length(names(attributes(terms(model))$dataClasses)[-1]) == 0)
+    nodes <- nodeFromFunction(names(attributes(stats::terms(model))$dataClasses))
+  list(nodes = as.character(stats::terms(model))[2],
+       parents = if (length(names(attributes(stats::terms(model))$dataClasses)[-1]) == 0)
                        NULL
                      else 
-                       matchVars(names(attributes(terms(model))$dataClasses)[-1],
+                       matchVars(names(attributes(stats::terms(model))$dataClasses)[-1],
                                  nodes),
        nodeType = "dcat",
        nodeFormula = model$call$formula,
@@ -140,7 +143,7 @@ modelToNode.multinom <- function(model, nodes, ...){
        nodeUtility = FALSE,
        fromData = TRUE,
        nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
-         if (is.null(model$model)) update(model, model=TRUE)$model
+         if (is.null(model$model)) stats::update(model, model=TRUE)$model
          else model$model
        } else NULL,
        nodeModel = model)

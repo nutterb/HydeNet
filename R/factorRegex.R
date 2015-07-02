@@ -1,4 +1,5 @@
 #' @name factorRegex
+#' @importFrom stats terms
 #' 
 #' @title Produce Regular Expressions for Extracting Factor Names and Levels
 #' @description A utility function to produce a regular expression that can
@@ -17,7 +18,7 @@
 #' 
 
 factorRegex <- function(fit){
-  fctr <- attributes(terms(fit))$dataClasses
+  fctr <- attributes(stats::terms(fit))$dataClasses
   if (any(fctr == "factor")){
     fctr <- names(fctr)[fctr == "factor"]
     fctr_regex <- paste0(fctr, collapse="|")

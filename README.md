@@ -1,5 +1,3 @@
-[![Travis-CI Build Status](https://travis-ci.org/nutterb/HydeNet.svg?branch=development)](https://travis-ci.org/nutterb/HydeNet)
-
 Hybrid Bayesian Networks Using R and JAGS
 ===
 
@@ -16,3 +14,18 @@ techniques like Markov Chain Monte Carlo are popular.  We provide a user-friendl
 interface to constructing these networks and running inference using rjags.
 Econometric analyses (maximum expected utility under competing policies, value of
 information) involving decision and utility nodes are also supported.
+
+`HydeNet` may be installed using 
+
+`install.packages("HydeNet")`
+
+Patched versions from GitHub may be installed using
+
+```
+setRepositories(ind=1:2)
+devtools::install_github("nutterb/HydeNet")
+```
+
+Please note that you may need to use the `ref` argument in `install_github` to get the latest
+updates.  Please visit the [GitHub repository](https://github.com/nutterb/HydeNet)
+to explore branches of the project.

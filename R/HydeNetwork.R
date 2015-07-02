@@ -3,6 +3,7 @@
 #' @importFrom graph nodes
 #' @importFrom gRbase dag
 #' @importFrom gRbase graphNEL2adjMAT
+#' @importFrom stats as.formula
 #' 
 #' @title Define a Probablistic Graphical Network
 #' @description Using either a directed acyclic graph (DAG) or a list of models, 
@@ -136,7 +137,7 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
       else f <- paste(names(parents)[x], "~ 1")
     }
     else f <- paste(names(parents)[x], "~", paste(parents[[x]], collapse=" + "))
-    return(as.formula(f))
+    return(stats::as.formula(f))
   }
   nodeFormula <- lapply(1:length(parents), nodeFormFn, parents)
   names(nodeFormula) <- node_names
@@ -256,7 +257,7 @@ HydeNetwork.list <- function(nodes, ...){
                                         if (!is.null(x$parents)) " | " else "", 
                                         paste(x$parents, collapse=" * ")))
   dag.form <- paste0("~ ", paste(dag.form, collapse = " + "))
-  network <- HydeNetwork(as.formula(dag.form))
+  network <- HydeNetwork(stats::as.formula(dag.form))
   
   #* Reassign parameters from the models
   for (i in names(Attrs)){
