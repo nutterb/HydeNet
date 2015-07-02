@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copied on 2014-01-06 from https://github.com/craigcitro/r-travis; validate this file at http://lint.travis-ci.org/
 # Sample .travis.yml for R projects.
 #
@@ -17,6 +18,27 @@ script: ./travis-tool.sh run_tests
 
 on_failure:
   - ./travis-tool.sh dump_logs
+=======
+# Sample .travis.yml for R projects
+
+language: r
+warnings_are_errors: true
+sudo: required
+bioc_required: true
+
+env:
+ global:
+   - CRAN: http://cran.rstudio.com
+   - WARNINGS_ARE_ERRORS=1
+   - R_BUILD_ARGS=--no-manual
+   - R_CHECK_ARGS=--no-manual --as-cran
+   
+r_github_packages:
+  - Rexamine/stringi
+
+r_packages:
+  - rjags
+>>>>>>> development
 
 notifications:
   email:

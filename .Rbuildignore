@@ -1,0 +1,10 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.gitignore$
+^\.travis.yml$
+^\.travis\.yml$
+^cran-comments.md
+^\z_supplemental\*.csv
+^\z_supplemental\*.R
+^z_supplemental$
+

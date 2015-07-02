@@ -1,5 +1,6 @@
 #' @name print.HydeNetwork
-#' @export print.HydeNetwork
+#' @export 
+#' @method print HydeNetwork
 #' 
 #' @title Print a HydeNetwork
 #' @details Prints a HydeNetwork object with a brief summary of each node.
@@ -16,24 +17,35 @@
 #'   
 #' @author Jarrod Dalton and Benjamin Nutter
 #' @examples
-#' carNet <- HydeNetwork( ~ cyl + 
-#'                       disp | cyl + 
-#'                       hp | disp + 
-#'                       wt + 
-#'                       gear + 
-#'                       mpg | disp*hp*wt*gear,
-#'                       data=mtcars)
-#' carNet
-#' 
-#' carNet <- setNode(carNet, mpg, 
-#'                   nodeType='dnorm', mu=fromFormula(), tau=1/2.65, 
-#'                   nodeFormula = mpg ~ disp + hp + wt + factor(gear),
+#' data(PE, package="HydeNet")
+#' Net <- HydeNetwork(~ wells + 
+#'                      pe | wells + 
+#'                      d.dimer | pregnant*pe + 
+#'                      angio | pe + 
+#'                      treat | d.dimer*angio + 
+#'                      death | pe*treat) 
+#' print(Net)  
+#' print(Net, d.dimer) 
+#'                     
+#' Net <- setNode(Net, d.dimer, 
+#'                   nodeType='dnorm', mu=fromData(), tau=fromData(), 
+#'                   nodeFormula = d.dimer ~ pregnant + pe,
 #'                   nodeFitter='lm')
-#' carNet
+#' print(Net, d.dimer)
 #'     
 print.HydeNetwork <- function(x, ...){
   Hyde.nm <- as.character(substitute(x))
+   
+  #* Requested Nodes
+  requested_nodes <- as.character(substitute(list(...)))[-1]
+  if (length(requested_nodes) == 0) requested_nodes <- x$nodes
   
+  bad_nodes <- requested_nodes[!requested_nodes %in% x$nodes]
+  if (length(bad_nodes) > 0)
+    stop(paste0("The following nodes are not found in ", substitute(x), ": ", 
+                paste(bad_nodes, collapse=", ")))
+  
+  #* Node Summary Function
   nodeSummary <- function(node){
     nodeName <- if (!is.null(x$parents[[node]]))
                     paste(node, "|", paste(x$parents[[node]], collapse=" * "))
@@ -53,7 +65,9 @@ print.HydeNetwork <- function(x, ...){
     return(paste(nodeName, nodeType, Formula, sep="\n"))
   }
   
-  nodeSummaries <- paste(sapply(x$nodes, nodeSummary), collapse="\n\n")
+  nodeSummaries <- paste(sapply(requested_nodes, 
+                                nodeSummary), 
+                         collapse="\n\n")
 
   cat("A Probabilistic Graphical Network", sep=" ")
   cat(paste("\nHas data attached:", if(is.null(x$data)) "No" else "Yes"))

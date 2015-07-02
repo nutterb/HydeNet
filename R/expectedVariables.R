@@ -1,7 +1,7 @@
 #' @name expectedVariables
 #' @export expectedVariables
 #' 
-#' @title List Expected Parameter Names
+#' @title List Expected Parameter Names and Expected Variables Names
 #' @description To assist in formula that defines the relationship to a node, 
 #'   \code{expectedVariables} returns to the console
 #'   a sample string that can be pasted into \code{setNode}
@@ -25,16 +25,20 @@
 #' 
 #' @author Jarrod Dalton and Benjamin Nutter
 #' @examples
-#' carNet <- HydeNetwork( ~ cyl + 
-#'                       disp | cyl + 
-#'                       hp | disp + 
-#'                       wt + 
-#'                       gear + 
-#'                       mpg | disp*hp*wt*gear)
+#' data(PE, package="HydeNet")
+#' Net <- HydeNetwork(~ wells + 
+#'                      pe | wells + 
+#'                      d.dimer | pregnant*pe + 
+#'                      angio | pe + 
+#'                      treat | d.dimer*angio + 
+#'                      death | pe*treat)
 #'   
-#' expectedVariables(carNet, mpg)
-#' expectedVariables(carNet, disp)
-#' expectedVariables(carNet, cyl)
+#' expectedVariables(Net, wells)
+#' expectedVariables(Net, treat)
+#' expectedVariables(Net, treat, returnVector=TRUE)
+#' 
+#' expectedParameters(Net, wells)
+#' expectedParameters(Net, wells, returnVector=TRUE)
 
 expectedVariables <- function(network, node, returnVector=FALSE){
   node <- as.character(substitute(node))
@@ -44,4 +48,20 @@ expectedVariables <- function(network, node, returnVector=FALSE){
   
   if (is.null(inputs)) cat(paste(node, "~ 1"))
   else cat(paste(node, "~", paste(inputs, collapse=" + ")))
+}
+
+#' @rdname expectedVariables
+#' @export expectedParameters
+
+expectedParameters <- function(network, node, returnVector=FALSE){
+  node <- as.character(substitute(node))
+  inputs <- network$nodeType[[node]]
+  
+  #   return(list(node, inputs))
+  
+  #   data(jagsDists, package='Hyde')
+  params <- jagsDists$Parameters[jagsDists$FnName == inputs]
+  
+  if (returnVector) return(params)
+  else cat(paste(paste(paste0(params, "= "), collapse=", ")))
 }

@@ -1,12 +1,15 @@
 #' @name rewriteHydeFormula
+#' @importFrom dplyr group_by_
+#' @importFrom dplyr summarise
+#' @importFrom stats as.formula
 #' @importFrom stringr str_split_fixed
-#' @importFrom plyr ddply
-#' @importFrom plyr summarise
+#' @importFrom utils tail
 #' 
-#' @title Rewrite Hybrid Decision Model Formula
-#' @description This is a utility function used to assist in the updating 
+#' @title Rewrite HydeNetwork Graph Model Formula
+#' @description This is a convenience function used to assist in the updating 
 #'   of \code{HydeNetwork} network objects.  It makes it possible to add and 
-#'   subtract individual parent relationships without deleting an entire node.
+#'   subtract individual parent relationships without deleting an entire node.   
+#'   It's still a work in progress.
 #'   
 #' @param old_form The current formula in a \code{HydeNetwork} object.
 #' @param new_form The formula specifications to be added
@@ -31,7 +34,7 @@
 rewriteHydeFormula <- function(old_form, new_form){
   #* Subroutine for decomposing formulae
   reduce_formula <- function(f){
-    f <- gsub("[+]", "+_+", tail(as.character(f), 1))
+    f <- gsub("[+]", "+_+", utils::tail(as.character(f), 1))
     f <- gsub("[-]", "-_-", f)
     f <- unlist(strsplit(f, "[+]_"))
     f <- unlist(strsplit(f, "[-]_"))
@@ -50,13 +53,20 @@ rewriteHydeFormula <- function(old_form, new_form){
   combine_form <- function(f1, f2){
     f1 <- sub("[+] ", "", f1)
     f2_match <- sub("([+]|[-]) ", "", f2)
-   
+    
+    #* Remove complete nodes
+    for (i in 1:length(f2)){
+      if (!grepl("[|]", f2_match[i])) f1 <- gsub(f2_match[i], "", f1)  
+    }
+ 
+    #* Remove subtracted relations
     for(i in 1:length(f1)){
       f1[i] <- if (f1[i] %in% f2_match){
                    if (substr(f2[f2_match %in% f1[i]], 1, 1) == "-") NA else f1[i] 
                } else f1[i]
     }
   
+    #* Remove subtractions
     f2 <- f2[!substr(f2, 1, 1) == "-"]
     f2 <- sub("[+]", "", f2)
     f2 <- f2[!f2 %in% f1]
@@ -75,16 +85,17 @@ rewriteHydeFormula <- function(old_form, new_form){
   names(Form) <- c("node", "parent")
   parent <- NULL
   
-  Form <- plyr::ddply(Form,
-                     "node",
-                     plyr::summarise,
-                     parent = paste(parent, collapse="*"))
-
+  Form <- Form[!Form$node %in% " ", ]
+  
+  Form <- Form %>%
+    dplyr::group_by_('node') %>%
+    dplyr::summarise(parent = paste(parent[!parent %in% c(" ")], collapse = "*"))
+  
   #* Paste together the complete formula
   Form <- apply(Form, 1, 
                 function(x) if (x[2] != "") paste(x, collapse="|") else x[1])
 
   Form <- paste0("~ ", paste(Form, collapse=" + "))
   
-  as.formula(Form)
+  stats::as.formula(Form)
 }

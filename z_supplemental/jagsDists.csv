@@ -1,0 +1,46 @@
+DistName,FnName,xLow,xHigh,Parameters,paramLimit,paramLogic
+Beta,dbeta,0,1,a,> 0,a > 0
+Beta,dbeta,0,1,b,> 0,b > 0
+Chi-square,dchisqr,0,,k,> 0,k > 0
+Double exponential,ddexp,,,mu,,is.numeric(mu)
+Double exponential,ddexp,,,tau,> 0,tau > 0
+Exponential,dexp,0,,lambda,> 0,lambda > 0
+F,df,0,,n,> 0,n > 0
+F,df,0,,mu,> 0,mu > 0
+Gamma,dgamma,0,,r,> 0 ,r > 0
+Gamma,dgamma,0,,lambda,> 0,lambda > 0
+Generalized gamma,dgen.gamma,0,,r,> 0,r > 0
+Generalized gamma,dgen.gamma,0,,b,> 0,b > 0
+Generalized gamma,dgen.gamma,0,,lambda,> 0,lambda > 0
+Logistic,dlogis,,,mu,,is.numeric(mu)
+Logistic,dlogis,,,tau,> 0,tau > 0
+Log-normal,dlnorm,0,,mu,,is.numeric(mu)
+Log-normal,dlnorm,0,,tau,> 0,tau > 0
+Noncentral chi-square,dnchisqr,0,,k,> 0,k > 0
+Noncentral chi-square,dnchisqr,0,,delta,>= 0,delta >= 0
+Normal,dnorm,,,mu,,is.numeric(mu)
+Normal,dnorm,,,tau,>= 0,tau >= 0
+Pareto,dpar,c,,alpha,> 0,alpha > 0
+Pareto,dpar,c,,alpha,> c,alpha > 0
+Student t,dt,,,mu,,is.numeric(mu)
+Student t,dt,,,tau,> 0,tau > 0
+Student t,dt,,,k,> 0,k > 0
+Uniform,dunif,a,b,a,< b,a < b
+Uniform,dunif,a,b,b,> a,b > a
+Weibull,dweib,0,,nu,> 0,nu > 0
+Weibull,dweib,0,,lambda,> 0,lambda > 0
+Beta Binomial,dbetabin,0,n,a,> 0,a > 0
+Beta Binomial,dbetabin,0,n,b,> 0,b > 0
+Beta Binomial,dbetabin,0,n,n,> 0,n > 0
+Bernoulli,dbern,0,1,p,0 < p < 1,0 < p & p < 1
+Binomial,dbin,0,n,p,0 < p < 1,0 < p & p < 1
+Binomial,dbin,0,n,n,> 0,n > 0
+Categorical,dcat,,,pi,> 0,pi > 0
+Noncentral hypergeometric,dhyper,"max(0, (n1 + n2) - m1)","min(n1, m1)",n1,> 0,n1 > 0
+Noncentral hypergeometric,dhyper,"max(0, (n1 + n2) - m1)","min(n1, m1)",n2,> 0,n2 > 0
+Noncentral hypergeometric,dhyper,"max(0, (n1 + n2) - m1)","min(n1, m1)",m1,0 < m1 < (n1 + n2),0 < m1 & m1 < (n1 + n2)
+Noncentral hypergeometric,dhyper,"max(0, (n1 + n2) - m1)","min(n1, m1)",psi,,is.numeric(psi)
+Negative Binomial,dnegbin,0,,p,0 < p < 1,0 < p & p < 1
+Negative Binomial,dnegbin,0,,r,> 0,r > 0
+Poisson,dpois,0,,lambda,> 0,lambda > 0
+Deterministic,determ,,,define,,plyr::is.formula(define)

@@ -1,8 +1,9 @@
 #' @name setNode
 #' @export setNode
+#' @importFrom plyr is.formula
 #' 
 #' @title Set Node Relationships
-#' @details The relationship between a node and its parents must be defined
+#' @description The relationship between a node and its parents must be defined
 #'   before the appropriate JAGS model statement can be constructed.  
 #'   \code{setNode} is the utility by which a user can define the distribution
 #'   of the node and its relationship to its parents (usually through a model
@@ -19,6 +20,25 @@
 #' @param fitterArgs Additional arguments to be passed to \code{fitter}.  This does not 
 #'   yet have any effect as I haven't yet decided out where to store this and 
 #'   how to implement the fitting.
+#' @param decision A value of either \code{"current"} or a logical value.  
+#'   If \code{"current"}, the current value of the setting is retained.  This allows 
+#'   decision nodes set by \code{setDecisionNode} to retain the classification as a 
+#'   decision node if \code{setNode} is run after \code{setDecisionNode}.
+#'   If \code{TRUE}, the node will be considered a
+#'   decision node in \code{compileDecisionNetwork}.  This is only a valid
+#'   option when the node is of type \code{"dbern"} or \code{"dcat"}. Note: if any 
+#'   character value other than \code{"current"} is given, \code{setNode} will assume
+#'   you intended \code{"current"}.  
+#' @param utility A value of either \code{"current"} or a logical value.  
+#'   If \code{"current"}, the current value of the setting is retained.  This allows 
+#'   utility nodes set by \code{setUtilityNode} to retain the classification as a 
+#'   utility node if \code{setNode} is run after \code{setUtilityNode}. 
+#'   If \code{TRUE}, the node will be considered a 
+#'   utility node.  This is only a valid option when the node is of type 
+#'   \code{"determ"} and it has no children.
+#'   Note: if any 
+#'   character value other than \code{"current"} is given, \code{setNode} will assume
+#'   you intended \code{"current"}.  
 #' @param fromData Logical.  Determines if a node's relationship is calculated 
 #'   from the data object in \code{network}.  Defaults to \code{TRUE} whenever
 #'   \code{network} has a data object.
@@ -30,22 +50,14 @@
 #'   from the data, the functions \code{fromData} and \code{fromFormula} may 
 #'   be used as placeholders.
 #' @param validate Logical.  Toggles validation of parameters given in \code{...}.
-#'   When passing raw JAGS code (ie, character strings), this should be turned off, 
-#'   as the validation is applicable to numerical values.
+#'   When passing raw JAGS code (ie, character strings), this will be ignored 
+#'   (with a message), 
+#'   as the validation is applicable to numerical/formula values.
 #' @param fitModel Logical. Toggles if the model is fit within the function call.
 #'   This may be set globally using \code{options('Hyde_fitModel')}.  See Details
 #'   for more about when to use this option.
 #'   
-#' @details \code{HydeNetwork} doesn't create a space for the \code{params} to be
-#'   stored.  I put this in place in case a non-gaussian distribution was desired
-#'   that did not lend itself to a modeling estimation.  I don't know what exactly
-#'   such a situation would look like.  Another situation where it might be needed
-#'   is when \code{fromData=FALSE} and the user specifies the coefficients associated
-#'   with each parent-term.  In this case, the precision must be given to JAGS somehow,
-#'   but the formula interface doesn't have a good place to do that.  This might 
-#'   be the argument in which 'tau' is passed to JAGS while 'mu' is calculated from
-#'   the formula specification.
-#'   
+#' @details   
 #'   The functions \code{fromFormula()} and \code{fromData()} help to control
 #'   how \code{Hyde} determines the values of parameters passed to JAGS.  If the 
 #'   parameters passed in \code{params} argument are to be calculated from the
@@ -61,32 +73,51 @@
 #'   will cause the model to be fit and the JAGS code for the parameters to be
 #'   stored in the \code{nodeParams} attribute.
 #'   
+#' @section Validation:
+#' The validation of parameters is performed by comparing the values provided with 
+#' the limits defined in the \code{jagsDists$paramLogic} variable. (look at 
+#' \code{data(jagsDists, data='HydeNet')}.  For most node types, validation will 
+#' be peformed for numeric variables.  For deterministic variables, the validation
+#' will only check that the parameter definition is a formula.  
+#' 
+#' It is possible to pass character strings as definitions, but when this is done, 
+#' \code{HydeNet} assumes you are passing JAGS code.  Unfortunately, \code{HydeNet}
+#' doesn't have to capability to validate JAGS code, so if there is an error in 
+#' the character string definition, it won't show up until you try to compile the
+#' network.  If you pass a character string as a parameter and leave 
+#' \code{validate = TRUE}, a message will be printed to indicate that validation
+#' is being ignored.  This message can be avoided by using \code{validate = FALSE}
+#' 
+#' The two exceptions to this rule are when you pass \code{fromFormula()} and 
+#' \code{fromData()} as the parameter definition.  These will skip the validation 
+#' without warning, since the definition will be built by \code{HydeNet} and be 
+#' proper JAGS code (barring any bugs, of course).
+#'   
 #' @author Jarrod Dalton and Benjamin Nutter
 #'   
 #' @examples
-#' carNet <- HydeNetwork( ~ cyl + 
-#'                       disp | cyl + 
-#'                       hp | disp + 
-#'                       wt + 
-#'                       gear + 
-#'                       mpg | disp*hp*wt*gear,
-#'                       data=mtcars)
-#'   
-#' carNet$nodeFormula$mpg
-#' carNet$nodeFitter$mpg
-#' carNet$nodeType$mpg
+#' data(PE, package="HydeNet")
+#' Net <- HydeNetwork(~ wells + 
+#'                      pe | wells + 
+#'                      d.dimer | pregnant*pe + 
+#'                      angio | pe + 
+#'                      treat | d.dimer*angio + 
+#'                      death | pe*treat,
+#'                      data = PE) 
+#' print(Net, d.dimer)
 #' 
-#' carNet <- setNode(carNet, mpg, nodeType='dnorm', mu=fromFormula(), tau=1/2.65, 
-#'                   nodeFormula = mpg ~ disp + hp + wt + factor(gear),
+#' #* Manually change the precision
+#' Net <- setNode(Net, d.dimer, nodeType='dnorm', mu=fromFormula(), tau=1/2.65, 
+#'                   nodeFormula = d.dimer ~ pregnant * pe,
 #'                   nodeFitter='lm')
-#'
-#' carNet$nodeFormula$mpg
-#' carNet$nodeFitter$mpg
-#' carNet$nodeType$mpg
+#' print(Net, d.dimer)
+#' 
 
 setNode <- function(network, node, nodeType, 
                     nodeFitter, nodeFormula, 
                     fitterArgs = list(),
+                    decision = "current",
+                    utility = "current",
                     fromData=!is.null(network$data), ...,
                     validate=TRUE, fitModel=getOption("Hyde_fitModel")){
   
@@ -101,7 +132,34 @@ setNode <- function(network, node, nodeType,
   wrn.flag <- 0
   wrn.msg <- ""
   
+  if (is.character(decision))
+  {
+    if (decision != "current")
+    {
+      wrn.flag <- wrn.flag + 1
+      wrn.msg <- c(wrn.msg,
+                   paste0(wrn.flag, ": 'decision' must be logical or 'current'.  You provided ",
+                          "an unrecognized character value.  'HydeNet' is assuming you mean ",
+                          "'current'."))
+      decision <- "current"
+    }
+    decision <- network$nodeDecision[[node.t]]
+  }
   
+  if (is.character(utility))
+  {
+    if (utility != "current")
+    {
+      wrn.flag <- wrn.flag + 1
+      wrn.msg <- c(wrn.msg,
+                   paste0(wrn.flag, ": 'utility' must be logical or 'current'.  You provided ",
+                          "an unrecognized character value.  'HydeNet' is assuming you mean ",
+                          "'current'."))
+      utility <- "current"
+    }
+    utility <- network$nodeUtility[[node.t]]
+  }
+
   if (!missing(nodeType)){
     if (length(nodeType) > 1){
       wrn.flag <- wrn.flag + 1
@@ -135,6 +193,13 @@ setNode <- function(network, node, nodeType,
 
   if (validate){
     valid <- validateParameters(params, network$nodeType[[node.t]]) 
+    
+    if (any(sapply(params, is.character) & 
+            !sapply(params, function(p) p %in% c("fromData", "fromFormula"))))
+    {
+      valid[sapply(params, is.character)] <- TRUE
+      message("Validation has been ignored for parameters defined with character strings")
+    }
 
     if (!all(valid)){
       not_valid <- which(!valid)
@@ -147,10 +212,39 @@ setNode <- function(network, node, nodeType,
     }
   }
 
+  if (decision){
+    if (!nodeType %in% c("dbern", "dcat")){
+      wrn.flag <- wrn.flag + 1
+      wrn.msg <- c(wrn.msg,
+                   paste0(wrn.flag, 
+                          ": Only nodes of type 'dbern' and 'dcat' may be decision nodes. ",
+                          "'decision' has been set to FALSE"))
+      decision <- FALSE
+    }
+  }
+
+  if (utility){
+    if (!nodeType %in% c("determ")){
+      err.flag <- err.flag + 1
+      err.msg <- c(err.msg,
+                   paste0(err.flag, 
+                          ": Utility nodes must be of type 'determ'."))
+    }
+    
+    if (any(sapply(network$parents, function(p, t) t %in% p, node.t))){
+      err.flag <- err.flag + 1
+      err.msg <- c(err.msg,
+                   paste0(err.flag,
+                          ": Utility nodes may not have children."))
+    }
+  }
+
   if (length(list(...))) network$nodeParams[[node.t]] <- list(...)
   if (!missing(nodeFormula)) network$nodeFormula[[node.t]] <- nodeFormula
   if (!missing(nodeFitter)) network$nodeFitter[[node.t]] <- nodeFitter
   if (length(fitterArgs)) network$nodeFitterArgs[[node.t]] <- fitterArgs
+  network$nodeDecision[[node.t]] <- decision
+  network$nodeUtility[[node.t]] <- utility
 
   if (fitModel) {
     fit <- do.call(network$nodeFitter[[node.t]],
@@ -160,17 +254,17 @@ setNode <- function(network, node, nodeType,
     network$nodeModel[[node.t]] <- fit
     
     if (network$nodeType[[node.t]] == "dbern"){
-      network$nodeParams[[node.t]]$p <- writeJagsFormula(fit)  
+      network$nodeParams[[node.t]]$p <- writeJagsFormula(fit, network$nodes)  
     }
     else if (network$nodeType[[node.t]] == "dcat"){
-      network$nodeParams[[node.t]]$pi <- writeJagsFormula(fit)
+      network$nodeParams[[node.t]]$pi <- writeJagsFormula(fit, network$nodes)
     }
     else if (network$nodeType[[node.t]] == "dnorm"){
-      network$nodeParams[[node.t]]$mu <- writeJagsFormula(fit)
+      network$nodeParams[[node.t]]$mu <- writeJagsFormula(fit, network$nodes)
       network$nodeParams[[node.t]]$tau <- 1/summary(fit)$sigma
     }
     else if (network$nodeType[[node.t]] == "dpois"){
-      network$nodeParams[[node.t]]$lambda <- writeJagsFormula(fit)
+      network$nodeParams[[node.t]]$lambda <- writeJagsFormula(fit, network$nodes)
     }
                    
   }
@@ -179,3 +273,14 @@ setNode <- function(network, node, nodeType,
   if (err.flag) stop(paste(err.msg, collapse="\n"))
   return(network)  
 }
+
+#' @rdname setNode
+#' @export fromData
+
+fromData <- function(){ "fromData" }
+
+#' @rdname setNode
+#' @export fromFormula
+
+fromFormula <- function(){ "fromFormula" }
+

@@ -1,0 +1,130 @@
+### 0.9.0 (2 July 2015)
+* Added imports from `utils` and `stats` to comply with new CRAN policies.
+* Adds the functionality to allow all `nodeType` specifications to properly build in
+  `writeJagsModel`. (See Issue #72)
+* Incremented to version 0.9.0 for CRAN release.
+
+### 0.8.11 (26 June 2015)
+* Fixed a bug preventing `cpt` arrays from being passed to `jags.model` in 
+  `compileDecisionModel`
+* Fixed a bug preventing bernoulli values from being passed to `cpt` arrays in the JAGS models.
+
+### 0.8.10 (19 June 2015)
+* Streamlined the generation of the `factorRef` element of the compiled Hyde Networks.  
+  This also allows all data frames in all nodes to be included to generate a complete list 
+  of factors throughout the network (previously, it only generated references for factors 
+  in the overall `data` element, not the `nodeData` elements.
+
+### 0.8.9 (16 June 2015)
+* Incorporated minor changes for compatibility with DiagrammeR 0.7
+* Minor bug fix to `mergeCustomNodes` to prevent loss of custom settings
+* Minor changes to `HydeNetPlots` vignette
+* Minor changes to `GettingStartedWithHydeNet` vignette.
+* Removed `ObtainingPosteriorDistributions` vignette.
+* Added `VignetteBuilder` option to the description file.  For now, when reinstalling the
+  package, use the command `devtools::install_local([directory])`.  If you try to build the 
+  vignettes with the package, a strange error occurs that prevents the installation.  This 
+  error is related to the `WorkingWithHydeNetObjects` vignette, but I can't reproduce the 
+  error outside of the build command.
+
+### 0.8.8 (5 June 2015)
+* `setNodeModel` and `writeJagsFormula` methods are complete.
+* `writeJagsModel` now accommodates `cpt` objects
+* `compileJagsNetwork` retrieves `cpt` objects to include in the 
+  `data` argument, allowing JAGS to compile without the user having to 
+  remember to assign the `cpt` object to the data.
+
+### 0.8.7 (29 May 2015)
+* `cpt` function is added to assist in developing multidimensional conditional
+  probability tables. `cpt` and `cptInput` are generics with methods for `list`
+  and `formula`.  Their structure is undergoing some growing pains right now, 
+  so expect more changes in the future.
+* Improvements to `setNode` validation.
+* Improvements to efficiency of `compileDecisionModel`.
+* Consolidated all data documentation into a single file.
+* `HydeNetwork` chooses `cpt` as the fitter for variables where the node is
+  a factor and all parents are factors.
+* Added `modelToNode.cpt`.  This is untested as of yet and may be buggy.  Final
+  changes are pending the finalization of the `cpt` objects.
+
+### 0.8.6 (15 May 2015)
+* An additional function called `nodeFromFormula` is used to generate most likely
+  node names from terms in model formulas that are used in functions and other 
+  transformations.  For instance, when a formula has `factor(x)`, only the `x` 
+  is used in node names. (Solves Issue #31)
+* A new, unexported function called `matchVars` is used to reduce terms in 
+  model formulas to just the node name. (Solves Issue #26) 
+* An additional argument is used in `writeJagsModel` and `modelToNode` that is
+  required by an unexported function `matchVars`. 
+* Changed behavior of `setNode` to retain current settings for decision and 
+  utility nodes (Issue #53)
+* Added a message to indicate that character strings defining parameters
+  in `setNode` are not validated (Issue #24).
+* Updated `BlackJack` network object to be consistent with the object defined in 
+  the Decision Nodes vignette.
+* Now Imports on `broom (>= 0.3.7)`.  This makes sure that the multinom tidiers
+  are available.
+
+### 0.8.5 (7 May 2015)
+* Moved `gRbase` from Depends: to Imports:
+* Repaired a bug in `plot.HydeNetwork` that prevented plotting without defaults
+* Updated the `HydeNetPlots` vignette to accommodate new plotting features.
+
+### 0.8.4 (3 May 2015)
+* Revamped plotting utilities to make use of the DiagrammeR package.  This makes
+  the full range of GraphViz available for use.
+
+### 0.8.3 (2 May 2015)
+* Implemented policy matrices into `compileDecisionModel` and fixed all the
+  bugs that popped up in doing so.
+* Changed the name of the Black Jack training data from `bjdata` to 
+  `BlackJackTrain`.  Added documentation for it.
+* Completed Documentation.
+
+### 0.8.2 (1 May 2015)
+* Adds functionality to customize plot defaults.
+* Adds functionality to customize nodes in plots.
+* Added the `BlackJack` data object, which contains a `HydeNetwork` object
+  simulating a game of black jack.
+* Included a vignette showing off the use of plotting methods.
+
+### 0.8.1 (25 April 2015)
+* Fixes Issue #10 dealing with utility nodes not being properly initialized 
+  and set.
+
+### 0.8.0 (24 April 2015)
+* Added a new dependency on package `dplyr` and `magrittr`.  This was done to
+  make `dplyr` available for joining MCMC matrices returned by `coda.samples`.
+* Modified `compileJagsModel` to accommodate compiling multiple JAGS models when
+  a policy/decision matrix is provided.
+* Added the function `HydePosterior`, which generates posterior distributions
+  of all of the JAGS models compiled by `HydePosterior`.
+* Added a print function for the output of `HydePosterior`
+* Added a function to bind all of the MCMC output from `HydePosterior` into
+  a single data frame.
+* Addressed a bug in `compileJagsModel` that affected observed data values. 
+  (Issue #36 on GitHub).
+* Addressed a bug in `modelToNode` that printed the node name in the first 
+  parameter, causing `compileJagsModel` to fail. (Issue #35 on GitHub).
+
+### 0.7.2 (10 April 2015)
+
+* The primary additions to this developmental change are the addition of 
+  decision nodes.  Each node now has a new descriptor (found in 
+  `network$nodeDecision`.  It is a logical value indicating if the node should
+  be considered a decision node.
+* The behavior of decision nodes is exactly like all other nodes in every 
+  respect _until_ you call the `compileDecisionNetwork` function.  
+  `compileDecisionNetwork` evaluates all of the decision nodes, builds a table
+  of all combinations of decision options, and systematically runs
+  `compileJagsModel` for each row of that table to create a JAGS model for 
+  each combination of decisions.
+* Decision nodes can be defined in `setNode`, but for convenience, a new 
+  function is introduced (`setDecisionNodes`) to allow multiple nodes to be 
+  defined as decision nodes in one call.  This is intended for use when a list
+  of models is used to define a network.
+* Various bugs have been corrected that were uncovered while testing conditional
+  logic nodes (this is not a formal feature of HydeNet, but can be done.  A 
+  vignette describing their use will be built later)
+* Additional bugs have been corrected while uncovered during the testing of 
+  decision node features.
