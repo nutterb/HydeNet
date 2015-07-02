@@ -322,8 +322,7 @@ post <- HydePosterior(compiledNet,
                       variable.names = trackedVars,
                       n.iter=10000)
 post <- bindPosterior(post)
-post$dealerOutcome <- factor(post$dealerOutcome,1:7,
-                             levels(BJDealer$dealerOutcome))
+
 dplyr::sample_n(post, 20)
 ```
 
@@ -350,15 +349,39 @@ policies <- data.frame(hit1 = c(0,1,1,1),
 
 In the MEU analysis, the goal is to characterize the distribution of utility under the competing policies. This amounts to sampling posterior distributions of utility nodes under varying sets of values for the decision nodes. In `HydeNet`, this is done by 1) using the function `compileDecisionModel()` to create a list of `compiledHydeNetwork` objects (one object corresponding to each policy); 2) feeding that list to `HydePosterior()` to get a list of `coda.samples` objects; and finally 3) feeding the list of `coda.samples` objects to `bindPosterior()` to get a single posterior sample matrix for each policy:
 
-```{r}
-compiledNet <- compileDecisionModel(net, policyMatrix = policies)
-str(compiledNet, 2)
+```{r, echo=FALSE}
+set.seed(39482820)
 ```
 
-## Value of Information Analysis
+```{r}
+compiledNets <- compileDecisionModel(net, policyMatrix = policies)
+
+samples <- lapply(compiledNets,
+                  HydePosterior,
+                  variable.names = trackedVars,
+                  n.iter=100000)
+
+samples <- lapply(samples, bindPosterior)
+
+lapply(samples, head)
+```
+
+We now have a list of data frames, each data frame corresponding to one of the four hit policies (never hit, hit once, hit twice, and hit three times). Straightforward manipulations allow for examination of expected utility:
+
+```{r}
+#summary of expected utility under each policy
+lapply(samples, function(l) mean(l$payoff))
+```
+
+We see that, among these four strategies, taking no cards appears to maximize expected utility (i.e., leads to losing the least amount of money.
 
 
 <!--
+
+## Value of Information Analysis
+
+XXXXX
+
 ## Asymmetric Decision Problems
 
 decision networks are tricky business. 3 types of asymmetry in decision networks. Currently, our package only allows for fully symmetric decision networks or networks that exhibit order asymmetry. However, careful use of the package to evaluate other situations is possible. We give some general guidance below on how to think about decision processes:
