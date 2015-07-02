@@ -35,6 +35,7 @@ Imports:
     stringr
 Suggests:
     knitr
+SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
 VignetteBuilder: knitr
 LazyLoad: yes
 LazyData: true
