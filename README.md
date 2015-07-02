@@ -29,3 +29,5 @@ devtools::install_github("nutterb/HydeNet")
 Please note that you may need to use the `ref` argument in `install_github` to get the latest
 updates.  Please visit the [GitHub repository](https://github.com/nutterb/HydeNet)
 to explore branches of the project.
+
+The package includes a colletion of vignettes to help you get started.  Use `vignette(package = "HydeNet")` to see the complete listing of vignettes.
