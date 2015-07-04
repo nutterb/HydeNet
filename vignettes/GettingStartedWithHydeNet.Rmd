@@ -1,20 +1,16 @@
-<!--
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Getting Started with HydeNet}
--->
 ---
 title: "Getting Started with `HydeNet`"
 author: "Jarrod Dalton and Benjamin Nutter"
-date: "11 Jun 2015"
+date: "`r Sys.Date()`"
 output:
-  html_document:
+  rmarkdown::html_vignette:
     fig_caption: yes
-    number_section: yes
-    toc: yes
-  pdf_document:
-    fig_caption: yes
-    number_section: yes
+    number_section: no
     toc: no
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Getting Started with HydeNet}
+  \usepackage[utf8]{inputenc}
 ---
 
 `HydeNet` is a package intended to facilitate modeling of hybrid Bayesian networks and influence diagrams (a.k.a. decision networks). A Bayesian network, formally defined, is a joint probability distribution for a set of random variables for which the set of conditional independencies can be represented using a directed acyclic graph. Each node represents a random variable, and each link represents the direction of influence between two nodes. The probability distribution for any given node is defined as conditional (only) on its parent nodes, and every node is conditionally independent from all of its non-descendants given data on its parent nodes.
@@ -128,7 +124,7 @@ carNet3 <- compileJagsModel(carNet, data=list(cyl="8"))
 
 MCMC sampling is performed by calling `HydePosterior()`. This function calls `coda.samples()` from the `rjags` library and returns an augmented `mcmc.list` object.  MCMC diagnostics and inference from this point onward are performed in the same manner as would typically be done when using `rjags`.
 
-```{r}
+```{r, fig.width=6, fig.height=6}
 post1 <- HydePosterior(carNet1,
                        variable.names = c("cyl","hp","mpg"),
                        n.iter = 10000)
