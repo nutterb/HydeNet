@@ -25,6 +25,7 @@ Depends:
     nnet,
     rjags
 Imports:
+    ArgumentCheck, 
     broom (>= 0.3.7),
     DiagrammeR (>= 0.7),
     plyr,

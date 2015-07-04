@@ -110,29 +110,24 @@ cpt.list <- function(x, data, wt, ...)
   wrn.flag <- 0
   wrn.msg <- ""
   
-  if(!all(c("y","x") %in% names(x))){
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg, paste0(err.flag,
-                                 ": List object 'x' must contain character vectors ",
-                                 "'y' and 'x'. See help('cpt')."))
-  }
+  Check <- ArgumentCheck::newArgCheck(list = FALSE)
   
-  if(!all(unlist(lapply(x,is.character)))){
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg, paste0(err.flag,
-                                 ": List object 'x' must contain character vectors ",
-                                 "'y' and 'x'. See help('cpt')."))
-  }
+  ArgumentCheck::addError(!all(c("y","x") %in% names(x)),
+                          paste0("List object 'x' must contain character vectors ",
+                                 "'y' and 'x'. See help('cpt')."),
+                          Check)
   
-  if(length(x[["y"]]) != 1){
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg, paste0(err.flag,
-                                 ": Element 'y' of list object 'x' must be a character ",
-                                 "vector of length 1. See help('cpt')."))
-  }
+  ArgumentCheck::addError(!all(unlist(lapply(x,is.character))),
+                          paste0("List object 'x' must contain character vectors ",
+                                 "'y' and 'x'. See help('cpt')."),
+                          Check)
   
-  if(wrn.flag) warning(paste(wrn.msg, collapse="\n"))
-  if(err.flag)  stop(paste(err.msg, collapse="\n"))
+  ArgumentCheck::addError(length(x[["y"]]) != 1,
+                          paste0("Element 'y' of list object 'x' must be a character ",
+                                 "vector of length 1. See help('cpt')."),
+                          Check)
+  
+  ArgumentCheck::finishArgCheck(Check)
   
   variables       <- c(x[["y"]], x[["x"]])
   dependentVar    <- x[["y"]]
@@ -154,73 +149,73 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   wrn.flag <- 0
   wrn.msg <- ""
   
-  if(!is.data.frame(data)){
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg, paste0(err.flag,": Object 'data' must be of class 'data.frame'"))
-  }
+  Check <- ArgumentCheck::newArgCheck(list = FALSE)
+  
+  ArgumentCheck::addError(!is.data.frame(data),
+                          "Object 'data' must be of class 'data.frame'",
+                          Check)
   n <- nrow(data)
   
-  if(err.flag)  stop(paste(err.msg, collapse="\n"))
+  ArgumentCheck::finishArgCheck(Check)
   
   missingVariables <- which(!variables %in% names(data))
   if(length(missingVariables)>0){
     tmp <- paste0("'",paste0(variables[missingVariables], collapse="', '"),"'")
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg,
-                 paste0(err.flag,
-                        ": These variables do not exist in the inputted data object: ",tmp,".")
-    )
-    if(err.flag) stop(paste(err.msg, collapse="\n"))
+    ArgumentCheck::addError(TRUE,
+                            paste0("These variables do not exist in the inputted data object: ",
+                                   tmp, "."),
+                            Check)
+    ArgumentCheck::finishArgCheck(Check)
   }
   
+  ArgumentCheck::addError(!all(unlist(lapply(data[,variables],function(x) "factor" %in% class(x)))),
+                          "All variables must be of class 'factor'",
+                          Check)
   
-  if(!all(unlist(lapply(data[,variables],function(x) "factor" %in% class(x))))){
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg, paste0(err.flag, ": All variables must be of class 'factor'"))
-  }
-  
-  if(missing(wt)) wt <- rep(1,n) else {
-    if(is.character(wt)){
-      if(length(wt)>1){
-        wrn.flag <- wrn.flag + 1
-        wrn.msg <- c(wrn.msg,
-                     paste0(wrn.flag, 
-                            ": Character vector of length >1 given for 'wt'. Using only the first element.")
-        )
+  if(missing(wt)) wt <- rep(1,n) 
+  else {
+    if(is.character(wt))
+    {
+      if(length(wt)>1)
+      {
+        ArgumentCheck::addWarning(TRUE,
+                                  paste0("Character vector of length >1 given for 'wt'. ",
+                                         "Using only the first element."),
+                                  Check)
         wt <- wt[1]
       }
-      if(wt %in% names(data)){
+      if(wt %in% names(data))
+      {
         wt <- data[,"wt"]
-      } else{
-        err.flag <- err.flag + 1
-        err.msg <- c(err.msg,
-                     paste0(err.flag,
-                            ": 'wt' must be a numeric vector or the name of a variable in 'data'")
-        )
+      } 
+      else{
+        ArgumentCheck::addError(TRUE,
+                                "'wt' must be a numeric vector or the name of a variable in 'data'",
+                                Check)
       }
     }
     
-    if(!is.numeric(wt)){
-      err.flag <- err.flag + 1
-      err.msg <- c(err.msg,
-                   paste0(err.flag,
-                          ": 'wt' must be a numeric vector or the name of a variable in 'data'")
-      )
-    } else if(length(wt) != n){
-      err.flag <- err.flag + 1
-      err.msg <- c(err.msg,
-                   paste0(err.flag,
-                          ": Length of 'wt' not equal to number of rows in 'data'"))
-    } else if(min(wt) < 0){
-      err.flag <- err.flag + 1
-      err.msg <- c(err.msg,
-                   paste0(err.flag,
-                          ": Negative values in parameter 'wt' not allowed"))
+    if(!is.numeric(wt))
+    {
+      ArgumentCheck::addError(TRUE,
+                              "'wt' must be a numeric vector or the name of a variable in 'data'",
+                              Check)
+    } 
+    else if(length(wt) != n)
+    {
+      ArgumentCheck::addError(TRUE,
+                              "Length of 'wt' not equal to number of rows in 'data'",
+                              Check)
+    } 
+    else if(min(wt) < 0)
+    {
+      ArgumentCheck::addError(TRUE,
+                              "Negative values in parameter 'wt' not allowed",
+                              Check)
     }
   }
   
-  if(wrn.flag) warning(paste(wrn.msg, collapse="\n"))
-  if(err.flag)  stop(paste(err.msg, collapse="\n"))
+  ArgumentCheck::finishArgCheck(Check)
   
   vars  <- c(dependentVar, independentVars)  
   ..vars <- lapply(vars, as.symbol)
