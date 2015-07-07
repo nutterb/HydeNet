@@ -77,39 +77,6 @@ compileJagsModel <- function(network, data=NULL, ...){
   }
   
   if (length(msg) > 1) stop(paste(msg, collapse="\n"))
-
-#   if (!is.null(network$data)){
-#     .factors <- names(network$data)[sapply(network$data, is.factor)]
-#     .factors <- .factors[.factors %in% network$nodes]
-# 
-#     if(length(.factors)>0){
-#       factorRef <- as.list(network$data[, .factors, drop=FALSE])
-#     
-#       msg <- ""
-#       for (i in .factors){
-#         if (i %in% names(data)){
-#           if (!is.numeric(data[[i]])){
-#             data[[i]] <- as.numeric(factor(data[[i]], levels(network$data[, i])))
-#             if (network$nodeType[[i]] == "dbern") data[[i]] <- data[[i]] - 1
-#           }
-#         }
-#         factorRef[[i]] <- data.frame(value = 1:nlevels(network$data[, i]),
-#                                      label = levels(network$data[, i]))
-#         if (network$nodeType[[i]] == "dbern") 
-#           factorRef[[i]]$value <- factorRef[[i]]$value - 1
-#         if (!all(data[[i]] %in% c(factorRef[[i]]$value,
-#                                   as.character(factorRef[[i]]$label)))){
-#           msg <- c(msg,
-#                    paste0("Values for '", i, "' must be an integer from ",
-#                           min(factorRef[[i]]$value), " to ",
-#                           max(factorRef[[i]]$value), " or one of the following: ",
-#                           paste0(levels(network$data[, i]), collapse=", ")))
-#         }      
-#       }
-#       if (length(msg) > 1) stop(paste(msg, collapse="\n"))
-#     }
-#   }
-#   else factorRef <- NULL
   
   cpt_arrays <- unlist(network$nodeFitter) == "cpt"
   if(any(cpt_arrays)){

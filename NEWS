@@ -1,3 +1,6 @@
+### 0.9.1 (4 July 2015)
+* Conversion of argument checks to using the `ArgumentCheck` package
+
 ### 0.9.0 (2 July 2015)
 * Added imports from `utils` and `stats` to comply with new CRAN policies.
 * Adds the functionality to allow all `nodeType` specifications to properly build in
