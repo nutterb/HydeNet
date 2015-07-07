@@ -144,15 +144,17 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
   lapply(options,
          function(o, j, cpt_arrays, ...)
          {
-           cHN <- list(jags = rjags::jags.model(textConnection(paste0(j$jags$model(),
-                                                                      collapse="\n")),
+           con <- textConnection(paste0(j$jags$model(),
+                                        collapse="\n"))
+           cHN <- list(jags = rjags::jags.model(con,
                                                 data = c(o, cpt_arrays),
                                                 ...),
                        observed = o,
                        dag = j$dag,
                        factorRef = j$factorRef)
            class(cHN) <- c("compiledHydeNetwork")
-           cHN
+           close(con)
+           return(cHN)
          },
          jags.code,
          cpt_arrays, 
