@@ -1,3 +1,5 @@
+<img src="inst/img/HydeNet.png">
+
 Hybrid Bayesian Networks Using R and JAGS
 ===
 
