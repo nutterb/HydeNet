@@ -50,14 +50,8 @@
 #' 
 bindPosterior <- function(hydePost, relabel_factor=TRUE){
 
-  #* first, bind chains within an mcmc object together
-  bind_chains <- function(mcmc){
-    m <- lapply(mcmc, as.data.frame)
-    dplyr::bind_rows(m)
-  }
-  
   if (class(hydePost$codas) == "mcmc.list")
-    bound <- dplyr::bind_rows(lapply(hydePost$codas, as.data.frame))
+    bound <- dplyr::bind_rows(lapply(seq_along(hydePost$codas), bind_chains_mcmclist))
   else 
     bound <- dplyr::bind_rows(lapply(hydePost$codas, bind_chains))
   
@@ -70,4 +64,19 @@ bindPosterior <- function(hydePost, relabel_factor=TRUE){
   }
 
   as.data.frame(bound)
+}
+
+bind_chains_mcmclist <- function(mcmc){
+  as.data.frame(hydePost$codas[[1]]) %>%
+    mutate_(chain_index = ~mcmc,
+            obs_index = ~1:n())
+}
+
+bind_chains_list <- function(mcmc){
+  lapply(1:length(mcmc),
+         function(chain)
+           as.data.frame(mcmc[[chain]]) %>%
+             mutate_(chain_index = ~chain,
+                     obs_index = ~1:n())) %>%
+    dplyr::bind_rows()
 }
