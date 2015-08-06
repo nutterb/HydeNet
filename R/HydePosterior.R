@@ -64,7 +64,7 @@
 #' 
 
 HydePosterior <- function(cHN, variable.names, n.iter, thin=1, ...,
-                          monitor_observed=TRUE){
+                          monitor_observed=TRUE, bind=TRUE){
   if (monitor_observed){
     variable.names <- 
       if (class(cHN$jags) == "jags")
@@ -103,6 +103,6 @@ HydePosterior <- function(cHN, variable.names, n.iter, thin=1, ...,
   
   
   class(HydePost) <- "HydePosterior"
-  HydePost
+  if (bind) return(bindPosterior(HydePost)) else return(HydePost)
   
 }
