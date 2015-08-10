@@ -18,6 +18,9 @@
 #'   forced into \code{variable.names} if not already provided.  This is 
 #'   recommended, especially if you will be binding multiple JAGS runs 
 #'   together.
+#' @param bind Logical. If \code{TRUE}, posterior distributions will be bound into 
+#'   a single data frame.  If \code{FALSE}, the standard output from \code{rjags}
+#'   is returned.
 #'   
 #' @details This is essentially a wrapper around \code{coda.samples} that 
 #'   returns in a list the output for each run of \code{coda.samples} over 

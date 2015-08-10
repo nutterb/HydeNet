@@ -71,28 +71,33 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
   
   dots <- list(...)
   
-  ArgumentCheck::addError("data" %in% names(dots),
-                          "'data' is not an accepted argument in 'compileDecisionModel'",
-                          Check)
+  if ("data" %in% names(dots))
+    ArgumentCheck::addError(
+      msg = "'data' is not an accepted argument in 'compileDecisionModel'",
+      argcheck = Check)
 
   if (is.null(policyMatrix))
   {
     decisionNodes <- names(network$nodeDecision)[sapply(network$nodeDecision, any)]
     
-    ArgumentCheck::addError(length(decisionNodes) == 0,
-                            "No decision nodes indicated in the network",
-                            Check)
+    if (length(decisionNodes) == 0)
+    ArgumentCheck::addError(
+      msg = "No decision nodes indicated in the network",
+      argcheck = Check)
+    
     if (length(decisionNodes) == 0) break; # The next argument check isn't meaningful
                                            # when this condition is true.
   
     validDecision <- sapply(network$nodeType[decisionNodes], 
                             function(x) x %in% c("dbern", "dcat", "dbin"))
     
-    ArgumentCheck::addError(!all(validDecision),
-                            paste0("Only nodes of type 'dcat', and 'dbin' may be decision nodes.\n  ",
-                                   paste0(names(validDecision)[!validDecision], collapse=", "),
-                                   " cannot be used as decision nodes."),
-                            Check)
+    if (!all(validDecision))
+    ArgumentCheck::addError(
+      msg = paste0("Only nodes of type 'dcat', and 'dbin' may be decision nodes.\n  ",
+                   paste0(names(validDecision)[!validDecision], collapse=", "),
+                   " cannot be used as decision nodes."),
+      argcheck = Check)
+    
     if (!all(validDecision)) break; # Avoids defining 'options' when there are invalid decision nodes
   
     options <- lapply(decisionNodes, decisionOptions, network)
@@ -102,9 +107,10 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
   }
   else
   {
-    ArgumentCheck::addError(!is.data.frame(policyMatrix),
-                            "'policyMatrix' must be a data frame",
-                            Check)
+    if (!is.data.frame(policyMatrix))
+    ArgumentCheck::addError(
+      msg = "'policyMatrix' must be a data frame",
+      argcheck = Check)
     if (!is.data.frame(policyMatrix)) break; # avoids defining 'options' when
                                              # the condition is not satisfied
     options <- policyMatrix

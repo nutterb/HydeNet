@@ -103,27 +103,20 @@ cpt.formula <- function(formula, data, wt, ...)
 #' @export 
 cpt.list <- function(x, data, wt, ...)
 {
+  Check <- ArgumentCheck::newArgCheck()
   
-  err.flag <- 0
-  err.msg <- ""
-  
-  wrn.flag <- 0
-  wrn.msg <- ""
-  
-  Check <- ArgumentCheck::newArgCheck(list = FALSE)
-  
-  ArgumentCheck::addError(!all(c("y","x") %in% names(x)),
-                          paste0("List object 'x' must contain character vectors ",
+  if (!all(c("y","x") %in% names(x)))
+  ArgumentCheck::addError(paste0("List object 'x' must contain character vectors ",
                                  "'y' and 'x'. See help('cpt')."),
                           Check)
   
-  ArgumentCheck::addError(!all(unlist(lapply(x,is.character))),
-                          paste0("List object 'x' must contain character vectors ",
+  if (!all(unlist(lapply(x,is.character))))
+  ArgumentCheck::addError(paste0("List object 'x' must contain character vectors ",
                                  "'y' and 'x'. See help('cpt')."),
                           Check)
   
-  ArgumentCheck::addError(length(x[["y"]]) != 1,
-                          paste0("Element 'y' of list object 'x' must be a character ",
+  if (length(x[["y"]]) != 1)
+  ArgumentCheck::addError(paste0("Element 'y' of list object 'x' must be a character ",
                                  "vector of length 1. See help('cpt')."),
                           Check)
   
@@ -149,10 +142,10 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   wrn.flag <- 0
   wrn.msg <- ""
   
-  Check <- ArgumentCheck::newArgCheck(list = FALSE)
+  Check <- ArgumentCheck::newArgCheck()
   
-  ArgumentCheck::addError(!is.data.frame(data),
-                          "Object 'data' must be of class 'data.frame'",
+  if (!is.data.frame(data))
+  ArgumentCheck::addError("Object 'data' must be of class 'data.frame'",
                           Check)
   n <- nrow(data)
   
@@ -161,15 +154,14 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   missingVariables <- which(!variables %in% names(data))
   if(length(missingVariables)>0){
     tmp <- paste0("'",paste0(variables[missingVariables], collapse="', '"),"'")
-    ArgumentCheck::addError(TRUE,
-                            paste0("These variables do not exist in the inputted data object: ",
+    ArgumentCheck::addError(paste0("These variables do not exist in the inputted data object: ",
                                    tmp, "."),
                             Check)
     ArgumentCheck::finishArgCheck(Check)
   }
   
-  ArgumentCheck::addError(!all(unlist(lapply(data[,variables],function(x) "factor" %in% class(x)))),
-                          "All variables must be of class 'factor'",
+  if (!all(unlist(lapply(data[,variables],function(x) "factor" %in% class(x)))))
+  ArgumentCheck::addError("All variables must be of class 'factor'",
                           Check)
   
   if(missing(wt)) wt <- rep(1,n) 
@@ -178,8 +170,7 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
     {
       if(length(wt)>1)
       {
-        ArgumentCheck::addWarning(TRUE,
-                                  paste0("Character vector of length >1 given for 'wt'. ",
+        ArgumentCheck::addWarning(paste0("Character vector of length >1 given for 'wt'. ",
                                          "Using only the first element."),
                                   Check)
         wt <- wt[1]
@@ -189,28 +180,24 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
         wt <- data[,"wt"]
       } 
       else{
-        ArgumentCheck::addError(TRUE,
-                                "'wt' must be a numeric vector or the name of a variable in 'data'",
+        ArgumentCheck::addError("'wt' must be a numeric vector or the name of a variable in 'data'",
                                 Check)
       }
     }
     
     if(!is.numeric(wt))
     {
-      ArgumentCheck::addError(TRUE,
-                              "'wt' must be a numeric vector or the name of a variable in 'data'",
+      ArgumentCheck::addError("'wt' must be a numeric vector or the name of a variable in 'data'",
                               Check)
     } 
     else if(length(wt) != n)
     {
-      ArgumentCheck::addError(TRUE,
-                              "Length of 'wt' not equal to number of rows in 'data'",
+      ArgumentCheck::addError("Length of 'wt' not equal to number of rows in 'data'",
                               Check)
     } 
     else if(min(wt) < 0)
     {
-      ArgumentCheck::addError(TRUE,
-                              "Negative values in parameter 'wt' not allowed",
+      ArgumentCheck::addError("Negative values in parameter 'wt' not allowed",
                               Check)
     }
   }

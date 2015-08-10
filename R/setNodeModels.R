@@ -38,12 +38,12 @@
 #' writeNetworkModel(Net, pretty=TRUE)
 
 setNodeModels <- function(network, ...){
-  Check <- ArgumentCheck::newArgCheck(list = FALSE)
+  Check <- ArgumentCheck::newArgCheck()
   
   models <- list(...)
   
-  ArgumentCheck::addError(length(models) == 0,
-                          "No objects passed in '...' argument.",
+  if (length(models) == 0)
+  ArgumentCheck::addError("No objects passed in '...' argument.",
                           Check)
   ArgumentCheck::finishArgCheck(Check)
   
@@ -58,15 +58,14 @@ setNodeModels <- function(network, ...){
   #* 3. Check that all regression variables are parents of the response
   
   #* 1. check that network is a HydeNetwork
-  ArgumentCheck::addError(class(network) != "HydeNetwork",
-                          "'network' must be of class 'HydeNetwork'",
+  if (class(network) != "HydeNetwork")
+  ArgumentCheck::addError("'network' must be of class 'HydeNetwork'",
                           Check)
   
   #* 2. Check that the response is the name of a node in 'network'
   if (!all(names(Attrs) %in% network$nodes)){
     not_nodes <- paste(names(Attrs)[!names(Attrs) %in% network$nodes], collapse=", ")
-    ArgumentCheck::addError(TRUE,
-                            paste0("The following model responses are not nodes in 'network': ",
+    ArgumentCheck::addError(paste0("The following model responses are not nodes in 'network': ",
                                    not_nodes),
                             Check)
   }
@@ -78,8 +77,8 @@ setNodeModels <- function(network, ...){
     equalParents[i] <- setequal(Attrs[[i]]$parents, network$parents[[names(Attrs)[i]]])
   }
   
-  ArgumentCheck::addError(!all(equalParents),
-                          paste0("The following model independent variables ",
+  if (!all(equalParents))
+  ArgumentCheck::addError(paste0("The following model independent variables ",
                                  "are not identical to the node parent list: ",
                                  paste(names(equalParents)[!equalParents], collapse=", ")),
                           Check)

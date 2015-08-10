@@ -127,11 +127,13 @@ MCMC sampling is performed by calling `HydePosterior()`. This function calls `co
 ```{r, fig.width=6, fig.height=6}
 post1 <- HydePosterior(carNet1,
                        variable.names = c("cyl","hp","mpg"),
-                       n.iter = 10000)
+                       n.iter = 10000,
+                       bind=FALSE)
 
 post2 <- HydePosterior(carNet2,
                        variable.names = c("cyl","hp","mpg"),
-                       n.iter = 10000)
+                       n.iter = 10000,
+                       bind = FALSE)
 
 str(post1, max.level = 3)
 plot(post1$codas[,c("hp","mpg")])

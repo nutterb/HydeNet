@@ -20,26 +20,20 @@ inputCPT.formula <- function(formula, factorLevels, reduce=TRUE, ...)
 
 inputCPT.list <- function(x, factorLevels, reduce=TRUE, ...)
 {
-  err.flag <- 0
-  err.msg <- ""
+  Check <- ArgumentCheck::newArgCheck()
   
-  wrn.flag <- 0
-  wrn.msg <- ""
-  
-  Check <- ArgumentCheck::newArgCheck(list = FALSE)
-  
-  ArgumentCheck::addError(!all(c("y","x") %in% names(x)),
-                          paste0("List object 'x' must contain character vectors ",
+  if (!all(c("y","x") %in% names(x)))
+  ArgumentCheck::addError(paste0("List object 'x' must contain character vectors ",
                                  "'y' and 'x'. See help('cpt')."),
                           Check)
 
-  ArgumentCheck::addError(!all(unlist(lapply(x,is.character))),
-                          paste0("List object 'x' must contain character vectors ",
+  if (!all(unlist(lapply(x,is.character))))
+  ArgumentCheck::addError(paste0("List object 'x' must contain character vectors ",
                                  "'y' and 'x'. See help('cpt')."),
                           Check)
   
-  ArgumentCheck::addError(length(x[["y"]]) != 1,
-                          paste0("Element 'y' of list object 'x' must be a character ",
+  if (length(x[["y"]]) != 1)
+  ArgumentCheck::addError(paste0("Element 'y' of list object 'x' must be a character ",
                                  "vector of length 1. See help('cpt')."),
                           Check)
   

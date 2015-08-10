@@ -317,7 +317,6 @@ compiledNet <- compileJagsModel(net, data = evidence,
 post <- HydePosterior(compiledNet,
                       variable.names = trackedVars,
                       n.iter=10000)
-post <- bindPosterior(post)
 
 dplyr::sample_n(post, 20)
 ```
@@ -356,8 +355,6 @@ samples <- lapply(compiledNets,
                   HydePosterior,
                   variable.names = trackedVars,
                   n.iter=100000)
-
-samples <- lapply(samples, bindPosterior)
 
 lapply(samples, head)
 ```

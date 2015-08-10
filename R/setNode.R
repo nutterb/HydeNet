@@ -125,14 +125,13 @@ setNode <- function(network, node, nodeType,
   node.t <- as.character(substitute(node))
   
 #   data(jagsDists, package='Hyde')
-  Check <- ArgumentCheck::newArgCheck(list = FALSE)
+  Check <- ArgumentCheck::newArgCheck()
   
   if (is.character(decision))
   {
     if (decision != "current")
     {
-      ArgumentCheck::addWarning(TRUE,
-                                paste0("'decision' must be logical or 'current'.  You provided ",
+      ArgumentCheck::addWarning(paste0("'decision' must be logical or 'current'.  You provided ",
                                        "an unrecognized character value.  'HydeNet' is assuming you mean ",
                                        "'current'."),
                                 Check)
@@ -145,8 +144,7 @@ setNode <- function(network, node, nodeType,
   {
     if (utility != "current")
     {
-      ArgumentCheck::addWarning(TRUE,
-                                paste0("'utility' must be logical or 'current'.  You provided ",
+      ArgumentCheck::addWarning(paste0("'utility' must be logical or 'current'.  You provided ",
                                        "an unrecognized character value.  'HydeNet' is assuming you mean ",
                                        "'current'."),
                                 Check)
@@ -157,16 +155,15 @@ setNode <- function(network, node, nodeType,
 
   if (!missing(nodeType)){
     if (length(nodeType) > 1){
-      ArgumentCheck::addWarning(TRUE,
-                                "nodeType must have length 1. The first element is being used.",
+      ArgumentCheck::addWarning("nodeType must have length 1. The first element is being used.",
                                 Check)
       nodeType <- nodeType[1]
     }
   }
   
   if (!missing(nodeType)){
-    ArgumentCheck::addError(!nodeType %in% jagsDists$FnName,
-                            paste0("nodeType must be one of the following -\n    ",
+    if (!nodeType %in% jagsDists$FnName)
+    ArgumentCheck::addError(paste0("nodeType must be one of the following -\n    ",
                                    paste(unique(jagsDists$FnName), collapse=", ")),
                             Check)
   }
@@ -176,8 +173,8 @@ setNode <- function(network, node, nodeType,
   exp_param <- eval(substitute(expectedParameters(network, node, TRUE)))
   params <- list(...)[exp_param]
   
-  ArgumentCheck::addError(!all(exp_param %in% names(params)),
-                          paste0("Nodes of type ", network$nodeType[[node.t]], 
+  if (!all(exp_param %in% names(params)))
+  ArgumentCheck::addError(paste0("Nodes of type ", network$nodeType[[node.t]], 
                                  " must have all of the following parameters--",
                                  paste(exp_param, collapse=", "), "."),
                           Check)
@@ -188,8 +185,7 @@ setNode <- function(network, node, nodeType,
     if (any(sapply(params, is.character) & 
             !sapply(params, function(p) p %in% c("fromData", "fromFormula"))))
     {
-      ArgumentCheck::addMessage(TRUE,
-                                "Validation has been ignored for parameters defined with character strings",
+      ArgumentCheck::addMessage("Validation has been ignored for parameters defined with character strings",
                                 Check)
       valid[sapply(params, is.character)] <- TRUE
     }
@@ -199,16 +195,14 @@ setNode <- function(network, node, nodeType,
       msg <- paste0("Please define ", names(params)[not_valid], " such that ", names(valid)[not_valid], 
                     " (or use validate=FALSE).")
       msg <- paste(msg, collapse="\n")
-      ArgumentCheck::addError(TRUE,
-                              msg,
+      ArgumentCheck::addError(msg,
                               Check)
     }
   }
 
   if (decision){
     if (!nodeType %in% c("dbern", "dcat")){
-      ArgumentCheck::addWarning(TRUE,
-                                paste0("Only nodes of type 'dbern' and 'dcat' may be decision nodes. ",
+      ArgumentCheck::addWarning(paste0("Only nodes of type 'dbern' and 'dcat' may be decision nodes. ",
                                        "'decision' has been set to FALSE"),
                                 Check)
       decision <- FALSE
@@ -216,12 +210,12 @@ setNode <- function(network, node, nodeType,
   }
 
   if (utility){
-    ArgumentCheck::addError(!nodeType %in% c("determ"),
-                            "Utility nodes must be of type 'determ'.",
+    if (!nodeType %in% c("determ"))
+    ArgumentCheck::addError("Utility nodes must be of type 'determ'.",
                             Check)
     
-    ArgumentCheck::addError(any(sapply(network$parents, function(p, t) t %in% p, node.t)),
-                            "Utility nodes may not have children.",
+    if (any(sapply(network$parents, function(p, t) t %in% p, node.t)))
+    ArgumentCheck::addError("Utility nodes may not have children.",
                             Check)
 
   }

@@ -66,8 +66,7 @@ policyMatrix <- function(network, ...){
   
   if (!(all(names(policies) %in% network$nodes))){
     not_in_network <- names(policies)[!names(policies) %in% network$nodes]
-    ArgumentCheck::addError(TRUE,
-                            paste0("The following input nodes do not exist in '",
+    ArgumentCheck::addError(paste0("The following input nodes do not exist in '",
                                    substitute(network), "': ",
                                    paste(not_in_network, collapse=", "), "."),
                             Check)
@@ -85,8 +84,8 @@ defaultPolicyMatrix <- function(network){
   decision_nodes <- names(network$nodeDecision)[sapply(network$nodeDecision, 
                                                        identity)]
   
-  ArgumentCheck::addError(length(decision_nodes) == 0,
-                          paste0("There are no decision nodes in '", substitute(network), "'."),
+  if (length(decision_nodes) == 0)
+  ArgumentCheck::addError(paste0("There are no decision nodes in '", substitute(network), "'."),
                           Check)
   
   decision_options <- lapply(decision_nodes, decisionOptions, network)
@@ -94,9 +93,3 @@ defaultPolicyMatrix <- function(network){
   
   expand.grid(decision_options) 
 }
-
-
-
-
-
-  
