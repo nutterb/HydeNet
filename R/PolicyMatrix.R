@@ -59,7 +59,7 @@
 #' 
  
 policyMatrix <- function(network, ...){
-  Check <- ArgumentCheck::newArgCheck(list = FALSE)
+  Check <- ArgumentCheck::newArgCheck()
   policies <- list(...)
   
   if (length(policies) < 1) return(defaultPolicyMatrix(network))
@@ -81,7 +81,7 @@ policyMatrix <- function(network, ...){
 #' @rdname policyMatrix
 
 defaultPolicyMatrix <- function(network){
-  Check <- ArgumentCheck::newArgCheck(list = FALSE)
+  Check <- ArgumentCheck::newArgCheck()
   decision_nodes <- names(network$nodeDecision)[sapply(network$nodeDecision, 
                                                        identity)]
   
