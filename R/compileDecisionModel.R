@@ -67,7 +67,7 @@
 #' decision3 <- compileDecisionModel(Net, custom_policy) 
 #' 
 compileDecisionModel <- function(network, policyMatrix = NULL, ...){
-  Check <- ArgumentCheck::newArgCheck(list = FALSE)
+  Check <- ArgumentCheck::newArgCheck()
   
   dots <- list(...)
   
