@@ -1,0 +1,25 @@
+\documentclass[12pt,landscape]{report}
+\usepackage{tikz}
+\usetikzlibrary{bayesnet}
+\begin{document}
+    \begin{figure}
+      \centering
+      \tikz{ %
+        \node[latent, yshift=3.5cm] (S_1) {$\phantom{0}S_t\phantom{0}$} ; %
+        \node[latent, right=of S_1] (S_2) {$S_{t+1}$} ; %
+        \node[latent, right=of S_2] (S_3) {$S_{t+2}$} ; %
+        \node[latent, right=of S_3] (S_4) {$S_{t+3}$} ; %
+        \node[obs, below=of S_1] (O_1) {$\phantom{0}O_t\phantom{0}$} ; %
+        \node[obs, below=of S_2] (O_2) {$O_{t+1}$} ; %
+        \node[obs, below=of S_3] (O_3) {$O_{t+2}$} ; %
+        \node[obs, below=of S_4] (O_4) {$O_{t+3}$} ; %
+        \edge {S_1} {S_2} ; %
+        \edge {S_2} {S_3} ; %
+        \edge {S_3} {S_4} ; %
+        \edge {S_1} {O_1} ; %
+        \edge {S_2} {O_2} ; %
+        \edge {S_3} {O_3} ; %
+        \edge {S_4} {O_4} ; %
+      }
+    \end{figure}
+    \end{document}
