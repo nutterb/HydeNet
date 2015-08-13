@@ -50,9 +50,9 @@ This probabilistic model is frequently further simplified into distinct substruc
 
 The general state-space model framework presented above accomodates more specific classes of temporal models, such as HMMs and Kalman filters. A HMM has a (typically single) latent class variable defining the states, i.e., $\boldsymbol{S}_t = s_{t1}$, where $s_{t1} \in \left \{ 1, 2, \cdots, K \right \}$. Kalman filters, on the other hand, assume a Gaussian system over both the states and the observed variables (the above representation does not accomodate the control-input process some Kalman filter models include; see below for a more general model structure that does allow for control variables).
 
-## Example: Disease Epidemic (SIR) Modeling
+## Example: SIRD Models
 
-Consider the basic Markov model for disease epidemics, the Susceptible-Infected-Recovered (SIR) model.
+Consider a basic HMM for disease epidemics, known as the Susceptible-Infected-Recovered-Dead (SIRD) model. Our single (latent) state variable has four categorical states: susceptible to disease infection, infected with the disease, recovered from the disease, and dead. (Polio???)
 
 
 

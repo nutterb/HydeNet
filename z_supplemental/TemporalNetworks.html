@@ -57,9 +57,9 @@ Pr \left( \mathbb{S},\mathbb{O} \right ) &amp; = \prod_{t=1}^{T} Pr \left ( \bol
 </ul>
 <p>The general state-space model framework presented above accomodates more specific classes of temporal models, such as HMMs and Kalman filters. A HMM has a (typically single) latent class variable defining the states, i.e., <span class="math">\(\boldsymbol{S}_t = s_{t1}\)</span>, where <span class="math">\(s_{t1} \in \left \{ 1, 2, \cdots, K \right \}\)</span>. Kalman filters, on the other hand, assume a Gaussian system over both the states and the observed variables (the above representation does not accomodate the control-input process some Kalman filter models include; see below for a more general model structure that does allow for control variables).</p>
 </div>
-<div id="example-disease-epidemic-sir-modeling" class="section level2">
-<h2>Example: Disease Epidemic (SIR) Modeling</h2>
-<p>Consider the basic Markov model for disease epidemics, the Susceptible-Infected-Recovered (SIR) model.</p>
+<div id="example-sird-models" class="section level2">
+<h2>Example: SIRD Models</h2>
+<p>Consider a basic HMM for disease epidemics, known as the Susceptible-Infected-Recovered-Dead (SIRD) model. Our single (latent) state variable has four categorical states: susceptible to disease infection, infected with the disease, recovered from the disease, and dead. (Polio???)</p>
 <ul>
 <li>online vs. offline models</li>
 <li>Types of inference in online TBN models – filtering, prediction, smoothing – see Archambeau lecture slides</li>
