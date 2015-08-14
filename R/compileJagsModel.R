@@ -82,6 +82,7 @@ compileJagsModel <- function(network, data=NULL, ...){
   if(any(cpt_arrays)){
     cpt_arrays <- names(cpt_arrays)[cpt_arrays]
     cpt_arrays <- network$nodeModel[cpt_arrays]
+    lapply(cpt_arrays, function(ca){dimnames(ca) <- NULL; ca})
     nms <- names(cpt_arrays)
     cpt_arrays <- lapply(names(cpt_arrays),
                          function(ca){
