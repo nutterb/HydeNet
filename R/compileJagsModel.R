@@ -82,14 +82,21 @@ compileJagsModel <- function(network, data=NULL, ...){
   if(any(cpt_arrays)){
     cpt_arrays <- names(cpt_arrays)[cpt_arrays]
     cpt_arrays <- network$nodeModel[cpt_arrays]
-    lapply(cpt_arrays, function(ca){dimnames(ca) <- NULL; ca})
     nms <- names(cpt_arrays)
-    cpt_arrays <- lapply(names(cpt_arrays),
-                         function(ca){
-                           cpt(network$nodeFormula[[ca]], 
-                               data = if (!is.null(network$nodeData[[ca]])) network$nodeData[[ca]]
-                                      else network$data)
-                         })
+    cpt_arrays <- 
+      lapply(names(cpt_arrays),
+             function(ca){
+               if ("cpt" %in% class(cpt_arrays[[ca]])) return(cpt_arrays[[ca]])
+               else{
+                 args <- 
+                   list(x = network$nodeFormula[[ca]],
+                        data = if (!is.null(network$nodeData[[ca]])) network$nodeData[[ca]]
+                                               else network$data)
+                 if (!is.null(network$nodeFitterArgs[[ca]]))
+                   args <- c(args, network$nodeFitterArgs[[ca]])
+                 return(do.call("cpt", args))
+               }   
+              })
     names(cpt_arrays) <- paste0("cpt.", nms)
   } else cpt_arrays = list()
   # return(cpt_arrays)
