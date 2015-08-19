@@ -77,8 +77,9 @@ net <- HydeNetwork(~ initialAces | card1*card2
                    + dealerOutcome | dealerUpcard
                    + payoff | playerFinalPoints*dealerOutcome)
 
-plot(net)
+# plot(net)
 ```
+![](images/vignette_DecisionNetworks1.png)
 
 Notice in the above network plot that all nodes have the same representation of empty black ovals. The `plot.HydeNetwork()` function allows for enhanced visualization of decision networks (see the vignette titled "Building and Customizing HydeNet Plots" for details; `vignette("HydeNetPlots", package="HydeNet")`), and since we have not yet specified the node types (i.e., random variable, deterministic, decision, or utility), it assumes that all nodes are random variables. Once we populate the network object with the node types and conditional distributions/deterministic functions, we will regenerate the plot.
 
@@ -244,8 +245,9 @@ c(net$nodeDecision$hit2, net$nodeUtility$payoff)
 We are now ready to visualize the finished decision network:
 
 ```{r, fig.width=7}
-plot(net)
+#plot(net)
 ```
+![](images/vignette_DecisionNetworks2.png)
 
 
 ## Decision and Utility Nodes

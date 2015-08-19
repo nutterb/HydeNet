@@ -8,8 +8,8 @@
 \usage{
 setNode(network, node, nodeType, nodeFitter, nodeFormula, fitterArgs = list(),
   decision = "current", utility = "current",
-  fromData = !is.null(network$data), ..., validate = TRUE,
-  fitModel = getOption("Hyde_fitModel"))
+  fromData = !is.null(network$data), ..., nodeData = NULL,
+  validate = TRUE, fitModel = getOption("Hyde_fitModel"))
 
 fromData()
 
@@ -65,6 +65,9 @@ The required parameters can be looked up using the
 \code{expectedParameters} function.  If parameters are to be estimated
 from the data, the functions \code{fromData} and \code{fromFormula} may
 be used as placeholders.}
+
+\item{nodeData}{A data frame with the values for the model.  Currently, no checks are
+performed to make sure that the necessary vectors are contained in the data frame.}
 
 \item{validate}{Logical.  Toggles validation of parameters given in \code{...}.
 When passing raw JAGS code (ie, character strings), this will be ignored
@@ -133,7 +136,7 @@ print(Net, d.dimer)
 #* Manually change the precision
 Net <- setNode(Net, d.dimer, nodeType='dnorm', mu=fromFormula(), tau=1/2.65,
                   nodeFormula = d.dimer ~ pregnant * pe,
-                  nodeFitter='lm')
+                  nodeFitter='lm', nodeData = mtcars)
 print(Net, d.dimer)
 }
 \author{

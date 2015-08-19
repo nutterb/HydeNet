@@ -49,6 +49,8 @@
 #'   \code{expectedParameters} function.  If parameters are to be estimated 
 #'   from the data, the functions \code{fromData} and \code{fromFormula} may 
 #'   be used as placeholders.
+#' @param nodeData A data frame with the values for the model.  Currently, no checks are 
+#'   performed to make sure that the necessary vectors are contained in the data frame.
 #' @param validate Logical.  Toggles validation of parameters given in \code{...}.
 #'   When passing raw JAGS code (ie, character strings), this will be ignored 
 #'   (with a message), 
@@ -109,7 +111,7 @@
 #' #* Manually change the precision
 #' Net <- setNode(Net, d.dimer, nodeType='dnorm', mu=fromFormula(), tau=1/2.65, 
 #'                   nodeFormula = d.dimer ~ pregnant * pe,
-#'                   nodeFitter='lm')
+#'                   nodeFitter='lm', nodeData = mtcars)
 #' print(Net, d.dimer)
 #' 
 
@@ -119,6 +121,7 @@ setNode <- function(network, node, nodeType,
                     decision = "current",
                     utility = "current",
                     fromData=!is.null(network$data), ...,
+                    nodeData = NULL,
                     validate=TRUE, fitModel=getOption("Hyde_fitModel")){
   
   network.t <- as.character(substitute(network))
@@ -224,6 +227,7 @@ setNode <- function(network, node, nodeType,
   if (!missing(nodeFormula)) network$nodeFormula[[node.t]] <- nodeFormula
   if (!missing(nodeFitter)) network$nodeFitter[[node.t]] <- nodeFitter
   if (length(fitterArgs)) network$nodeFitterArgs[[node.t]] <- fitterArgs
+  if (!is.null(nodeData)) network$nodeData[[node.t]] <- nodeData
   network$nodeDecision[[node.t]] <- decision
   network$nodeUtility[[node.t]] <- utility
 
