@@ -76,9 +76,8 @@ net <- HydeNetwork(~ wells
                    + treat | d.dimer*angio
                    + death | pe*treat)
 
-# plot(net)
+plot(net)
 ```
-![](images/vignette_Working1.png)
 
 The **HydeNetwork** object we created, called `net`, is worth exploring:
 
@@ -513,11 +512,10 @@ craps <- setNode(craps, firstRollOutcome, nodeType = "determ",
                                  ifelse(diceSum < 4 | diceSum > 11, -1,
                                     ifelse(diceSum == 7 | diceSum == 11, 1,0)))
 
-# plot(craps)
+plot(craps)
 
 writeNetworkModel(craps, pretty=TRUE)
 ```
-![](images/vignette_Working2.png)
 
 The formulas follow the same rules as described above in the [Regression Equations] section.
 
@@ -539,10 +537,9 @@ net2 <- update(net, . ~ . + newTest | pe
                           - pregnant)
 
 
-# plot(net2)
+plot(net2)
 
 ```
-![](images/vignette_Working3.png)
 
 The `update()` method for `HydeNetwork` objects processes terms in the given model equation sequentially. In the above example, the original object `net` did not contain a node called `newTest`.  But there were nodes called `pregnant`, `pe`, and `treat`.  The first term within the model equation (`+ newTest | pe`) specifies the addition of the node `newTest` as a child of node `pe`.  The second term (`+ treat | newTest`) specifies the addition of a link from the now-existing node `newTest` into node `treat`.  The third term (`- pregnant`) specifies the removal of node `pregnant`.  Examining the network object, two important points are worth mentioning:
 
