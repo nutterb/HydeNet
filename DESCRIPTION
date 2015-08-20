@@ -37,7 +37,8 @@ Imports:
     stringr,
     utils
 Suggests:
-    knitr
+    knitr,
+    testthat
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
 VignetteBuilder: knitr
 LazyLoad: yes

@@ -89,7 +89,7 @@ compileJagsModel <- function(network, data=NULL, ...){
                if ("cpt" %in% class(cpt_arrays[[ca]])) return(cpt_arrays[[ca]])
                else{
                  args <- 
-                   list(x = network$nodeFormula[[ca]],
+                   list(formula = network$nodeFormula[[ca]],
                         data = if (!is.null(network$nodeData[[ca]])) network$nodeData[[ca]]
                                                else network$data)
                  if (!is.null(network$nodeFitterArgs[[ca]]))

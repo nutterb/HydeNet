@@ -49,6 +49,10 @@
 #'   \code{expectedParameters} function.  If parameters are to be estimated 
 #'   from the data, the functions \code{fromData} and \code{fromFormula} may 
 #'   be used as placeholders.
+#' @param nodeData A data frame with the appropriate data to fit the model for the node.
+#'   Data passed in this argument are applied only to this specific node.  No checks are 
+#'   performed to ensure that all of the appropriate variables (the node and its parents)
+#'   are included.
 #' @param validate Logical.  Toggles validation of parameters given in \code{...}.
 #'   When passing raw JAGS code (ie, character strings), this will be ignored 
 #'   (with a message), 
@@ -119,6 +123,7 @@ setNode <- function(network, node, nodeType,
                     decision = "current",
                     utility = "current",
                     fromData=!is.null(network$data), ...,
+                    nodeData = NULL,
                     validate=TRUE, fitModel=getOption("Hyde_fitModel")){
   
   network.t <- as.character(substitute(network))
@@ -224,6 +229,7 @@ setNode <- function(network, node, nodeType,
   if (!missing(nodeFormula)) network$nodeFormula[[node.t]] <- nodeFormula
   if (!missing(nodeFitter)) network$nodeFitter[[node.t]] <- nodeFitter
   if (length(fitterArgs)) network$nodeFitterArgs[[node.t]] <- fitterArgs
+  if (!is.null(nodeData)) network$nodeData[[node.t]] <- nodeData
   network$nodeDecision[[node.t]] <- decision
   network$nodeUtility[[node.t]] <- utility
 
