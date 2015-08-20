@@ -67,22 +67,38 @@
 #' decision3 <- compileDecisionModel(Net, custom_policy) 
 #' 
 compileDecisionModel <- function(network, policyMatrix = NULL, ...){
-  dots <- list(...)
-  if ("data" %in% names(dots)) 
-    stop("'data' is not an accepted argument in 'compileDecisionModel'")
+  Check <- ArgumentCheck::newArgCheck()
   
+  dots <- list(...)
+  
+  if ("data" %in% names(dots))
+    ArgumentCheck::addError(
+      msg = "'data' is not an accepted argument in 'compileDecisionModel'",
+      argcheck = Check)
+
   if (is.null(policyMatrix))
   {
     decisionNodes <- names(network$nodeDecision)[sapply(network$nodeDecision, any)]
-    if (length(decisionNodes) == 0) 
-      stop("No decision nodes indicated in the network")
+    
+    if (length(decisionNodes) == 0)
+    ArgumentCheck::addError(
+      msg = "No decision nodes indicated in the network",
+      argcheck = Check)
+    
+    if (length(decisionNodes) == 0) break; # The next argument check isn't meaningful
+                                           # when this condition is true.
   
     validDecision <- sapply(network$nodeType[decisionNodes], 
                             function(x) x %in% c("dbern", "dcat", "dbin"))
+    
     if (!all(validDecision))
-      stop(paste0("Only nodes of type 'dcat', and 'dbin' may be decision nodes.\n  ",
-                  paste0(names(validDecision)[!validDecision], collapse=", "),
-                  " cannot be used as decision nodes."))
+    ArgumentCheck::addError(
+      msg = paste0("Only nodes of type 'dcat', and 'dbin' may be decision nodes.\n  ",
+                   paste0(names(validDecision)[!validDecision], collapse=", "),
+                   " cannot be used as decision nodes."),
+      argcheck = Check)
+    
+    if (!all(validDecision)) break; # Avoids defining 'options' when there are invalid decision nodes
   
     options <- lapply(decisionNodes, decisionOptions, network)
     names(options) <- decisionNodes
@@ -92,10 +108,17 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
   else
   {
     if (!is.data.frame(policyMatrix))
-      stop("'policyMatrix' must be a data frame")
+    ArgumentCheck::addError(
+      msg = "'policyMatrix' must be a data frame",
+      argcheck = Check)
+    if (!is.data.frame(policyMatrix)) break; # avoids defining 'options' when
+                                             # the condition is not satisfied
     options <- policyMatrix
     
   }
+  
+  ArgumentCheck::finishArgCheck(Check)
+  
   options <- lapply(1:nrow(options), 
                     function(i){ 
                       l <- as.list(options[i, , drop=FALSE])
@@ -112,12 +135,20 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
     cpt_arrays <- names(cpt_arrays)[cpt_arrays]
     cpt_arrays <- network$nodeModel[cpt_arrays]
     nms <- names(cpt_arrays)
-    cpt_arrays <- lapply(names(cpt_arrays),
-                         function(ca){
-                           cpt(network$nodeFormula[[ca]], 
-                               data = if (!is.null(network$nodeData[[ca]])) network$nodeData[[ca]]
-                               else network$data)
-                         })
+    cpt_arrays <- 
+      lapply(names(cpt_arrays),
+             function(ca){
+               if ("cpt" %in% class(cpt_arrays[[ca]])) return(cpt_arrays[[ca]])
+               else{
+                 args <- 
+                   list(formula = network$nodeFormula[[ca]],
+                        data = if (!is.null(network$nodeData[[ca]])) network$nodeData[[ca]]
+                                               else network$data)
+                 if (!is.null(network$nodeFitterArgs[[ca]]))
+                   args <- c(args, network$nodeFitterArgs[[ca]])
+                 return(do.call("cpt", args))
+               }   
+              })
     names(cpt_arrays) <- paste0("cpt.", nms)
   } else cpt_arrays = list()
   # return(cpt_arrays)
@@ -127,15 +158,17 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
   lapply(options,
          function(o, j, cpt_arrays, ...)
          {
-           cHN <- list(jags = rjags::jags.model(textConnection(paste0(j$jags$model(),
-                                                                      collapse="\n")),
+           con <- textConnection(paste0(j$jags$model(),
+                                        collapse="\n"))
+           cHN <- list(jags = rjags::jags.model(con,
                                                 data = c(o, cpt_arrays),
                                                 ...),
                        observed = o,
                        dag = j$dag,
                        factorRef = j$factorRef)
            class(cHN) <- c("compiledHydeNetwork")
-           cHN
+           close(con)
+           return(cHN)
          },
          jags.code,
          cpt_arrays, 

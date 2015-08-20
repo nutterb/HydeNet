@@ -112,112 +112,53 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
   node_names <- graph::nodes(network)
   
   #* Parents
-  adjMat <- gRbase::graphNEL2adjMAT(network)  
-  parents <- lapply(1:ncol(adjMat), function(x) rownames(adjMat)[adjMat[, x] == 1])
-  parents <- lapply(parents, function(x) if (length(x) == 0) NULL else x)
+  parents <- HydeNetwork_parents(network)
   names(parents) <- node_names
   
   #* fromData
   #* returns TRUE if the node and its parents are in 'data'
   #* returns FALSE if any node or parent is missing from 'data'
-  fromData <- lapply(node_names, 
-                     function(x){
-                       if (is.null(data)) return(FALSE)
-                       if (all(c(x, parents[[x]]) %in% names(data)))
-                         return(TRUE)
-                       else return(FALSE)
-                     })
+  fromData <- lapply(node_names, HydeNetwork_fromData, data, parents)
   names(fromData) <- node_names
   
   #* nodeFormula
-  nodeFormFn <- function(x, parents){
-    if (is.null(parents[[x]])){
-      if (fromData[[names(parents)[x]]] & !is.numeric(data[, names(parents)[x]]))
-        f <- paste("~ ", names(parents)[x])
-      else f <- paste(names(parents)[x], "~ 1")
-    }
-    else f <- paste(names(parents)[x], "~", paste(parents[[x]], collapse=" + "))
-    return(stats::as.formula(f))
-  }
-  nodeFormula <- lapply(1:length(parents), nodeFormFn, parents)
+  nodeFormula <- lapply(seq_along(parents), HydeNetwork_nodeFormula, parents, data, fromData)
   names(nodeFormula) <- node_names
   
   #* nodeFitter
   #* returns 'lm' for continuous variables
   #* returns 'glm' for categorical variables
   #* returns NULL for variables not in the data
-  nodeFitter <- lapply(node_names, 
-                       function(x){
-                         if (is.null(data)) return(NULL)
-                         if (!x %in% names(data)) return(NULL)
-                         else if (is.numeric(data[, x])) return("lm")
-                         else if (is.factor(data[, x]) & is.null(parents[[x]])) return("xtabs")
-                         else if (is.factor(data[, x]) & 
-                                  all(vapply(parents[[x]], function(p) is.factor(data[, p]), logical(1))))
-                           return("cpt")
-                         else if (is.factor(data[, x]) & nlevels(data[, x]) == 2) return("glm")
-                         else if (is.factor(data[, x]) & nlevels(data[, x]) > 2) return("multinom")
-                         else return("glm")
-                       }
-  )
+  nodeFitter <- lapply(node_names, HydeNetwork_nodeFitter, data, parents)
   names(nodeFitter) <- node_names
-  
+
   #* nodeTypes
   #* returns 'dcat' if categorical and has no parents
   #* returns 'dnorm' otherwise
-  nodeType <- lapply(node_names, 
-                     function(x){
-                       if (is.null(data)) return('dnorm')
-                       if (x %in% names(data)){
-                         if ((is.null(parents[[x]]) && !is.numeric(data[, x])) || 
-                               (!is.null(parents[[x]]) && !is.numeric(data[, x]) && nlevels(data[, x]) > 2))
-                           return('dcat')
-                         else if (nodeFitter[[x]] == "cpt") return('dcat')
-                         else if ((is.null(parents[[x]]) && !is.numeric(data[, x])) || 
-                                    (!is.null(parents[[x]]) && !is.numeric(data[, x]) && nlevels(data[, x]) == 2))
-                           return('dbern')
-                         else return('dnorm')
-                       }
-                       else return('dnorm')
-                     }  
-  )
+  nodeType <- lapply(node_names, HydeNetwork_nodeType, data, parents, nodeFitter)
   names(nodeType) <- node_names
-  
+
   #* nodeParameters
   data(jagsDists, envir=environment())
-  nodeParams <- lapply(node_names, 
-                       function(x){
-                         parm <- jagsDists$Parameters[jagsDists$FnName == nodeType[[x]]]
-                         if (fromData[[x]]) 
-                           parm <- paste0("c(",
-                                          paste(parm, "fromData()", sep="=", collapse=", "),
-                                          ")")
-                         else 
-                           parm <- paste0("c(",
-                                          paste(parm, "'Unspecified'", sep="=", collapse=", "),
-                                          ")")
-                         return(eval(parse(text=parm)))
-                       }
-  )
+  nodeParams <- lapply(node_names, HydeNetwork_nodeParams, jagsDists, nodeType, fromData)
   names(nodeParams) <- node_names
   
   #* fitterArgs
-  nodeFitterArgs <- lapply(1:length(node_names), function(x) return(NULL))
-  if (any(sapply(nodeFitter, function(x) if (is.null(x)) FALSE else x == "glm")))
-    #     return(nodeFitterArgs[which(sapply(nodeFitter, function(x) x == "glm"))])
+  nodeFitterArgs <- lapply(seq_along(node_names), function(x) return(NULL))
+  if (any(sapply(nodeFitter, nodeFitter_is_glm)))
     nodeFitterArgs[which(sapply(nodeFitter, function(x) x == "glm"))] <- list(family='binomial')
   names(nodeFitterArgs) <- node_names
   
-  nodeData <- lapply(1:length(node_names), function(x) return(NULL))
+  nodeData <- lapply(seq_along(node_names), function(x) return(NULL))
   names(nodeData) <- node_names
   
-  nodeModel <- lapply(1:length(node_names), function(x) return(NULL))
+  nodeModel <- lapply(seq_along(node_names), function(x) return(NULL))
   names(nodeModel) <- node_names  
   
-  nodeDecision <- lapply(1:length(node_names), function(x) return(FALSE))
+  nodeDecision <- lapply(seq_along(node_names), function(x) return(FALSE))
   names(nodeDecision) <- node_names 
   
-  nodeUtility <- lapply(1:length(node_names), function(x) return(FALSE))
+  nodeUtility <- lapply(seq_along(node_names), function(x) return(FALSE))
   names(nodeUtility) <- node_names
   
   #* Define the HydeNetwork object
@@ -261,7 +202,6 @@ HydeNetwork.list <- function(nodes, ...){
   
   #* Reassign parameters from the models
   for (i in names(Attrs)){
-#     network$parents[[i]] <- if (length(Attrs[[i]]$parents) == 0) NULL else Attrs[[i]]$parents
     network$nodeType[[i]] <- Attrs[[i]]$nodeType
     network$nodeFormula[[i]] <- Attrs[[i]]$nodeFormula
     network$nodeFitter[[i]] <- Attrs[[i]]$nodeFitter
@@ -275,4 +215,80 @@ HydeNetwork.list <- function(nodes, ...){
   }
   
   return(network)
+}
+
+#** Utility Functions ***************************
+HydeNetwork_parents <- function(network){
+  adjMat <- gRbase::graphNEL2adjMAT(network)  
+  parents <- lapply(1:ncol(adjMat), function(x) rownames(adjMat)[adjMat[, x] == 1])
+  parents <- lapply(parents, function(x) if (length(x) == 0) NULL else x)
+  parents
+}
+
+HydeNetwork_fromData <- function(node_names, data, parents){
+    if (is.null(data)) return(FALSE)
+    if (all(c(node_names, parents[[node_names]]) %in% names(data)))
+      return(TRUE)
+    else return(FALSE)
+}
+
+HydeNetwork_nodeFormula <- function(x, parents, data, fromData){
+  if (is.null(parents[[x]])){
+    if (fromData[[names(parents)[x]]] & !is.numeric(data[, names(parents)[x]]))
+      f <- paste("~ ", names(parents)[x])
+    else f <- paste(names(parents)[x], "~ 1")
+  }
+  else f <- paste(names(parents)[x], "~", paste(parents[[x]], collapse=" + "))
+  return(stats::as.formula(f))
+}
+
+HydeNetwork_nodeFitter <- function(node_name, data, parents){
+  if (is.null(data)) return(NULL)
+  if (!node_name %in% names(data)) return(NULL)
+  else if (is.numeric(data[, node_name])) return("lm")
+  else if (is.factor(data[, node_name]) & is.null(parents[[node_name]])) return("xtabs")
+  else if (is.factor(data[, node_name]) & 
+           all(vapply(parents[[node_name]], function(p) is.factor(data[, p]), logical(1))))
+    return("cpt")
+  else if (is.factor(data[, node_name]) & nlevels(data[, node_name]) == 2) return("glm")
+  else if (is.factor(data[, node_name]) & nlevels(data[, node_name]) > 2) return("multinom")
+  else return("glm")
+}
+
+HydeNetwork_nodeType <- function(node_name, data, parents, nodeFitter){
+  if (is.null(data)) return('dnorm')
+  if (node_name %in% names(data)){
+    if ((is.null(parents[[node_name]]) && 
+         !is.numeric(data[, node_name])) || 
+        (!is.null(parents[[node_name]]) && 
+         !is.numeric(data[, node_name]) && 
+         nlevels(data[, node_name]) > 2))
+      return('dcat')
+    else if (nodeFitter[[node_name]] == "cpt") return('dcat')
+    else if ((is.null(parents[[node_name]]) && 
+              !is.numeric(data[, node_name])) || 
+             (!is.null(parents[[node_name]]) && 
+              !is.numeric(data[, node_name]) && 
+              nlevels(data[, node_name]) == 2))
+      return('dbern')
+    else return('dnorm')
+  }
+  else return('dnorm')
+}  
+
+HydeNetwork_nodeParams <- function(node_name, jagsDists, nodeType, fromData){
+  parm <- jagsDists$Parameters[jagsDists$FnName == nodeType[[node_name]]]
+  if (fromData[[node_name]]) 
+    parm <- paste0("c(",
+                   paste(parm, "fromData()", sep="=", collapse=", "),
+                   ")")
+  else 
+    parm <- paste0("c(",
+                   paste(parm, "'Unspecified'", sep="=", collapse=", "),
+                   ")")
+  return(eval(parse(text=parm)))
+}
+
+nodeFitter_is_glm <- function(fitter){
+  if (is.null(fitter)) FALSE else fitter == "glm"
 }

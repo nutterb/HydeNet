@@ -38,8 +38,14 @@
 #' writeNetworkModel(Net, pretty=TRUE)
 
 setNodeModels <- function(network, ...){
+  Check <- ArgumentCheck::newArgCheck()
+  
   models <- list(...)
-  if (length(models) == 0) stop("No objects passed in '...' argument.")
+  
+  if (length(models) == 0)
+  ArgumentCheck::addError("No objects passed in '...' argument.",
+                          Check)
+  ArgumentCheck::finishArgCheck(Check)
   
   Attrs <- lapply(models, modelToNode, nodes=network$nodes)
   #* assign names to list elements
@@ -51,26 +57,17 @@ setNodeModels <- function(network, ...){
   #* 2. Check that the response is the name of a node in 'network'
   #* 3. Check that all regression variables are parents of the response
   
-  err.flag <- 0
-  err.msg <- ""
-  
-  wrn.flag <- 0
-  wrn.msg <- ""
-  
   #* 1. check that network is a HydeNetwork
-  if (class(network) != "HydeNetwork"){
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg,
-                 paste0(err.flag, ": 'network' must be of class 'HydeNetwork'"))
-  }
+  if (class(network) != "HydeNetwork")
+  ArgumentCheck::addError("'network' must be of class 'HydeNetwork'",
+                          Check)
   
   #* 2. Check that the response is the name of a node in 'network'
   if (!all(names(Attrs) %in% network$nodes)){
     not_nodes <- paste(names(Attrs)[!names(Attrs) %in% network$nodes], collapse=", ")
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg,
-                 paste0(err.flag, ": The following model responses are not nodes in 'network': ",
-                        not_nodes))
+    ArgumentCheck::addError(paste0("The following model responses are not nodes in 'network': ",
+                                   not_nodes),
+                            Check)
   }
   
   #* 3. Check that all regression variables are parents of the response
@@ -80,16 +77,13 @@ setNodeModels <- function(network, ...){
     equalParents[i] <- setequal(Attrs[[i]]$parents, network$parents[[names(Attrs)[i]]])
   }
   
-  if (!all(equalParents)){
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg,
-                 paste0(err.flag, ": The following model independent variables ",
-                        "are not identical to the node parent list: ",
-                        paste(names(equalParents)[!equalParents], collapse=", ")))
-  }
+  if (!all(equalParents))
+  ArgumentCheck::addError(paste0("The following model independent variables ",
+                                 "are not identical to the node parent list: ",
+                                 paste(names(equalParents)[!equalParents], collapse=", ")),
+                          Check)
   
-  if (wrn.flag) warning(paste(wrn.msg, collapse="\n"))
-  if (err.flag) stop(paste(err.msg, collapse="\n"))
+  ArgumentCheck::finishArgCheck(Check)
   
   #* Translate new node features into network object  
   for (i in names(Attrs)){

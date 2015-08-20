@@ -1,3 +1,7 @@
+<img src="inst/img/HydeNet.png">
+
+![](http://cranlogs.r-pkg.org/badges/grand-total/HydeNet)
+
 Hybrid Bayesian Networks Using R and JAGS
 ===
 

@@ -1,12 +1,16 @@
-<!--
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Building and Customizing HydeNet Plots}
--->
 ---
 title: "Building and Customizing HydeNet Plots"
 author: "Jarrod Dalton and Benjamin Nutter"
-date: "`r format(Sys.Date(), format='%B %d, %Y')`"
-output: html_vignette
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    fig_caption: yes
+    number_section: no
+    toc: no
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Building and Customizing HydeNet Plots}
+  \usepackage[utf8]{inputenc}
 ---
 
 Visualizing your graphical network will be critical to explaining the relationships between the variables in your model. While the printed output explicitly defines the nature of the relationships, the visual representation usually makes it easier to see how all the pieces fit together and evaluate if all of the important relationships have been assembled correctly.

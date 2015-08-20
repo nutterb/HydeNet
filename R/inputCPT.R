@@ -20,35 +20,24 @@ inputCPT.formula <- function(formula, factorLevels, reduce=TRUE, ...)
 
 inputCPT.list <- function(x, factorLevels, reduce=TRUE, ...)
 {
-  err.flag <- 0
-  err.msg <- ""
+  Check <- ArgumentCheck::newArgCheck()
   
-  wrn.flag <- 0
-  wrn.msg <- ""
+  if (!all(c("y","x") %in% names(x)))
+  ArgumentCheck::addError(paste0("List object 'x' must contain character vectors ",
+                                 "'y' and 'x'. See help('cpt')."),
+                          Check)
+
+  if (!all(unlist(lapply(x,is.character))))
+  ArgumentCheck::addError(paste0("List object 'x' must contain character vectors ",
+                                 "'y' and 'x'. See help('cpt')."),
+                          Check)
   
-  if(!all(c("y","x") %in% names(x))){
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg, paste0(err.flag,
-                                 ": List object 'x' must contain character vectors ",
-                                 "'y' and 'x'. See help('cpt')."))
-  }
+  if (length(x[["y"]]) != 1)
+  ArgumentCheck::addError(paste0("Element 'y' of list object 'x' must be a character ",
+                                 "vector of length 1. See help('cpt')."),
+                          Check)
   
-  if(!all(unlist(lapply(x,is.character)))){
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg, paste0(err.flag,
-                                 ": List object 'x' must contain character vectors ",
-                                 "'y' and 'x'. See help('cpt')."))
-  }
-  
-  if(length(x[["y"]]) != 1){
-    err.flag <- err.flag + 1
-    err.msg <- c(err.msg, paste0(err.flag,
-                                 ": Element 'y' of list object 'x' must be a character ",
-                                 "vector of length 1. See help('cpt')."))
-  }
-  
-  if(wrn.flag) warning(paste(wrn.msg, collapse="\n"))
-  if(err.flag)  stop(paste(err.msg, collapse="\n"))
+  ArgumentCheck::finishArgCheck(Check)
   
   variables       <- c(x[["y"]], x[["x"]])
   dependentVar    <- x[["y"]]

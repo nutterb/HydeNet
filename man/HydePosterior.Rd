@@ -5,7 +5,7 @@
 \title{Posterior Distributions of a Decision Network}
 \usage{
 HydePosterior(cHN, variable.names, n.iter, thin = 1, ...,
-  monitor_observed = TRUE)
+  monitor_observed = TRUE, bind = TRUE)
 }
 \arguments{
 \item{cHN}{A \code{compiledHydeNetwork} object as returned by
@@ -21,10 +21,14 @@ HydePosterior(cHN, variable.names, n.iter, thin = 1, ...,
 jags model objects.}
 
 \item{monitor_observed}{If TRUE, the observed or fixed variables (those
-  passed to the \code{data} argument in \code{compileJagsNetwork}) are
-  forced into \code{variable.names} if not already provided.  This is
-  recommended, especially if you will be binding multiple JAGS runs
-  together.}
+passed to the \code{data} argument in \code{compileJagsNetwork}) are
+forced into \code{variable.names} if not already provided.  This is
+recommended, especially if you will be binding multiple JAGS runs
+together.}
+
+\item{bind}{Logical. If \code{TRUE}, posterior distributions will be bound into
+  a single data frame.  If \code{FALSE}, the standard output from \code{rjags}
+  is returned.}
 }
 \value{
 A list of class \code{HydePosterior} with elements \code{codas}
