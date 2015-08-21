@@ -3,9 +3,9 @@
 language: r
 warnings_are_errors: true
 sudo: required
-bioc_packages:
-  - RBGL
-  - graph
+install:
+  - ./travis-tool.sh install_bioc RBGL
+  - ./travis-tool.sh install_bioc graph
 
 before_install:
   - sudo add-apt-repository ppa:marutter/rrutter -y
