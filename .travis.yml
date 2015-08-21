@@ -3,7 +3,7 @@
 language: r
 warnings_are_errors: true
 sudo: required
-bioc_required: true
+
 
 before_install:
   - sudo add-apt-repository ppa:marutter/rrutter
