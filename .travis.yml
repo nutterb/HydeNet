@@ -6,9 +6,9 @@ sudo: required
 # bioc_required: true
 
 before_install:
-  - add-apt-repository ppa:marutter/rrutter
-  - apt-get update
-  - apt-get install r-cran-rjags 
+  - sudo add-apt-repository ppa:marutter/rrutter
+  - sudo apt-get update
+  - sudo apt-get install r-cran-rjags 
 
 env:
  global:
