@@ -59,7 +59,8 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
         "If this is a binary variable, enter '<yn>' as a shortcut.\n",
         "When finished, enter '<z>'.\n",
         "To repeat entry of the last inputted factor level, enter '<b>'.\n",
-        "To start over entirely, enter '<s>'\n", hbar, sep="")
+        "To start over entirely, enter '<s>'.\n",
+        "To quit, enter <q>.", hbar, sep="")
   }
   
   if(missing(factorLevels)){  # solicit the names of factor levels from the console
