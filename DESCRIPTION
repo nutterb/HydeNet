@@ -40,7 +40,6 @@ Suggests:
     knitr,
     testthat
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
-VignetteBuilder: knitr
 LazyLoad: yes
 LazyData: true
 URL: https://github.com/nutterb/HydeNet,
