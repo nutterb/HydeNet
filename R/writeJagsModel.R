@@ -119,11 +119,13 @@ writeJagsModel <- function(network, node){
     if (node_params['mu'] %in% c(fromData(), fromFormula())){
       if (node_params['mu'] == fromData())
         node_params['mu'] <- writeJagsFormula(fit, network$nodes)
-  
+      
       else if (node_params['mu'] == fromFormula())
         node_params['mu'] <- rToJags(network$nodeFormula[[node_str]])
     
-      node_params['mu'] <- as.character(as.formula(node_params['mu']))[-(1:2)]
+      
+      node_params['mu'] <- as.character(as.formula(node_params[['mu']]))[-(1:2)]
+
     }
     
     if (node_params['tau'] %in% c(fromData(), fromFormula())){
@@ -155,7 +157,7 @@ writeJagsModel <- function(network, node){
       else if (node_params['lambda'] == fromFormula())
         node_params['lambda'] <- rToJags(network$nodeFormula[[node_str]])
     
-      node_params['lambda'] <- as.character(as.formula(node_params['lambda']))[-(1:2)]
+      node_params['lambda'] <- as.character(as.formula(node_params[['lambda']]))[-(1:2)]
     }
     
     model_code <- paste0(node_str, " ~ ",
