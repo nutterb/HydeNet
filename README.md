@@ -4,7 +4,6 @@
 ![](http://cranlogs.r-pkg.org/badges/grand-total/HydeNet)
 [![Coverage Status](https://coveralls.io/repos/nutterb/HydeNet/badge.svg?branch=current-devel&service=github)](https://coveralls.io/github/nutterb/HydeNet?branch=current-devel)
 
-
 Hybrid Bayesian Networks Using R and JAGS
 ===
 
