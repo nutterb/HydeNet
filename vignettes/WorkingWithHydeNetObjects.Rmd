@@ -68,7 +68,7 @@ The network we will study involves the diagnosis and treatment of pulmonary embo
 
 A graphical representation of the PE network can be constructed based on an unpopulated **HydeNetwork** object (i.e., a "base" object for which node distributions have not yet been specified):
 
-```{r, fig.width=7}
+```{r, fig.width=7, eval=1}
 net <- HydeNetwork(~ wells
                    + pe | wells
                    + d.dimer | pregnant*pe
@@ -78,6 +78,8 @@ net <- HydeNetwork(~ wells
 
 plot(net)
 ```
+
+![](vignette_images/WorkingWithHydeNetObjects1.jpeg)
 
 The **HydeNetwork** object we created, called `net`, is worth exploring:
 
@@ -491,7 +493,7 @@ attr(,"class")
 
 In many cases, the user may desire to specify nodes that are non-random in nature. For example, we might construct a network for the first roll of dice within a game of craps.  In craps, if the "shooter" (the person rolling the dice) rolls a 2, 3, or 12, you immediately lose. If the "shooter" rolls a 7 or 11, you immediately win. Anything else and the "point" gets set (and then the shooter rolls again).
 
-```{r, fig.width=3}
+```{r, fig.width=3, eval = -10}
 craps <- HydeNetwork(~ d1 + d2 + diceSum | d1*d2
                        + firstRollOutcome | diceSum)
 
@@ -513,7 +515,10 @@ craps <- setNode(craps, firstRollOutcome, nodeType = "determ",
                                     ifelse(diceSum == 7 | diceSum == 11, 1,0)))
 
 plot(craps)
+```
+![](vignette_images/WorkingWithHydeNetObjects2.jpeg)
 
+```{r}
 writeNetworkModel(craps, pretty=TRUE)
 ```
 
@@ -531,15 +536,16 @@ We have implemented a series of "helper" deterministic functions to facilitate m
 
 Nodes and/or links may be added or removed from an existing `HydeNetwork` object, using an `update` method we have implemented for `HydeNetwork` objects. Syntactically, this function acts in a similar fashion to `update.lm()`, in that you add or subtract terms from the model equation.  Suppose that a new diagnostic test for PE was invented and we wish to incorporate it into the PE network.  We can achieve this by the following code:
 
-```{r, fig.width=7}
+```{r, fig.width=7, eval=1}
 net2 <- update(net, . ~ . + newTest | pe
                           + treat | newTest
                           - pregnant)
 
 
 plot(net2)
-
 ```
+
+![](vignette_images/WorkingWithHydeNetObjects3.jpeg)
 
 The `update()` method for `HydeNetwork` objects processes terms in the given model equation sequentially. In the above example, the original object `net` did not contain a node called `newTest`.  But there were nodes called `pregnant`, `pe`, and `treat`.  The first term within the model equation (`+ newTest | pe`) specifies the addition of the node `newTest` as a child of node `pe`.  The second term (`+ treat | newTest`) specifies the addition of a link from the now-existing node `newTest` into node `treat`.  The third term (`- pregnant`) specifies the removal of node `pregnant`.  Examining the network object, two important points are worth mentioning:
 

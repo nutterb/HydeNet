@@ -59,7 +59,7 @@ To begin the modeling, we first construct a skeleton `HydeNet` model object, (i.
 ```{r, echo=FALSE, message=FALSE}
 library(HydeNet)
 ```
-```{r, fig.width=7}
+```{r, fig.width=7, eval = 1}
 net <- HydeNetwork(~ initialAces | card1*card2
                    + initialPoints | card1*card2
                    + highUpcard | dealerUpcard
@@ -79,6 +79,8 @@ net <- HydeNetwork(~ initialAces | card1*card2
 
 plot(net)
 ```
+
+![](vignette_images/DecisionNetworks1.jpeg)
 
 Notice in the above network plot that all nodes have the same representation of empty black ovals. The `plot.HydeNetwork()` function allows for enhanced visualization of decision networks (see the vignette titled "Building and Customizing HydeNet Plots" for details; `vignette("HydeNetPlots", package="HydeNet")`), and since we have not yet specified the node types (i.e., random variable, deterministic, decision, or utility), it assumes that all nodes are random variables. Once we populate the network object with the node types and conditional distributions/deterministic functions, we will regenerate the plot.
 
@@ -243,10 +245,11 @@ c(net$nodeDecision$hit2, net$nodeUtility$payoff)
 
 We are now ready to visualize the finished decision network:
 
-```{r, fig.width=7}
+```{r, fig.width=7, eval=FALSE}
 plot(net)
 ```
 
+![](vignette_images/DecisionNetworks2.jpeg)
 
 ## Decision and Utility Nodes
 
@@ -354,7 +357,7 @@ compiledNets <- compileDecisionModel(net, policyMatrix = policies)
 samples <- lapply(compiledNets,
                   HydePosterior,
                   variable.names = trackedVars,
-                  n.iter=100000)
+                  n.iter=10000)
 
 lapply(samples, head)
 ```

@@ -34,11 +34,12 @@ The key aspects of this network are that it contains
 
 When you load `HydeNet`, it will define some default settings for each of these nodes, but before we show you those settings, let's take a look at what the GraphViz would return if we chose not to use anything but its defaults.
 
-```{r}
+```{r, eval=1:2}
 library(HydeNet)
 data(BlackJack, package="HydeNet")
 plot(BlackJack, useHydeDefaults=FALSE)
 ```
+![](vignette_images/HydeNetPlots1.jpeg)
 
 The figure above shows every node in the network in a circle with white fill and black text. In a decision network, however, different nodes may be inherently different.  It would be helpful to be able to distinguish between random variables, deterministic nodes, decision nodes, and utility nodes.  The `plot.HydeNetwork` method uses the package's default settings to distinguish these types of nodes and can produce the figure below.
 
@@ -56,9 +57,10 @@ What we will see is:
   nodes are deterministic nodes with no children that are usually of special 
   interest.  In this case the utility node is the payoff from the game.
 
-```{r}
+```{r, eval=FALSE}
 plot(BlackJack)
 ```
+![](vignette_images/HydeNetPlots2.jpeg)
 
 ### Customizing the Default Settings
 We understand that it's possible that you won't find our default settings appealing.  That's okay, we promise that our feelings aren't hurt. In fact, we're willing to help!  
@@ -76,7 +78,7 @@ Let's assume that you only want to change the default scheme.  That is, you want
 * decision nodes are in yellow ellipses with black text and red borders
 * utility nodes are in red circles with white text
 
-```{r}
+```{r, eval=1}
 HydePlotOptions(variable=list(shape = "rect", fillcolor = "#A6DBA0"),
                 determ = list(shape = "rect", fillcolor = "#E7D4E8",
                               fontcolor = "#1B7837", linecolor = "#1B7837"),
@@ -86,30 +88,33 @@ HydePlotOptions(variable=list(shape = "rect", fillcolor = "#A6DBA0"),
                                fontcolor = "white"))
 plot(BlackJack)
 ```
+![](vignette_images/HydeNetPlots3.jpeg)
 
 And at this point, if you decide that maybe our default color scheme really wasn't so bad, there's an easy way to go back, too.
 
-```{r}
+```{r, eval=FALSE}
 HydePlotOptions(restorePackageDefault=TRUE)
 plot(BlackJack)
 ```
+![](vignette_images/HydeNetPlots2.jpeg)
 
 ### Customizing Individual Nodes
 The last thing you might want to do, from time to time, is customize an individual node.  For instance, you might want to highlight one particular decision.  In our case, let's focus on the decision to take the first hit.  To make this node stand out, let's make it a purple circle.
 
 To do this, we'll need to use the `customNode` function.  It's easiest to do this right within the plot call.  We'll even change the size of the node to really make it pop.
 
-```{r}
+```{r, eval=FALSE}
 plot(BlackJack,
      customNodes = customNode(node_id = "hit1",
                               fillcolor = "purple", shape = "circle",
                        fontcolor = "white", height = "2",
                        style="filled"))
 ```
+![](vignette_images/HydeNetPlots4.jpeg)
 
 Or if we would rather show a series of plots walking through the three decisions, we might not want to change the node appearance, but only the size.
 
-```{r}
+```{r, eval = FALSE}
 plot(BlackJack,
      customNodes = customNode(node_id = "hit1", height = "2"))
 plot(BlackJack,
@@ -117,20 +122,24 @@ plot(BlackJack,
 plot(BlackJack,
      customNodes = customNode(node_id = "hit3", height = "2"))
 ```
+![](vignette_images/HydeNetPlots5.jpeg)
+![](vignette_images/HydeNetPlots6.jpeg)
+![](vignette_images/HydeNetPlots7.jpeg)
 
 The way that the node customization works is that it only applies custom attributes _after_ establishing the plot defaults.  You may also alter the appearance of 
 multiple nodes simultaneously
 
-```{r}
+```{r, eval=FALSE}
 plot(BlackJack,
      customNodes = rbind(customNode(node_id = "hit1", height="2"),
                          customNode(node_id = "hit2", height="2"),
                          customNode(node_id = "hit3", height="2")))
 ```
+![](vignette_images/HydeNetPlots8.jpeg)
 
 And, of course, if you want to use a custom node appearance without all of the `HydeNet` defaults, you may always do the following:
 
-```{r}
+```{r, eval=FALSE}
 plot(BlackJack,
      customNodes = customNode(node_id = "payoff", 
                               fillcolor = "green", 
@@ -140,6 +149,7 @@ plot(BlackJack,
                               style="filled"),
      useHydeDefaults = FALSE)
 ```
+![](vignette_images/HydeNetPlots9.jpeg)
 
 ## Conclusion
 `HydeNet` is a tool to assist in generating and evaluating hybrid decision networks.  Displaying the network is an important aspect of communicating the relationships established by your network.  The `HydeNet` plotting tools provide the basic functionality needed to express both generic and customized plots suitable for sharing and evaluating network models.
