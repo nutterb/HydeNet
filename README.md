@@ -1,5 +1,6 @@
 <img src="inst/img/HydeNet.png">
 
+[![Travis-CI Build Status](https://travis-ci.org/nutterb/HydeNet.svg?branch=current-devel)](https://travis-ci.org/nutterb/HydeNet)
 [![CRAN version](http://www.r-pkg.org/badges/version/HydeNet)](https://cran.r-project.org/web/packages/HydeNet/index.html)
 ![](http://cranlogs.r-pkg.org/badges/grand-total/HydeNet)
 [![Coverage Status](https://coveralls.io/repos/nutterb/HydeNet/badge.svg?branch=current-devel&service=github)](https://coveralls.io/github/nutterb/HydeNet?branch=current-devel)
