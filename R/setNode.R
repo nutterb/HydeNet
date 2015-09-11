@@ -174,7 +174,6 @@ setNode <- function(network, node, nodeType,
   }
 
   if (!missing(nodeType)) network$nodeType[[node.t]] <- nodeType
- 
   exp_param <- eval(substitute(expectedParameters(network, node, TRUE)))
   params <- list(...)[exp_param]
   
