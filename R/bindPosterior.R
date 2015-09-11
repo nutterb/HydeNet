@@ -67,6 +67,9 @@ bindPosterior <- function(hydePost, relabel_factor=TRUE){
   as.data.frame(bound)
 }
 
+
+
+#**** UTILITY FUNCTIONS
 bind_chains_mcmclist <- function(mcmc, hydePost){
   as.data.frame(hydePost$codas[[mcmc]]) %>%
     dplyr::mutate_(chain_index = ~mcmc,
