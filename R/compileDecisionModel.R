@@ -75,9 +75,9 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
     ArgumentCheck::addError(
       msg = "'data' is not an accepted argument in 'compileDecisionModel'",
       argcheck = Check)
-
-  options <- makePolicyMatrix(network, policyMatrix, Check)
   
+  options <- makePolicyMatrix(network, policyMatrix, Check)
+
   ArgumentCheck::finishArgCheck(Check)
   
   cpt_arrays <- makeCptArrays(network)
