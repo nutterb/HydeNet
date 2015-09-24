@@ -1,3 +1,7 @@
+### 0.9.3 (24 Sept 2015)
+* Minor bug fix related to creating policy matrices with nodes that
+  don't have a 'nodeFitter' specified.
+
 ### 0.9.2 (11 Sept 2015)
 * Fixed a bug in `compileJagsModel` and `compileDecisionModel` that prevented `cpt`
   objects from being passed to JAGS models correctly.
