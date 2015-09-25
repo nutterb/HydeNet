@@ -32,7 +32,7 @@
 #' g6 <- glm(treat ~ d.dimer + angio, data=PE, family="binomial")
 #' g7 <- glm(death ~ pe + treat, data=PE, family="binomial")
 #' 
-#' Net <- setNodeModels(Net, g1, g2, g3, g4, g5, g6, g7) 
+#' Net2 <- setNodeModels(Net, g1, g2, g3, g4, g5, g6, g7) 
 #' print(Net)
 #' 
 #' writeNetworkModel(Net, pretty=TRUE)
@@ -84,17 +84,18 @@ setNodeModels <- function(network, ...){
                           Check)
   
   ArgumentCheck::finishArgCheck(Check)
-  
+
   #* Translate new node features into network object  
   for (i in names(Attrs)){
     network$parents[[i]] <- Attrs[[i]]$parents
     network$nodeType[[i]] <- Attrs[[i]]$nodeType
     network$nodeFormula[[i]] <- Attrs[[i]]$nodeFormula
     network$nodeFitter[[i]] <- Attrs[[i]]$nodeFitter
-    network$nodeFitterargs[[i]] <- Attrs[[i]]$nodeFitterArgs
+    network$nodeFitterArgs[[i]] <- Attrs[[i]]$nodeFitterArgs
     network$nodeParams[[i]] <- Attrs[[i]]$nodeParams
     network$nodeData[[i]] <- Attrs[[i]]$nodeData
     network$nodeModel[[i]] <- Attrs[[i]]$nodeModel
+    network$factorLevels[[i]] <- Attrs[[i]]$factorLevels
   }
 
   return(network) 

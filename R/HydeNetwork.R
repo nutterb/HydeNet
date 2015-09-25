@@ -49,6 +49,12 @@
 #'   \item \code{nodeData} A named list with the data for each node.  If a node's 
 #'       entry in \code{fromData} is \code{TRUE} and \code{nodeData} is \code{NULL},
 #'       it will look to the \code{data} attribute instead.
+#'   \item \code{factorLevels} If the vector associated with the node is a factor 
+#'       (or character), the levels of the factor are stored here.  Although it
+#'       may seem redundant, it allows factor levels to be specified in cases
+#'       where the node is not define with data.  If data are provided to the 
+#'       node, this element is determined from the data and cannot be 
+#'       manually overwritten.
 #'   \item \code{nodeModel} A list of model objects.  This is a storing place for 
 #'       models that have already been fit so that they don't have to be refit 
 #'       again.
@@ -161,6 +167,15 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
   nodeUtility <- lapply(seq_along(node_names), function(x) return(FALSE))
   names(nodeUtility) <- node_names
   
+  factorLevels <- lapply(seq_along(node_names), function(x) return(NULL))
+  names(factorLevels) <- node_names
+  if (!is.null(data)){
+    factor_vars <- names(data)[vapply(data, is.factor, logical(1))]
+    factorLevels[factor_vars] <- 
+      lapply(data[, factor_vars, drop = FALSE],
+             levels)
+  }
+
   #* Define the HydeNetwork object
   network <- list(nodes = node_names, parents=parents, nodeType=nodeType,
                   nodeFormula=nodeFormula,
@@ -168,6 +183,7 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
                   nodeParams=nodeParams, 
                   fromData=fromData, 
                   nodeData = nodeData,
+                  factorLevels = factorLevels,
                   nodeModel = nodeModel,
                   nodeDecision = nodeDecision,
                   nodeUtility = nodeUtility,
@@ -212,6 +228,7 @@ HydeNetwork.list <- function(nodes, ...){
     network$nodeDecision[[i]] <- Attrs[[i]]$nodeDecision
     network$nodeUtility[[i]] <- Attrs[[i]]$nodeUtility
     network$fromData[[i]] <- TRUE
+    network$factorLevels[[i]] <- Attrs[[i]]$factorLevels
   }
   
   return(network)

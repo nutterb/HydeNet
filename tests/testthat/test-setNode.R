@@ -57,4 +57,54 @@ test_that("fit the model for dpois",
             fitModel = TRUE),
     not(throws_error()))
 })
+
+test_that("setNode factorLevels with non-dcat or dbern",
+{
+  NetLevels <- HydeNetwork(~ gear | mpg + am)
+  expect_warning(
+    setNode(NetLevels, am, nodeType = "dpois", 
+          factorLevels = c("Automatic", "Manual"),
+          lambda = 1))
+})
+
+test_that("setNode factorLevels with cpt fitter",
+{
+  NetLevels <- HydeNetwork( ~ gear | mpg + am)
+  expect_warning(
+    setNode(NetLevels, am, nodeType = "dcat",
+          nodeFitter = "cpt",
+          factorLevels = c("Automatic", "Manual"),
+          pi = fromData()))
+})
+
+test_that("setNode factorLevels with nodeData",
+{
+  NetLevels <- HydeNetwork( ~ gear | mpg + am)
+  expect_warning(
+    setNode(NetLevels, am, nodeType = "dcat",
+            nodeFitter = "cpt",
+            nodeData = mtcars,
+            factorLevels = c("Automatic", "Manual"),
+            pi = fromData()))
+})
+
+test_that("setNode factorLevels with network data",
+{
+  NetLevels <- HydeNetwork( ~ gear | mpg + am, data = mtcars)
+  expect_warning(
+    setNode(NetLevels, am, nodeType = "dcat",
+            nodeFitter = "cpt",
+            factorLevels = c("Automatic", "Manual"),
+            pi = fromData()))
+})
+
+test_that("setNode factorLevels as intended to be used",
+{
+  NetLevels <- HydeNetwork( ~ gear | mpg + am)
+  expect_equal(
+    setNode(NetLevels, am, nodeType = "dcat",
+            factorLevels = c("Automatic", "Manual"),
+            pi = vectorProbs(c(15, 25), "am"))$factorLevels,
+    list(gear = NULL, mpg = NULL, am = c("Automatic", "Manual")))
+})
   

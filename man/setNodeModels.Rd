@@ -37,7 +37,7 @@ g5 <- glm(angio ~ pe, data=PE, family="binomial")
 g6 <- glm(treat ~ d.dimer + angio, data=PE, family="binomial")
 g7 <- glm(death ~ pe + treat, data=PE, family="binomial")
 
-Net <- setNodeModels(Net, g1, g2, g3, g4, g5, g6, g7)
+Net2 <- setNodeModels(Net, g1, g2, g3, g4, g5, g6, g7)
 print(Net)
 
 writeNetworkModel(Net, pretty=TRUE)
