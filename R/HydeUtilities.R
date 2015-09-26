@@ -235,7 +235,8 @@ makeFactorRef <- function(network)
   Ref <- lapply(network_factors,
          function(f){
            data.frame(value = 1:length(network$factorLevels[[f]]),
-                      label = network$factorLevels[[f]])
+                      label = network$factorLevels[[f]],
+                      stringsAsFactors = FALSE)
          })
   names(Ref) <- network_factors
   

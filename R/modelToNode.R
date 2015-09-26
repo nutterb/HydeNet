@@ -38,7 +38,9 @@ modelToNode.cpt <- function(model, nodes, ...)
 {
   if (missing(nodes))
     nodes <- names(dimnames(model))
-  list(nodes = utils::tail(names(dimnames(model)), 1),
+  
+  node_name = utils::tail(names(dimnames(model)), 1)
+  list(nodes = node_name,
        parents = if (length(dimnames(model)) == 1)
          NULL
        else 
@@ -58,7 +60,7 @@ modelToNode.cpt <- function(model, nodes, ...)
        nodeUtility = FALSE,
        fromData = TRUE,
        nodeData = attributes(model)$model,
-       factorLevels = levels(attributes(model)$model[[1]]),
+       factorLevels = levels(attributes(model)$model[[node_name]]),
        nodeModel = model)
 }
 
