@@ -17,6 +17,10 @@
 #' @param ... Additional arguments to pass to \code{jags.model}, excepting
 #'   the \code{data} argument.  The \code{data} argument is created by 
 #'   \code{compileDecisionModel}, and cannot be passed manually.
+#' @param data An optional list of data values to be observed in the nodes.  
+#'   It is passed to the \code{data} argument of \code{rjags::jags}. Any
+#'   values given in \code{data} will override values provided in 
+#'   \code{policyMatrix} with a warning.
 #'   
 #' @details \code{compileDecisionModel} only accepts nodes of type \code{"dbern"}
 #'   (Bernoulli random variable taking either 0 or 1) or \code{"dcat"} 
@@ -66,17 +70,19 @@
 #'                               angio = c("Negative", "Positive"))
 #' decision3 <- compileDecisionModel(Net, custom_policy) 
 #' 
-compileDecisionModel <- function(network, policyMatrix = NULL, ...){
+compileDecisionModel <- function(network, policyMatrix = NULL, ..., data = NULL){
   Check <- ArgumentCheck::newArgCheck()
   
   dots <- list(...)
   
-  if ("data" %in% names(dots))
-    ArgumentCheck::addError(
-      msg = "'data' is not an accepted argument in 'compileDecisionModel'",
-      argcheck = Check)
- 
-  options <- makePolicyMatrix(network, policyMatrix, Check)
+#   if ("data" %in% names(dots))
+#     ArgumentCheck::addError(
+#       msg = "'data' is not an accepted argument in 'compileDecisionModel'",
+#       argcheck = Check)
+#  
+  options <- makePolicyMatrix(network, policyMatrix, data, Check)
+
+  return(options)
 
   ArgumentCheck::finishArgCheck(Check)
   
@@ -96,7 +102,7 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ...){
 
 #*********** UTILITY FUNCTIONS
 
-makePolicyMatrix <- function(network, policyMatrix, argcheck){
+makePolicyMatrix <- function(network, policyMatrix, data, argcheck){
   if (is.null(policyMatrix))
   {
     decisionNodes <- names(network$nodeDecision)[sapply(network$nodeDecision, any)]
@@ -135,6 +141,25 @@ makePolicyMatrix <- function(network, policyMatrix, argcheck){
     if (!is.data.frame(policyMatrix)) break; # avoids defining 'options' when
     # the condition is not satisfied
     options <- policyMatrix
+  }
+  
+  #* This is the part that pushes values from `data` into the 
+  #* policy matrix.
+  if (!is.null(data)){
+    conflicts <- names(data)[names(data) %in% names(options)]
+    if (length(conflicts) > 0){
+      ArgumentCheck::addWarning(
+        msg = paste0("The following variables in 'data' are overriding ",
+                     "values in 'policyMatrix': ",
+                     paste0(conflicts, collapse = ", ")),
+        argcheck = argcheck)
+    }
+    
+    for (i in names(data)){
+      options[[i]] <- data[[i]]
+    }
+    #* Remove duplicated rows
+    options <- options[!duplicated(options), , drop = FALSE]
   }
   
   ArgumentCheck::finishArgCheck(argcheck)

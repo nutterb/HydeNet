@@ -113,7 +113,7 @@ plot.HydeNetwork <- function(x,
                              ..., 
                              useHydeDefaults = TRUE)
 {
-  node_df <- data.frame(node_id = x$nodes,
+  node_df <- data.frame(nodes = x$nodes,
                         stringsAsFactors = FALSE)
   if (useHydeDefaults) node_df <- mergeDefaultPlotOpts(x, node_df)
   
@@ -151,8 +151,8 @@ mergeDefaultPlotOpts <- function(network, node_df){
                    by="type") %>%
     dplyr::select_("-type")
   
-  node_df[, -which(names(node_df) == "node_id")] <- 
-    lapply(node_df[, -which(names(node_df) == "node_id"), drop=FALSE],
+  node_df[, -which(names(node_df) == "nodes")] <- 
+    lapply(node_df[, -which(names(node_df) == "nodes"), drop=FALSE],
            function(x) ifelse(is.na(x), "", x))
   node_df
 }
@@ -165,7 +165,7 @@ mergeCustomNodes <- function(node_df, customNodes)
 #   node_df <- dplyr::mutate(node_df, index=2)
 #   customNodes <- dplyr::mutate(customNodes, index=1)
   node_df <- dplyr::full_join(customNodes, node_df,
-                              by = c("node_id" = "node_id"))
+                              by = c("nodes" = "nodes"))
   
   duplicated_names.x <- names(node_df)[grepl("[.]x", names(node_df))]
   if (length(duplicated_names.x) > 0)
@@ -185,8 +185,8 @@ mergeCustomNodes <- function(node_df, customNodes)
 
   names(node_df) <- gsub("[.]x", "", names(node_df))
 
-  node_df[, -which(names(node_df) == "node_id")] <- 
-    lapply(node_df[, -which(names(node_df) == "node_id")],
+  node_df[, -which(names(node_df) == "nodes")] <- 
+    lapply(node_df[, -which(names(node_df) == "nodes")],
            function(x) ifelse(is.na(x), "", x))
   return(node_df)
 }
@@ -205,7 +205,7 @@ mergeCustomEdges <- function(edge_df, customEdges)
   edge_df <- dplyr::mutate(edge_df, index = 2)
   customEdges <- dplyr::mutate(customEdges, index = 1)
   edge_df <- dplyr::bind_rows(customEdges, edge_df) %>%
-    dplyr::group_by_("edge_from", "edge_to")  %>%
+    dplyr::group_by_("from", "to")  %>%
     dplyr::filter_("rank(index, ties.method='first')==1") %>%
     dplyr::select_("-index")
   edge_df  
@@ -218,7 +218,7 @@ mergeCustomEdges <- function(edge_df, customEdges)
 #'   
 customNode <- function(node_id, ...){
   node_id <- as.character(substitute(node_id))
-  nodeAttrs <- as.data.frame(c(list(node_id = node_id),
+  nodeAttrs <- as.data.frame(c(list(nodes = node_id),
                                list(...)), 
                              stringsAsFactors=FALSE)
   if (length(nodeAttrs) > 0) return(nodeAttrs)

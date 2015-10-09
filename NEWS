@@ -1,6 +1,14 @@
 ### 0.10.0 (26 Sept 2015)
 * Implements the `factorLevels` element in network objects 
   and arguments in `setNode`.  See Issue #81
+* Changes to `plot.HydeNetwork` relevant to changes in 
+  `DiagrammeR` 0.8.0.  Note that the column names in custom node
+  data frames no longer contain `node_id` but use `nodes` 
+  instead.  However, the `HydeNet` function arguments have no
+  changed names, in order to maintain compatibility with 0.9.0.
+  Future versions may allow for either `node_id` or `nodes` to 
+  be used.  In custom edge data frames, `edge_from` and `edge_to`
+  are changed to `from` and `to`, respectively.
 
 ### 0.9.3 (24 Sept 2015)
 * Minor bug fix related to creating policy matrices with nodes that
