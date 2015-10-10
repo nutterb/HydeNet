@@ -24,6 +24,8 @@ r_github_packages:
 
 r_packages:
   - rjags
+  - DiagrammeR
+  - V8
 
 notifications:
   email:

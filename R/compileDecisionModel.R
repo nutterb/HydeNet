@@ -82,8 +82,6 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ..., data = NULL)
 #  
   options <- makePolicyMatrix(network, policyMatrix, data, Check)
 
-  return(options)
-
   ArgumentCheck::finishArgCheck(Check)
   
   cpt_arrays <- makeCptArrays(network)

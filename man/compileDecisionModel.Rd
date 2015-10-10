@@ -4,7 +4,7 @@
 \alias{compileDecisionModel}
 \title{Compile JAGS Models to Evaluate the Effect of Decisions in a Network}
 \usage{
-compileDecisionModel(network, policyMatrix = NULL, ...)
+compileDecisionModel(network, policyMatrix = NULL, ..., data = NULL)
 }
 \arguments{
 \item{network}{A HydeNet object with decision nodes defined.}
@@ -14,8 +14,13 @@ for comparing networks under different conditions.  See
 \code{\link{policyMatrix}}.}
 
 \item{...}{Additional arguments to pass to \code{jags.model}, excepting
-  the \code{data} argument.  The \code{data} argument is created by
-  \code{compileDecisionModel}, and cannot be passed manually.}
+the \code{data} argument.  The \code{data} argument is created by
+\code{compileDecisionModel}, and cannot be passed manually.}
+
+\item{data}{An optional list of data values to be observed in the nodes.
+  It is passed to the \code{data} argument of \code{rjags::jags}. Any
+  values given in \code{data} will override values provided in
+  \code{policyMatrix} with a warning.}
 }
 \value{
 Returns a list of \code{compiledHydeNetwork} objects.
