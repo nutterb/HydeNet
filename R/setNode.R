@@ -53,6 +53,15 @@
 #'   Data passed in this argument are applied only to this specific node.  No checks are 
 #'   performed to ensure that all of the appropriate variables (the node and its parents)
 #'   are included.
+#' @param factorLevels A character vector used to specify the levels of factors
+#'   when data are not provided for a node.  The order of factors follows the 
+#'   order provided by the user.  This argument is only used when the node type 
+#'   is either \code{dcat} or \code{dbern}, the node Fitter is not \code{cpt}, 
+#'   \code{nodeData} is \code{NULL}, and no variable for the node exists in 
+#'   the network's \code{data} element.  If any of those conditions is not met,
+#'   \code{factorLevels} is ignored.  This proves particularly important when 
+#'   data are specified in order to prevent a user specification from conflicting 
+#'   with expected factors across nodes.
 #' @param validate Logical.  Toggles validation of parameters given in \code{...}.
 #'   When passing raw JAGS code (ie, character strings), this will be ignored 
 #'   (with a message), 
@@ -123,7 +132,7 @@ setNode <- function(network, node, nodeType,
                     decision = "current",
                     utility = "current",
                     fromData=!is.null(network$data), ...,
-                    nodeData = NULL,
+                    nodeData = NULL, factorLevels = NULL,
                     validate=TRUE, fitModel=getOption("Hyde_fitModel")){
   
   network.t <- as.character(substitute(network))
@@ -174,7 +183,6 @@ setNode <- function(network, node, nodeType,
   }
 
   if (!missing(nodeType)) network$nodeType[[node.t]] <- nodeType
- 
   exp_param <- eval(substitute(expectedParameters(network, node, TRUE)))
   params <- list(...)[exp_param]
   
@@ -230,6 +238,50 @@ setNode <- function(network, node, nodeType,
   if (!missing(nodeFitter)) network$nodeFitter[[node.t]] <- nodeFitter
   if (length(fitterArgs)) network$nodeFitterArgs[[node.t]] <- fitterArgs
   if (!is.null(nodeData)) network$nodeData[[node.t]] <- nodeData
+ 
+  if (!is.null(factorLevels)){
+    nodeFitter <- if (is.null(network$nodeFitter[[node.t]])) "" else network$nodeFitter[[node.t]]
+    if (!(network$nodeType[[node.t]] %in% c("dcat", "dbern")) ||
+          nodeFitter == "cpt" ||
+          !is.null(network$nodeData[[node.t]]) || 
+          (node.t %in% names(network$data))){
+      ArgumentCheck::addWarning(
+        msg = paste0("'", node.t, "' does not satisfy the conditions ",
+                     "to use 'factorLevels'.  See '?setNode' for details."),
+        argcheck = Check)
+      
+      if (nodeFitter == "cpt"){
+        if (!is.null(network$nodeData[[node.t]])){
+          network$factorLevels[[node.t]] <- 
+            if (!is.factor(network$nodeData[[node.t]][[node.t]]))
+              sort(unique(network$nodeData[[node.t]][[node.t]]))
+            else levels(network$nodeData[[node.t]][[node.t]])
+        }
+        else if (!is.null(network$data[[node.t]])){
+          network$factorLevels[[node.t]] <- 
+            if (!is.factor(network$data[[node.t]]))
+              sort(unique(network$data[[node.t]]))
+          else levels(network$data[[node.t]])
+        }
+      }
+    } 
+    else{
+      network$factorLevels[[node.t]] <- factorLevels
+    }
+  }
+  else{
+    if (!is.null(network$nodeData[[node.t]])){
+      network$factorLevels[[node.t]] <- 
+        levels(network$nodeData[[node.t]][[node.t]])
+    }
+    else if (!is.null(network$data)){
+      network$factorLevels[[node.t]] <- 
+        levels(network$data[[node.t]])
+    }
+    else{
+      network$factorLevels[[node.t]] <- NULL
+    }
+  }
   network$nodeDecision[[node.t]] <- decision
   network$nodeUtility[[node.t]] <- utility
 

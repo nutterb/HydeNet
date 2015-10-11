@@ -1,8 +1,8 @@
 Package: HydeNet
 Type: Package
 Title: Hybrid Bayesian Networks Using R and JAGS
-Version: 0.9.1
-Date: 2015-07-06
+Version: 0.10.0
+Date: 2015-09-26
 Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter <benjamin.nutter@gmail.com>
 Maintainer: Benjamin Nutter <benjamin.nutter@gmail.com>
 Description: Facilities for easy implementation of hybrid Bayesian networks
@@ -27,7 +27,7 @@ Depends:
 Imports:
     ArgumentCheck, 
     broom (>= 0.3.7),
-    DiagrammeR (>= 0.7),
+    DiagrammeR (>= 0.8),
     plyr,
     dplyr,
     graph,
@@ -38,7 +38,9 @@ Imports:
     utils
 Suggests:
     knitr,
+    survival,
     testthat
+VignetteBuilder: knitr
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
 LazyLoad: yes
 LazyData: true

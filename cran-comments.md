@@ -1,28 +1,20 @@
 ## Test environments
-* local Windows install (devel)
-* win-builder (devel and release)
+* local Windows install (release)
+* win-builder (devel[2015-10-09 r69501] and release)
+* Ubuntu 12.04 LTS (Travis-CI)
 
 ## R CMD check results
-Use of the LICENSE file has been corrected to fit with expectations. 
-I apologize for this misunderstanding.
 
-`check` on win-builder returns the NOTE:  
+The local Windows install using the release version
+returned the expected NOTE about the package maintainer and
+license file.
 
-Possibly mis-spelled words in DESCRIPTION:  
-  acyclic (9:45)  
-  conditionality (11:26)  
-
-We believe these words to be spelled 
-correctly and wish to overlook this note, if possible.
-
-
-
-`check` on win-builder returns the NOTE:
-
-No repository set, so cyclic dependency check skipped
-
-We did not observe this NOTE on the local build.
+The Ubuntu checks also returned a NOTE about not checking
+for cyclic dependencies.  This NOTE was note returned on
+any of the other checks.
 
 ## Downstream dependencies
 There are no downstream dependencies for this package
 at this time.
+
+Many thanks, and have a great day.

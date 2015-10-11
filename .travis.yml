@@ -22,6 +22,9 @@ env:
 r_github_packages:
   - Rexamine/stringi
 
+apt_packages:
+  - libv8-dev
+
 r_packages:
   - rjags
 

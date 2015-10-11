@@ -13,7 +13,8 @@ test_that("HydeNetwork.formula returns expected attributes",
 {
   expect_equal(names(Net),
                c("nodes", "parents", "nodeType", "nodeFormula", "nodeFitter",
-                 "nodeFitterArgs", "nodeParams", "fromData", "nodeData",
+                 "nodeFitterArgs", "nodeParams", "fromData", "nodeData", 
+                 "factorLevels",
                  "nodeModel", "nodeDecision", "nodeUtility", "dag", 
                  "data", "network_formula"))
 })
@@ -47,6 +48,7 @@ test_that("HydeNetwork.list returns expected attributes",
   expect_equal(names(bagNet),
                c("nodes", "parents", "nodeType", "nodeFormula", "nodeFitter",
                  "nodeFitterArgs", "nodeParams", "fromData", "nodeData",
+                 "factorLevels", 
                  "nodeModel", "nodeDecision", "nodeUtility", "dag", 
                  "network_formula"))
 })

@@ -55,17 +55,21 @@ bindPosterior <- function(hydePost, relabel_factor=TRUE){
   else 
     bound <- dplyr::bind_rows(lapply(hydePost$codas, bind_chains_list))
   
-  factors_to_relabel <- names(bound)[names(bound) %in% names(hydePost$factorRef)]
-  
-  for(i in factors_to_relabel){
-    bound[i] <- factor(bound[[i]], 
-                       levels=hydePost$factorRef[[i]]$value,
-                       labels=hydePost$factorRef[[i]]$label)
+  if (relabel_factor){
+    factors_to_relabel <- names(bound)[names(bound) %in% names(hydePost$factorRef)]
+    for(i in factors_to_relabel){
+      bound[i] <- factor(bound[[i]], 
+                         levels=hydePost$factorRef[[i]]$value,
+                         labels=hydePost$factorRef[[i]]$label)
+    }
   }
 
   as.data.frame(bound)
 }
 
+
+
+#**** UTILITY FUNCTIONS
 bind_chains_mcmclist <- function(mcmc, hydePost){
   as.data.frame(hydePost$codas[[mcmc]]) %>%
     dplyr::mutate_(chain_index = ~mcmc,

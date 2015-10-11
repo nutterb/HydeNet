@@ -42,6 +42,12 @@ list with the following components:
   \item \code{nodeData} A named list with the data for each node.  If a node's
       entry in \code{fromData} is \code{TRUE} and \code{nodeData} is \code{NULL},
       it will look to the \code{data} attribute instead.
+  \item \code{factorLevels} If the vector associated with the node is a factor
+      (or character), the levels of the factor are stored here.  Although it
+      may seem redundant, it allows factor levels to be specified in cases
+      where the node is not define with data.  If data are provided to the
+      node, this element is determined from the data and cannot be
+      manually overwritten.
   \item \code{nodeModel} A list of model objects.  This is a storing place for
       models that have already been fit so that they don't have to be refit
       again.

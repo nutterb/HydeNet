@@ -174,10 +174,11 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
                                          "Using only the first element."),
                                   Check)
         wt <- wt[1]
+        wt_text <- wt_text[1]
       }
       if(wt %in% names(data))
       {
-        wt <- data[,"wt"]
+        wt <- data[,wt]
       } 
       else{
         ArgumentCheck::addError("'wt' must be a numeric vector or the name of a variable in 'data'",
@@ -213,7 +214,7 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   
   joint    <- data %>% dplyr::group_by_(.dots = ..vars) %>%  
     dplyr::summarise_(wt = ~sum(wt))
-  
+ 
   marginal <- joint %>% dplyr::group_by_(.dots = ..independentVars) %>% 
     dplyr::summarise_(sumWt = ~sum(wt))
   
@@ -223,10 +224,12 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
     plyr::daply(c(vars[-1], vars[1]), function(x) x$p)
   
   cpt[is.na(cpt)] <- 0
-  
-  model <- data[, c(names(dimnames(cpt)), wt_text)]
+
+  model <- data[, c(names(dimnames(cpt)), "wt")]
+  if ("wt" %in% names(model) && !is.null(wt_text)) 
+    names(model)[length(model)] <- wt_text
   if (is.null(wt_text)) model <- cbind(model, wt)
-  
+
   attr(cpt, "model") <- model
   
   class(cpt) <- c("cpt", "array")

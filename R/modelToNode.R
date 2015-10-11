@@ -38,7 +38,9 @@ modelToNode.cpt <- function(model, nodes, ...)
 {
   if (missing(nodes))
     nodes <- names(dimnames(model))
-  list(nodes = utils::tail(names(dimnames(model)), 1),
+  
+  node_name = utils::tail(names(dimnames(model)), 1)
+  list(nodes = node_name,
        parents = if (length(dimnames(model)) == 1)
          NULL
        else 
@@ -58,6 +60,7 @@ modelToNode.cpt <- function(model, nodes, ...)
        nodeUtility = FALSE,
        fromData = TRUE,
        nodeData = attributes(model)$model,
+       factorLevels = levels(attributes(model)$model[[node_name]]),
        nodeModel = model)
 }
 
@@ -87,6 +90,7 @@ modelToNode.glm <- function(model, nodes, ...){
          if (is.null(model$model)) stats::update(model, model=TRUE)$model
          else model$model
        } else NULL,
+       factorLevels = if (is.factor(model$model[[1]])) levels(model$model[[1]]) else NULL,
        nodeModel = model)
 }
 
@@ -117,6 +121,7 @@ modelToNode.lm <- function(model, nodes, ...){
          if (is.null(model$model)) stats::update(model, model=TRUE)$model
          else model$model
        } else NULL,
+       factorLevels = NULL,
        nodeModel = model)
 }
 
@@ -124,6 +129,7 @@ modelToNode.lm <- function(model, nodes, ...){
 #' @export
 
 modelToNode.multinom <- function(model, nodes, ...){
+  if (is.null(model$model)) model <- stats::update(model, model=TRUE)
   if (missing(nodes))
     nodes <- nodeFromFunction(names(attributes(stats::terms(model))$dataClasses))
   list(nodes = as.character(stats::terms(model))[2],
@@ -142,10 +148,8 @@ modelToNode.multinom <- function(model, nodes, ...){
        nodeDecision = FALSE,
        nodeUtility = FALSE,
        fromData = TRUE,
-       nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
-         if (is.null(model$model)) stats::update(model, model=TRUE)$model
-         else model$model
-       } else NULL,
+       nodeData = if (!is.null(model$model)) model$model else NULL,
+       factorLevels = if (is.factor(model$model[[1]])) levels(model$model[[1]]) else NULL,
        nodeModel = model)
 }
 
@@ -166,6 +170,7 @@ modelToNode.xtabs <- function(model, nodes, ...){
        nodeUtility = FALSE,
        fromData = FALSE,
        nodeData = NULL,
+       factorLevels = names(model),
        nodeModel = model)
 }
 

@@ -73,7 +73,7 @@ rToJags <- function(f){
     x <- gsub(" ", "", x)
     if (grepl("logit[(]", x)){
       if (grepl("inverse[=]T", x)){
-        x <- gsub("(logit[(]|qlogis[(]", "ilogit(", x)
+        x <- gsub("(logit[(]|qlogis[(])", "ilogit(", x)
       }
       x <- gsub(",[[:print:]]+[)]", ")", x)
       return(x)

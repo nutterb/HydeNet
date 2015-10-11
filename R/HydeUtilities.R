@@ -86,16 +86,23 @@ termName <- function(term, reg){
 #' @param network A Hyde Network Object
 
 decisionOptions <- function(node, network){
-  if (network$nodeFitter[[node]] == "cpt"){
-    D <- {if (!is.null(network$nodeData[[node]])) network$nodeData[[node]][[node]] 
-          else network$data[[node]]}
-    dist <- 1:length(unique(D))
+  #* In some cases, nodeFitter isn't set for a node.  When nodeFitter is NULL,
+  #* we want to skip the "cpt" check and move on to other possibilities.
+  #* If it isn't NULL and "cpt" is the fitter, we return dist immediately
+  #* to avoid overwriting it in subsequent checks
+  if (!is.null(network$nodeFitter[[node]])){
+    if (network$nodeFitter[[node]] == "cpt"){
+      D <- {if (!is.null(network$nodeData[[node]])) network$nodeData[[node]][[node]] 
+            else network$data[[node]]}
+      dist <- 1:length(unique(D))
+      return(dist)
+    }
   }
   #* This uses a regular expression to extract the level number from
   #* the node JAGS model.  For instance
   #* pi.var[1] <- .123; pi.var[2] <- .321; ...
   #* the regular expression pulls out the numbers in between each set of [].
-  else if (network$nodeType[[node]] == "dcat"){
+  if (network$nodeType[[node]] == "dcat"){
     dist <- writeJagsModel(network, node)[1]
     dist <- unlist(strsplit(dist, ";"))
     dist <- as.numeric(stringr::str_extract(dist, stringr::regex("(?<=[\\[]).*(?=[\\]])")))
@@ -220,11 +227,20 @@ validateParameters <- function(params, dist){
 #' 
 makeFactorRef <- function(network)
 {
-  dataList <- c(list(network$data), network$nodeData)
-  names(dataList) <- NULL
-  Ref <- do.call("c", lapply(dataList, dataframeFactors))
+  network_factors <- 
+    names(network$factorLevels)[!vapply(network$factorLevels, is.null, logical(1))]
   
-  types <- unlist(network$nodeType[names(Ref)])
+  if (length(network_factors) == 0) return(NULL)
+  
+  Ref <- lapply(network_factors,
+         function(f){
+           data.frame(value = 1:length(network$factorLevels[[f]]),
+                      label = network$factorLevels[[f]],
+                      stringsAsFactors = FALSE)
+         })
+  names(Ref) <- network_factors
+  
+  types <- unlist(network$nodeType[network_factors])
   types <- types[types %in% "dbern"]
   
   Ref[names(types)] <- 
@@ -233,7 +249,26 @@ makeFactorRef <- function(network)
              f$value <- f$value - 1
              f
            })
+  
   Ref[unique(names(Ref))]
+  #* The code below was the old way of doing this
+  #* before we implemented the `factorLevels` element.
+  #* I'm just hesitant to give it up before the 
+  #* new system is well tested.
+#   dataList <- c(list(network$data), network$nodeData)
+#   names(dataList) <- NULL
+#   Ref <- do.call("c", lapply(dataList, dataframeFactors))
+#   
+#   types <- unlist(network$nodeType[names(Ref)])
+#   types <- types[types %in% "dbern"]
+#   
+#   Ref[names(types)] <- 
+#     lapply(Ref[names(types)], 
+#            function(f){
+#              f$value <- f$value - 1
+#              f
+#            })
+#   Ref[unique(names(Ref))]
 }
 
 #' @rdname HydeUtilities
