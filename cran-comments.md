@@ -9,6 +9,12 @@ The local Windows install using the release version
 returned the expected NOTE about the package maintainer and
 license file.
 
+The Ubuntu checks also returned a NOTE about not checking
+for cyclic dependencies.  This NOTE was note returned on
+any of the other checks.
+
 ## Downstream dependencies
 There are no downstream dependencies for this package
 at this time.
+
+Many thanks, and have a great day.
