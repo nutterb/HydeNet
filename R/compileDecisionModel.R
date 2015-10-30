@@ -75,11 +75,6 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ..., data = NULL)
   
   dots <- list(...)
   
-#   if ("data" %in% names(dots))
-#     ArgumentCheck::addError(
-#       msg = "'data' is not an accepted argument in 'compileDecisionModel'",
-#       argcheck = Check)
-#  
   options <- makePolicyMatrix(network, policyMatrix, data, Check)
 
   ArgumentCheck::finishArgCheck(Check)
@@ -87,7 +82,7 @@ compileDecisionModel <- function(network, policyMatrix = NULL, ..., data = NULL)
   cpt_arrays <- makeCptArrays(network)
   
   jags.code <- compileJagsModel(network, ...)
-  
+
   lapply(options,
          runJagsDecisionModel,
          jags.code,
@@ -166,9 +161,7 @@ makePolicyMatrix <- function(network, policyMatrix, data, argcheck){
                     function(i){ 
                       l <- as.list(options[i, , drop=FALSE])
                       nms <- names(l)
-                      if (is.character(unlist(l)))
-                        l <- as.list(as.character(l))
-                      else l <- as.list(as.numeric(l))
+                      attributes(l) <- NULL
                       names(l) <- nms
                       l
                     })
@@ -210,6 +203,12 @@ makeCptArrays <- function(network){
 runJagsDecisionModel <- function(o, j, cpt_arrays, ...){
   con <- textConnection(paste0(j$jags$model(),
                                  collapse="\n"))
+  o_character <- vapply(o, is.character, logical(1))
+  for (i in seq_along(o)){
+    if (o_character[i])
+      o[[i]] <- j$factorRef[[names(o[i])]]$value[j$factorRef[[names(o[i])]]$label == o[[i]]]
+  }
+  
   cHN <- list(jags = rjags::jags.model(con,
                                        data = c(o, cpt_arrays),
                                        ...),

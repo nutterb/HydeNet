@@ -1,4 +1,11 @@
-### 0.10.0 (11 Oct 2015)
+### 0.10.1 (30 October 2015)
+* Corrected a serious bug in how character values were handled in the 
+  `data` argument of `compileDecisionModel`.
+* Adds `factorFormula` to assist in writing formulae that make use 
+  of factor levels instead of their numeric codes.
+
+### 0.10.0 (26 Sept 2015)
+>>>>>>> origin/current-devel
 * Implements the `factorLevels` element in network objects 
   and arguments in `setNode`.  See Issue #81
 * Changes to `plot.HydeNetwork` relevant to changes in 
