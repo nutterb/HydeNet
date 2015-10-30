@@ -288,23 +288,24 @@ net <- setNode(net, payoff, "determ", define=fromFormula(),
          nodeFormula = factorFormula(payoff ~
                          ifelse(playerFinalPoints > 21, -1,
                            ifelse(playerFinalPoints == 21,
-                             ifelse(dealerOutcome == 1, 0,
+                             ifelse(dealerOutcome == "Blackjack", 0,
                                ifelse(dealerOutcome == 7, 0, 1)),
-                             ifelse(dealerOutcome == 2,
+                             ifelse(dealerOutcome == "Bust",
                                ifelse(playerFinalPoints < 22, 1, -1),
-                               ifelse(dealerOutcome == 3,
+                               ifelse(dealerOutcome == "17",
                                  ifelse(playerFinalPoints == 17, 0,
                                  ifelse(playerFinalPoints > 17, 1, -1)),
-                                 ifelse(dealerOutcome == 4,
+                                 ifelse(dealerOutcome == "18",
                                    ifelse(playerFinalPoints == 18, 0,
                                      ifelse(playerFinalPoints > 18, 1, -1)),
-                                   ifelse(dealerOutcome == 5,
+                                   ifelse(dealerOutcome == "19",
                                      ifelse(playerFinalPoints == 19, 0,
                                        ifelse(playerFinalPoints > 19, 1, -1)),
-                                     ifelse(dealerOutcome == 6,
+                                     ifelse(dealerOutcome == "20",
                                        ifelse(playerFinalPoints == 20, 0,
                                          ifelse(playerFinalPoints > 20, 1, -1)),
-                                       ifelse(playerFinalPoints == 21, 0, -1))))))))))
+                                       ifelse(playerFinalPoints == 21, 0, -1)))))))),
+                         net))
 
 ```
 

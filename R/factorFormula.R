@@ -40,10 +40,12 @@
 #' 
 factorFormula <- function(form, network){
   form <- deparse(form)
+  form <- trimws(form)
+  form <- paste0(form, collapse = "")
   
   relabel <- extractFactors(form)
   
-  relabel_mat <- isolateVariableFromLabel(relabel)
+  relabel_mat <- isolateVariableFromLabel(relabel, network)
   
   new_label <- 
     mapply(getNumericLevel, 
@@ -73,7 +75,7 @@ extractFactors <- function(form){
   unlist(relabel)
 }
 
-isolateVariableFromLabel <- function(relabel){
+isolateVariableFromLabel <- function(relabel, network){
   relabel_mat <- stringr::str_split_fixed(relabel, "[=][=]", 2)
   relabel_mat <- trimws(relabel_mat)
   relabel_mat <- gsub("('|\")", "", relabel_mat)
