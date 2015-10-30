@@ -285,7 +285,7 @@ Alternatively, decision nodes can be deterministic in nature. In this case, we i
 
 ```{r}
 net <- setNode(net, payoff, "determ", define=fromFormula(),
-         nodeFormula = factorFormula(payoff ~
+         nodeFormula = payoff ~
                          ifelse(playerFinalPoints > 21, -1,
                            ifelse(playerFinalPoints == 21,
                              ifelse(dealerOutcome == "Blackjack", 0,
@@ -304,8 +304,7 @@ net <- setNode(net, payoff, "determ", define=fromFormula(),
                                      ifelse(dealerOutcome == "20",
                                        ifelse(playerFinalPoints == 20, 0,
                                          ifelse(playerFinalPoints > 20, 1, -1)),
-                                       ifelse(playerFinalPoints == 21, 0, -1)))))))),
-                         net))
+                                       ifelse(playerFinalPoints == 21, 0, -1)))))))))
 
 ```
 

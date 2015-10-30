@@ -1,5 +1,4 @@
 #' @name factorFormula
-#' @export factorFormula
 #' @importFrom stringr str_extract_all
 #' @importFrom stringr str_split_fixed
 #' 
@@ -28,6 +27,7 @@
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
 #' @examples 
+#' \dontrun{
 #' Net <- HydeNetwork(~ wells +
 #'                     pe | wells +
 #'                     d.dimer | pregnant*pe +
@@ -37,6 +37,7 @@
 #'                   data = PE)
 #' factorFormula(form = payoff ~ (death == 'No') + (pe == 'Yes'),
 #'               network = Net)
+#' }
 #' 
 factorFormula <- function(form, network){
   form <- deparse(form)

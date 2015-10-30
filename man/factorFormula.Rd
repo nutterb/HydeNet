@@ -32,6 +32,7 @@ It is assumed that factor variables will be used in logical
   \code{factorFormula} may require writing native JAGS code.
 }
 \examples{
+\dontrun{
 Net <- HydeNetwork(~ wells +
                     pe | wells +
                     d.dimer | pregnant*pe +
@@ -41,6 +42,7 @@ Net <- HydeNetwork(~ wells +
                   data = PE)
 factorFormula(form = payoff ~ (death == 'No') + (pe == 'Yes'),
               network = Net)
+}
 }
 \author{
 Jarrod Dalton and Benjamin Nutter

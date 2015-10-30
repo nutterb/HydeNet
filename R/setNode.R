@@ -16,7 +16,9 @@
 #' @param nodeFitter the fitting function, such as \code{lm} or \code{glm}.  This
 #'   will probably only be needed when \code{fromData = TRUE}.
 #' @param nodeFormula A formula object specifying the relationship between a 
-#'   node and its parents.  It must use as a term every parent of \code{node}.
+#'   node and its parents.  It must use as a term every parent of \code{node}. This formula 
+#'   will be pushed through the unexported function \code{factorFormula}.  See
+#'   "Coding Factor Levels" for more details.
 #' @param fitterArgs Additional arguments to be passed to \code{fitter}.  This does not 
 #'   yet have any effect as I haven't yet decided out where to store this and 
 #'   how to implement the fitting.
@@ -85,6 +87,23 @@
 #'   (especially if you are working interactively).  Using \code{fitModel=TRUE} 
 #'   will cause the model to be fit and the JAGS code for the parameters to be
 #'   stored in the \code{nodeParams} attribute.
+#'   
+#' @section Coding Factor Levels:
+#' The \code{nodeFormula} argument will accept any valid R formula.  If desired, you 
+#' may use a specific formulation to indicate the presence of factor levels in the 
+#' formula.  For instance, consider the case of a variable \code{y} with a binary 
+#' categorical parent \code{x} coded as 0 = No, and 1 = Yes.  JAGS expects the 
+#' formula \code{y ~ c * x == 1} (where \code{c} is a constant).  However, in 
+#' factor variables with a large number of levels, it can be difficult to remember 
+#' what value corresponds to what level.  
+#' 
+#' \code{HydeNet} uses an internal (unexported) function within \code{setNode} to allow
+#' an alternate specification: \code{y ~ c * (x == "Yes")}.  So long as the factors in 
+#' the formula are previously defined within the network structure, \code{HydeNet}
+#' will translate the level into its numeric code.
+#' 
+#' Note that it is required to write \code{x == "Yes"}.  \code{"Yes" == x} will not 
+#' translate correctly.
 #'   
 #' @section Validation:
 #' The validation of parameters is performed by comparing the values provided with 
@@ -234,7 +253,7 @@ setNode <- function(network, node, nodeType,
   }
 
   if (length(list(...))) network$nodeParams[[node.t]] <- list(...)
-  if (!missing(nodeFormula)) network$nodeFormula[[node.t]] <- nodeFormula
+  if (!missing(nodeFormula)) network$nodeFormula[[node.t]] <- factorFormula(nodeFormula, network)
   if (!missing(nodeFitter)) network$nodeFitter[[node.t]] <- nodeFitter
   if (length(fitterArgs)) network$nodeFitterArgs[[node.t]] <- fitterArgs
   if (!is.null(nodeData)) network$nodeData[[node.t]] <- nodeData
