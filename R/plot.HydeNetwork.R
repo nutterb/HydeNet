@@ -111,6 +111,7 @@ plot.HydeNetwork <- function(x,
                              customNodes = NULL,
                              customEdges = NULL,
                              ..., 
+                             removeDeterm = FALSE,
                              useHydeDefaults = TRUE)
 {
   node_df <- data.frame(nodes = x$nodes,
