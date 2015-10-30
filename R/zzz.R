@@ -5,7 +5,7 @@
   options(Hyde_plotOptions = 
     data.frame(type = c("variable", "determ", "decision", "utility"),
                fillcolor = c("white", "white", "#6BAED6", "#FFFFB2"),
-               shape = c("ellipse", "ellipse", "rect", "rect"),
+               shape = c("ellipse", "ellipse", "rect", "diamond"),
                fontcolor = c("black", "gray70", "black", "black"),
                color = c("black", "gray70", "black", "black"),
                style = c("filled", "filled", "filled", "filled"),
