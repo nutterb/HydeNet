@@ -31,6 +31,10 @@
 #' @param ... for the \code{plot} method, additional arguments to be passed to 
 #'   \code{DiagrammeR::render_graph}.  For \code{customNode}, 
 #'   named node attributes to assign to a node's plotting characteristics.
+#' @param removeDeterm A logical value.  When \code{FALSE} (the default), 
+#'   it has no effect.  When \code{TRUE}, deterministic nodes are removed
+#'   from the network and a reduced plot with no deterministic nodes
+#'   is rendered.
 #' @param useHydeDefaults A logical value indicating if the default plot
 #'   parameters in \code{options("Hyde_plotOptions")} should be applied
 #'   to the plot.
@@ -114,6 +118,8 @@ plot.HydeNetwork <- function(x,
                              removeDeterm = FALSE,
                              useHydeDefaults = TRUE)
 {
+  if (removeDeterm) x <- plot_nondeterm_only(x)
+  
   node_df <- data.frame(nodes = x$nodes,
                         stringsAsFactors = FALSE)
   if (useHydeDefaults) node_df <- mergeDefaultPlotOpts(x, node_df)

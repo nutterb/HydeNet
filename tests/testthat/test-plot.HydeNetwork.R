@@ -39,3 +39,10 @@ test_that("HydePlotOptions - restoreDefaults",
     plot(BlackJack)},
     not(throws_error()))
 })
+
+test_that("Remove Deterministic Nodes",
+{
+  expect_that({
+    plot(BlackJack, removeDeterm = TRUE)},
+    not(throws_error()))
+})
