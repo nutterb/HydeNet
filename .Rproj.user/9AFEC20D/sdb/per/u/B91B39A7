@@ -1,0 +1,18 @@
+{
+    "contents" : "devtools::document(\"C:/Users/nutterb/Documents/GitHub/HydeNet\")\ndevtools::test(\"C:/Users/nutterb/Documents/GitHub/HydeNet\")\ndevtools::check(\"C:/Users/nutterb/Documents/GitHub/HydeNet\", args = \"--as-cran\")\ndevtools::install_local(\"C:/Users/nutterb/Documents/GitHub/HydeNet\")\n\n\ndata(PE, package=\"HydeNet\")\nNet <- HydeNetwork(~ wells + \n                    pe | wells + \n                    d.dimer | pregnant*pe + \n                    angio | pe + \n                  treat | d.dimer*angio + \n                    death | pe*treat,\n                    data = PE) \n                    \n\n                \nNet <- setDecisionNodes(Net, treat, angio)\nplot(Net)\n\ncompileDecisionModel(Net, data = list(death = 1))\n#' ",
+    "created" : 1444395153335.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "2026126701",
+    "id" : "B91B39A7",
+    "lastKnownWriteTime" : 578055781,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

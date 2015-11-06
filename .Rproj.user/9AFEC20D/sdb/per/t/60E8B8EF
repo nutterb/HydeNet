@@ -1,0 +1,17 @@
+{
+    "contents" : "Package: HydeNet\nType: Package\nTitle: Hybrid Bayesian Networks Using R and JAGS\nVersion: 0.10.0\nDate: 2015-09-26\nAuthor: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter <benjamin.nutter@gmail.com>\nMaintainer: Benjamin Nutter <benjamin.nutter@gmail.com>\nDescription: Facilities for easy implementation of hybrid Bayesian networks\n    using R. Bayesian networks are directed acyclic graphs representing joint\n    probability distributions, where each node represents a random variable and\n    each edge represents conditionality. The full joint distribution is\n    therefore factorized as a product of conditional densities, where each node\n    is assumed to be independent of its non-descendents given information on its\n    parent nodes. Since exact, closed-form algorithms are computationally\n    burdensome for inference within hybrid networks that contain a combination\n    of continuous and discrete nodes, particle-based approximation techniques\n    like Markov Chain Monte Carlo are popular.  We provide a user-friendly\n    interface to constructing these networks and running inference using the 'rjags' package.\n    Econometric analyses (maximum expected utility under competing policies,\n    value of information) involving decision and utility nodes are also\n    supported.\nLicense: MIT + file LICENSE\nDepends:\n    R (>= 3.0.0),\n    nnet,\n    rjags\nImports:\n    ArgumentCheck, \n    broom (>= 0.3.7),\n    DiagrammeR (>= 0.8),\n    plyr,\n    dplyr,\n    graph,\n    gRbase,\n    magrittr,\n    stats,\n    stringr,\n    utils\nSuggests:\n    knitr,\n    survival,\n    testthat\nVignetteBuilder: knitr\nSystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)\nLazyLoad: yes\nLazyData: true\nURL: https://github.com/nutterb/HydeNet,\nBugReports: https://github.com/nutterb/HydeNet/issues\n",
+    "created" : 1444394271115.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2218520494",
+    "id" : "60E8B8EF",
+    "lastKnownWriteTime" : 1444394545,
+    "path" : "~/GitHub/HydeNet/DESCRIPTION",
+    "project_path" : "DESCRIPTION",
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "type" : "dcf"
+}
