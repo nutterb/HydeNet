@@ -1,0 +1,34 @@
+<!--begin.rcode, echo = FALSE, results = 'asis'
+baseCode <- readLines("index_default.html")
+
+w <- which(grepl("</section>", baseCode))
+baseCodeEnd <- baseCode[w:length(baseCode)]
+baseCode <- baseCode[1:(w-1)]
+cat(baseCode, sep = "\n")
+end.rcode-->
+
+<H3> Gallery of Sample Analyses </H3>
+
+<!--begin.rcode, echo = FALSE, results = 'asis'
+pages <- list.files("vignettes", 
+                     pattern = "[.]html")
+
+titles <- vector("character", length(pages))
+for (i in seq_along(pages)){
+  x <- readLines(gsub("[.]html", ".Rmd", file.path("vignettes", pages[i])))
+  x <- x[min(which(grepl("title:", x)))]
+  x <- gsub("title:", "", x)
+  x <- trimws(x)
+  x <- gsub("('|\")", "", x)
+  titles[i] <- x
+}
+
+cat(paste0("<a href = 'vignettes/", pages, "'>", titles, "</a>"))
+end.rcode-->
+
+
+<!--begin.rcode, echo = FALSE, results = 'asis'
+cat(baseCodeEnd, sep = "\n")
+end.rcode-->
+</body>
+</html>

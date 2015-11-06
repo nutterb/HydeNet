@@ -1,0 +1,48 @@
+---
+output: html_document
+---
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>HydeNet by nutterb</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">HydeNet</h1>
+        <p class="header">Hybrid Decision Networks in R</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/nutterb/HydeNet/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/nutterb/HydeNet/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/nutterb/HydeNet">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/nutterb">nutterb</a></p>
+
+
+      </header>
+      <section>
+        <h3>
+<a id="hybrid-decision-networks" class="anchor" href="#hybrid-decision-networks" aria-hidden="true"><span class="octicon octicon-link"></span></a>Hybrid Decision Networks</h3>
+
+<p>Bayesian networks are directed acyclic graphs representing joint probability distributions, where each node represents a random variable and each edge represents conditionality. The full joint distribution is therefore factorized as a product of conditional densities, where each node is assumed to be independent of its non-desendents given information on its parent nodes. Since exact, closed-form algorithms are computationally burdensome for inference within hybrid networks that contain a combination of continuous and discrete nodes, particle-based approximation techniques like Markov Chain Monte Carlo are popular. We provide a user-friendly interface to constructing these networks and running inference using rjags. Econometric analyses (maximum expected utility under competing policies, value of information) involving decision and utility nodes are also supported.</p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>

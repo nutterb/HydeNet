@@ -1,6 +1,68 @@
 <!doctype html>
 <html>
   <head>
+<style type="text/css">
+.knitr .inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+}
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.rimage .left {
+  text-align: left;
+}
+.rimage .right {
+  text-align: right;
+}
+.rimage .center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>HydeNet by nutterb</title>
@@ -34,6 +96,13 @@
 <a id="hybrid-decision-networks" class="anchor" href="#hybrid-decision-networks" aria-hidden="true"><span class="octicon octicon-link"></span></a>Hybrid Decision Networks</h3>
 
 <p>Bayesian networks are directed acyclic graphs representing joint probability distributions, where each node represents a random variable and each edge represents conditionality. The full joint distribution is therefore factorized as a product of conditional densities, where each node is assumed to be independent of its non-desendents given information on its parent nodes. Since exact, closed-form algorithms are computationally burdensome for inference within hybrid networks that contain a combination of continuous and discrete nodes, particle-based approximation techniques like Markov Chain Monte Carlo are popular. We provide a user-friendly interface to constructing these networks and running inference using rjags. Econometric analyses (maximum expected utility under competing policies, value of information) involving decision and utility nodes are also supported.</p>
+
+
+<H3> Gallery of Sample Analyses </H3>
+
+<a href = 'vignettes/DecisionNetworks.html'>Decision Network (Influence Diagram) Analyses in HydeNet</a>
+
+
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
@@ -42,4 +111,7 @@
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
 		
   </body>
+</html>
+
+</body>
 </html>
