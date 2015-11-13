@@ -1,0 +1,84 @@
+---
+title: "Using Conditional Logic Nodes"
+author: "Benjamin Nutter"
+date: "November 13, 2015"
+output: html_document
+---
+
+Conditional logic nodes can be used to control the flow of a network and redirect information depending on the observed value of a node.  Situations in which this might arise are, for example, when observing patient characteristics may alter the options available for testing or treating a patient.  
+
+Conditional logic nodes are not a node type recognized by `HydeNet`, but can be defined using deterministic nodes.  As an example, we will look at a casino game and illustrate how conditional logic nodes can help model direct the behavior of posterior distributions.
+
+## Craps
+
+Craps is a casino table game that involves rolling dice.  The shooter rolls two dice to start the game.  If the dice add up to seven (7) or eleven (11), the players win.  If the dice add up to two (2), three (3), or twelve (12), the house wins.  When the dice add up to four, five, six, eight, nine, or ten, the sum sets the "point", and the point is now the value the shooter must roll in order to win.  However, if the shooter rolls a seven after the point is set, the house wins.
+
+Theoretically, the game may extend indefinitely so long as the shooter never rolls either a seven or the point after the point is set.  For simplicity of example, however, we will begin by modeling the probability of winning by the second roll.
+
+Our basic model structure will appear as below:
+```{r, message = FALSE}
+library(HydeNet)
+library(magrittr)
+library(dplyr)
+Craps <- HydeNetwork( ~ d11 + 
+                        d12 + 
+                        sum1 | d11 * d12 + 
+                        roll_again | sum1  + 
+                        d21 | roll_again +
+                        d22 | roll_again + 
+                        sum2 | d21 * d22 * roll_again + 
+                        win_or_lose | sum1 * sum2)
+plot(Craps)
+```
+
+The nodes are defined as
+
+* `d11` The value of the first roll of die 1.
+* `d12` The value of the first roll of die 2.
+* `sum1` The sum of the values `d1` and `d2`
+* `roll_again` A conditional logic node determining if the dice should be rolled again.
+* `d21` The value of the second roll of die 1.
+* `d22` The value of the second roll of die 2.
+* `sum2` The sum of the values `d1` and `d2` multiplied by the logical value of `roll_again`.  The result of this will be that when there was no need for a second roll, `sum2` will resolve to 0, which is an impossible value for the sum of two dice.
+* `win_or_lose` A deterministic node that resolves to 1 (a win) when either of the conditions below is true and 0 (a loss) otherwise.
+    + `sum1` == `sum2` or 
+    + `sum1` is 7 or 11 AND `sum2` is 0
+    
+Now, let's get to work defining all of those nodes.
+
+```{r, message = FALSE}
+Craps %<>%
+  setNode(d11, nodeType = "dcat", pi = vectorProbs(rep(1/6, 6), "d11")) %>%
+  setNode(d12, nodeType = "dcat", pi = vectorProbs(rep(1/6, 6), "d12")) %>%
+  setNode(d21, nodeType = "dcat", pi = vectorProbs(rep(1/6, 6), "d21")) %>%
+  setNode(d22, nodeType = "dcat", pi = vectorProbs(rep(1/6, 6), "d22")) %>%
+  setNode(sum1, nodeType = "determ", define = "d11 + d12") %>%
+  setNode(sum2, nodeType = "determ", define = "(d21 + d22) * roll_again") %>%
+  setNode(roll_again, nodeType = "determ", 
+          define = paste0("ifelse(sum1 == 4 || sum1 == 5 || ",
+                                 "sum1 == 6 || sum1 == 8 || ",
+                                 "sum1 == 9 || sum1 == 10, 1, 0)")) %>%
+  setNode(win_or_lose, nodeType = "determ",
+          define = "ifelse(sum1 == sum2 || ((sum1 == 7 || sum1 == 11)) && sum2 == 0, 1, 0)") 
+
+plot(Craps)
+```
+
+Now we can compile a model and build a posterior distribution for the probability of winning a game of craps.
+
+```{r}
+CrapsPost <- 
+  compileJagsModel(Craps, n.chains = 3) %>%
+  HydePosterior(n.iter = 10000, 
+                variable.names = c("sum1", "sum2", 
+                                   "roll_again", "win_or_lose"))
+(p_win_by_second_roll <- 
+  CrapsPost %>%
+  summarise(p_win = sum(win_or_lose) / n()))
+```
+
+So with a conditional logic node, we are able to determine that the probability of winning craps by the second roll is about `r round(p_win_by_second_roll, 3)`.
+
+In order to determine the overall probability of winning at craps, we would need to model a time series network which would re-run the subsequent rolls until either a seven or the point was rolled.  However, at the time of this writing, `HydeNet` does not support this kind of model, though we hope it will do so in the near future.
+
+Truthfully, modeling craps is kind of a silly thing for a graphical network. The overall probability of winning is easily calculated using frequency tables. But hopefully this illustrates the concept of using conditional logic nodes to enhance complex graphical models.
