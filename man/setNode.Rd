@@ -10,7 +10,7 @@ setNode(network, node, nodeType, nodeFitter, nodeFormula, fitterArgs = list(),
   decision = "current", utility = "current",
   fromData = !is.null(network$data), ..., nodeData = NULL,
   factorLevels = NULL, validate = TRUE,
-  fitModel = getOption("Hyde_fitModel"))
+  fitModel = getOption("Hyde_fitModel"), policyValues = NULL)
 
 fromData()
 
@@ -90,8 +90,18 @@ When passing raw JAGS code (ie, character strings), this will be ignored
 as the validation is applicable to numerical/formula values.}
 
 \item{fitModel}{Logical. Toggles if the model is fit within the function call.
-  This may be set globally using \code{options('Hyde_fitModel')}.  See Details
-  for more about when to use this option.}
+This may be set globally using \code{options('Hyde_fitModel')}.  See Details
+for more about when to use this option.}
+
+\item{policyValues}{A vector of values to be used in the policy matrix when
+  the node is decision node.  This may be left \code{NULL} for factor
+  variables, which will then draw on the factor levels.  For numerical
+  variables, it can be more important: if left \code{NULL} and data are
+  available for the node, the first, second, and third quartiles will
+  be used to populate the policy values.  If no data are available and no
+  values are provided, \code{policyMatrix} and \code{compileDecisionModel}
+  are likely to return errors when they are called.  Policy values may
+  also be set with \code{setPolicyValues} after a network has been defined.}
 }
 \description{
 The relationship between a node and its parents must be defined

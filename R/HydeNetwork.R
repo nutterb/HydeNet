@@ -175,6 +175,9 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
       lapply(data[, factor_vars, drop = FALSE],
              levels)
   }
+  
+  policyValues <- lapply(node_names, HydeNet_defaultPolicyValues, data)
+  names(policyValues) <- node_names
 
   #* Define the HydeNetwork object
   network <- list(nodes = node_names, parents=parents, nodeType=nodeType,
@@ -186,6 +189,7 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...){
                   factorLevels = factorLevels,
                   nodeModel = nodeModel,
                   nodeDecision = nodeDecision,
+                  nodePolicyValues = policyValues,
                   nodeUtility = nodeUtility,
                   dag=network)
   
@@ -229,6 +233,7 @@ HydeNetwork.list <- function(nodes, ...){
     network$nodeUtility[[i]] <- Attrs[[i]]$nodeUtility
     network$fromData[[i]] <- TRUE
     network$factorLevels[[i]] <- Attrs[[i]]$factorLevels
+    network$nodePolicyValues[[i]] <- Attrs[[i]]$policyValues
   }
   
   return(network)
@@ -304,6 +309,19 @@ HydeNetwork_nodeParams <- function(node_name, jagsDists, nodeType, fromData){
                    paste(parm, "'Unspecified'", sep="=", collapse=", "),
                    ")")
   return(eval(parse(text=parm)))
+}
+
+HydeNet_defaultPolicyValues <- function(node_name, data){
+  if (is.null(data)) return(NULL)
+  if (!node_name %in% names(data)) return(NULL)
+  else {
+    if (is.numeric(data[[node_name]]))
+      return(stats::quantile(data[[node_name]], probs = c(.25, .50, .75), na.rm=TRUE))
+    else if (is.factor(data[[node_name]]))
+      return(levels(data[[node_name]]))
+    else
+      return(unique(data[[node_name]]))
+  }
 }
 
 nodeFitter_is_glm <- function(fitter){

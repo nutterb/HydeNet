@@ -10,6 +10,10 @@
 #'   
 #' @param network A HydeNetwork object
 #' @param ... Named arguments with vectors of the policy values.  
+#' @param useDefaultPolicies A logical indicating if the default policy
+#'   values from decision nodes should be used for any decision nodes 
+#'   not named in \code{...}.  If a node is named in \code{...} and also
+#'   has default policy values, the user supplied values take precedence.
 #' 
 #' @details  When \code{...} is not used, the default policy matrix is defined
 #'   as all possible combinations of the levels in the network's decision 
@@ -23,7 +27,7 @@
 #'   node to be considered.  When manually supplying values, the nodes must 
 #'   exist in network, but the requirement that they be decision nodes is not
 #'   enforced.  Thus, it is possible to include numeric values in a decision 
-#'   matrix, though it is strongly discouraged.
+#'   matrix.
 #'   
 #'   Policy matrices can be passed to \code{HydePosterior} to run posterior 
 #'   distributions on each row of the policy matrix.  There is nothing 
@@ -32,6 +36,9 @@
 #'   from the nodes in the network.  Any data frame can be passed to 
 #'   \code{HydePosterior} and a check is done there to confirm all of the 
 #'   column names match a node in the network.
+#'   
+#'   Whenever a node is identified as a deterministic node, its policy values
+#'   are forced to \code{NULL}, regardless of what the user has specified.
 #'   
 #' @return Returns a data frame built by \code{expand.grid} and intended to be
 #'   used with \code{HydePosterior}.
@@ -58,9 +65,19 @@
 #' policyMatrix(Net, treat="No", angio = c("No", "Yes"))
 #' 
  
-policyMatrix <- function(network, ...){
+policyMatrix <- function(network, ..., useDefaultPolicies = TRUE){
   Check <- ArgumentCheck::newArgCheck()
+  utility_nodes <- names(network$nodeUtility)[sapply(network$nodeUtility,
+                                                     identity)]
+  
+  decision_nodes <- names(network$nodeDecision)[sapply(network$nodeDecision, 
+                                                       identity)]
+  decision_nodes <- decision_nodes[!decision_nodes %in% utility_nodes]
+  
+  defaultPolicies <- network$nodePolicyValues[decision_nodes]
+  
   policies <- list(...)
+  policies <- policies[!names(policies) %in% utility_nodes]
   
   if (length(policies) < 1) return(defaultPolicyMatrix(network))
   
@@ -74,21 +91,30 @@ policyMatrix <- function(network, ...){
   
   ArgumentCheck::finishArgCheck(Check)
   
-  expand.grid(policies, stringsAsFactors=FALSE)
+  if (any(names(policies) %in% names(defaultPolicies))){
+    defaultPolicies <- defaultPolicies[!names(defaultPolicies) %in% names(policies)]
+  }
+  
+  expand.grid(c(policies, defaultPolicies), stringsAsFactors=FALSE)
 }
 
 #' @rdname policyMatrix
 
 defaultPolicyMatrix <- function(network){
   Check <- ArgumentCheck::newArgCheck()
+  utility_nodes <- names(network$nodeUtility)[sapply(network$nodeUtility,
+                                                     identity)]
+  
   decision_nodes <- names(network$nodeDecision)[sapply(network$nodeDecision, 
                                                        identity)]
+  
+  decision_nodes <- decision_nodes[!decision_nodes %in% utility_nodes]
   
   if (length(decision_nodes) == 0)
   ArgumentCheck::addError(paste0("There are no decision nodes in '", substitute(network), "'."),
                           Check)
   
-  decision_options <- lapply(decision_nodes, decisionOptions, network)
+  decision_options <- lapply(decision_nodes, policyMatrixValues, network)
   names(decision_options) <- decision_nodes
   
   expand.grid(decision_options) 

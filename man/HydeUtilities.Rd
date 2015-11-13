@@ -9,6 +9,7 @@
 \alias{matchLevelNumber}
 \alias{matchVars}
 \alias{nodeFromFunction}
+\alias{policyMatrixValues}
 \alias{polyToPow}
 \alias{termName}
 \alias{validateParameters}
@@ -25,6 +26,8 @@ matchLevelNumber(t, lev)
 matchVars(terms, vnames)
 
 nodeFromFunction(node_fn)
+
+policyMatrixValues(node, network)
 
 polyToPow(poly)
 

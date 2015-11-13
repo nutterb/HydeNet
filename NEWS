@@ -1,3 +1,6 @@
+### 0.10.2 (13 November 2015)
+* Expanded options for specifying policy matrices (per Issue #95)
+
 ### 0.10.1 (30 October 2015)
 * Corrected a serious bug in how character values were handled in the 
   `data` argument of `compileDecisionModel`.

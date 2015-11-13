@@ -193,6 +193,16 @@ nodeFromFunction <- function(node_fn)
 }
 
 #' @rdname HydeUtilities
+#' 
+
+policyMatrixValues <- function(node, network){
+  policy <- network$nodePolicyValues[[node]]
+  if (!is.numeric(policy)) policy <- seq_along(policy)
+  if (network$nodeType[[node]] == "dbern") policy <- policy - 1
+  policy
+}
+
+#' @rdname HydeUtilities
 #' @param poly A single term for which the polynomial components should be 
 #'   converted to the JAGS pow() function.
 
