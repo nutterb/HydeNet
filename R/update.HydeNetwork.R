@@ -48,7 +48,7 @@ update.HydeNetwork <- function(object, formula, ...){
   
   if (any(sapply(lostParents, length) > 0)){
     lostParents <- lostParents[sapply(lostParents, length) > 0]
-    warning(paste0("The following nodes lost parents in the update:\n",
+    warning(paste0("The following nodes lost parents in the update--please redefine the node formula:\n",
                    paste0("    ", names(lostParents), ": ", sapply(lostParents, paste, collapse=", "),
                           collapse="\n")))
   }
