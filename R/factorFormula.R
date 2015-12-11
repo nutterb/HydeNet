@@ -55,6 +55,14 @@ factorFormula <- function(form, network){
            nodeType = relabel_mat[, 3],
            MoreArgs = list(network = network))
   
+  if (any(vapply(new_label, length, numeric(1)) == 0))
+  {
+    noFactors <- unique(names(new_label[vapply(new_label, length, numeric(1)) == 0]))
+    stop(paste0("The following nodes do not have factor levels defined ",
+                "in the 'factorLevels' element of the HydeNetwork object: ", 
+                paste0(noFactors, collapse = ", ")))
+  }
+  
   form <- rewriteFormula(relabel, new_label, form)
   
   as.formula(form)
