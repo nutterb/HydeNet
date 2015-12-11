@@ -11,25 +11,93 @@
 #' 
 
 summary.HydeNetwork <- function(x, ...){
-
-  cat(node_decision(x), 
+  
+  decision_nodes <- names(network$nodeDecision)[sapply(network$nodeDecision, identity)]
+  utility_nodes <- names(network$nodeUtility)[sapply(network$nodeUtility, identity)]
+  deterministic_nodes <- names(network$nodeType)[sapply(network$nodeType, 
+                                                        function(x) x == "determ")]
+  
+  random_nodes <- network$nodes[!network$nodes %in% c(decision_nodes, 
+                                                      utility_nodes,
+                                                      deterministic_nodes)]
+  cat("Decision Nodes: \n",
+      decision_node_summary(decision_nodes),
       "\n\n",
-      node_utility(x), 
+      "Utility Nodes: \n",
+      utility_node_summary(utility_nodes),
       "\n\n",
-      node_determ(x),
+      "Deterministic Nodes: \n",
+      utility_node_summary(deterministic_nodes),
       "\n\n",
-      node_random(x),
-      sep = "")
+      "Random Nodes: \n",
+      random_node_summary(random_nodes),
+      sep = ""
+  )
 }
 
-node_decision <- function(network){
-  name <-   names(network$nodeDecision)[sapply(network$nodeDecision, identity)]
-  parents <- vapply(network$parents[name],
-                    length,
-                    numeric(1))
-  parents <- ifelse(parents == 1, 
-                    paste0(parents, " parent"),
-                    paste0(parents, " parents"))
+decision_node_summary <- function(nodes)
+{
+  name_summary <- summarise_node_name(nodes)
+  parent_summary <- summarise_parents(nodes, max(nchar(name_summary)))
+  policy_summary <- summarise_policy(nodes, 
+                                     max(nchar(name_summary)), 
+                                     max(nchar(parent_summary)))
+  
+  paste0(name_summary, parent_summary, policy_summary, collapse = "\n")
+}
+
+utility_node_summary <- function(nodes)
+{
+  name_summary <- summarise_node_name(nodes)
+  parent_summary <- summarise_parents(nodes, max(nchar(name_summary)), end_sep = "")
+  
+  paste0(name_summary, parent_summary, collapse = "\n")
+}
+
+random_node_summary <- function(nodes)
+{
+  name_summary <- summarise_node_name(nodes)
+  parent_summary <- summarise_parents(nodes, max(nchar(name_summary)))
+  type_summary <- summarise_type(nodes)
+  
+  paste0(name_summary, parent_summary, type_summary, collapse = "\n")
+}
+
+
+summarise_node_name <- function(nodes, max.width = 20)
+{
+  max.width <- min(c(max.width, 
+                     max(nchar(nodes)) + 3))
+  
+  ifelse(nchar(nodes) > (max.width - 2),
+         paste0(substr(nodes, 1, 14), "...  |  "),
+         paste0(stringr::str_pad(nodes, max.width - 2, "right"), "  |  "))
+}
+
+summarise_parents <- function(nodes, name_width, end_sep = "  |  ")
+{
+  max.width <- floor((getOption("width") - name_width) / 2)
+  parents <- vapply(network$parents[nodes],
+                    paste0,
+                    character(1),
+                    collapse = ", ")
+  nparents <- vapply(network$parents[nodes],
+                     length,
+                     numeric(1))
+  
+  parents <- 
+    ifelse(nchar(parents) > (max.width - 2),
+           ifelse(nparents == 1,
+                  "1 parent",
+                  paste0(nparents, " parents  ")),
+           parents)
+  
+  paste0(stringr::str_pad(parents, max(nchar(parents)), "right"), end_sep)
+}
+
+summarise_policy <- function(nodes, name_width, parent_width)
+{
+  max.width <- getOption("width") - name_width - parent_width
   decision_policy <-
     vapply(network$nodePolicyValues[name],
            paste0,
@@ -40,72 +108,12 @@ node_decision <- function(network){
                             "(no policies defined)",
                             decision_policy)
   
-  paste0("Decision Nodes: \n",
-         paste0(pad_summary_str(name), "  |",
-                pad_summary_str(parents, "left"), "  |",
-                pad_summary_str(decision_policy), collapse = "\n"))
-  
+  ifelse(nchar(decision_policy) > max.width,
+         paste0(substr(decision_policy, 1, max.width - 3), "..."),
+         decision_policy)
 }
 
-node_utility <- function(network){
-  name <-   names(network$nodeUtility)[sapply(network$nodeUtility, identity)]
-  parents <- vapply(network$parents[name],
-                    length,
-                    numeric(1))
-  parents <- ifelse(parents == 1, 
-                    paste0(parents, " parent"),
-                    paste0(parents, " parents"))
-  paste0("Utility Nodes: \n",
-         paste0(pad_summary_str(name), "  |",
-                pad_summary_str(parents, "left"), 
-                collapse = "\n"))
-  
-}
-
-node_determ <- function(network){
-  name <-   names(network$nodeType)[sapply(network$nodeType, 
-                                           function(x) x == "determ")]
-  parents <- vapply(network$parents[name],
-                    length,
-                    numeric(1))
-  parents <- ifelse(parents == 1, 
-                    paste0(parents, " parent"),
-                    paste0(parents, " parents"))
-  paste0("Deterministic Nodes: \n",
-         paste0(pad_summary_str(name), "  |",
-                pad_summary_str(parents, "left"), 
-                collapse = "\n"))
-  
-}
-
-node_random <- function(network){
-  determ <-   names(network$nodeType)[sapply(network$nodeType, 
-                                           function(x) x == "determ")]
-  decision <-   names(network$nodeDecision)[sapply(network$nodeDecision, identity)]
-  utility <-   names(network$nodeUtility)[sapply(network$nodeUtility, identity)]
-  
-  name <- network$nodes[!network$nodes %in% c(determ, decision, utility)]
-  parents <- vapply(network$parents[name],
-                           length,
-                           numeric(1))
-  parents <- ifelse(parents == 1, 
-                    paste0(parents, " parent"),
-                    paste0(parents, " parents"))
-  
-  type <- unlist(network$nodeType[name])
-  
-  paste0("Random Nodes: \n",
-         paste0(pad_summary_str(name), "  |",
-                pad_summary_str(parents, "left"), "  |",
-                pad_summary_str(type),
-                collapse = "\n"))
-  
-}
-
-pad_summary_str <- function(string, side = "right"){
-  paste0("  ", 
-         stringr::str_pad(string, 
-                   width = max(nchar(string)),
-                   side = side,
-                   pad = " "))
+summarise_type <- function(nodes)
+{
+  unlist(network$nodeType[name])
 }
