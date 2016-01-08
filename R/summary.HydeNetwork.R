@@ -4,61 +4,63 @@
 #' @description Summaries of \code{HydeNetwork}, compiled network, and
 #'   compiled decision network objects.
 #'   
-#' @param x A \code{HydeNet} object to be summarized
+#' @param object A \code{HydeNet} object to be summarized
 #' @param ... Additional arguments.
 #' 
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
+#' @method summary HydeNetwork
+#' @export
 
-summary.HydeNetwork <- function(x, ...){
+summary.HydeNetwork <- function(object, ...){
   
-  decision_nodes <- names(network$nodeDecision)[sapply(network$nodeDecision, identity)]
-  utility_nodes <- names(network$nodeUtility)[sapply(network$nodeUtility, identity)]
-  deterministic_nodes <- names(network$nodeType)[sapply(network$nodeType, 
+  decision_nodes <- names(object$nodeDecision)[sapply(object$nodeDecision, identity)]
+  utility_nodes <- names(object$nodeUtility)[sapply(object$nodeUtility, identity)]
+  deterministic_nodes <- names(object$nodeType)[sapply(object$nodeType, 
                                                         function(x) x == "determ")]
   
-  random_nodes <- network$nodes[!network$nodes %in% c(decision_nodes, 
-                                                      utility_nodes,
-                                                      deterministic_nodes)]
+  random_nodes <- object$nodes[!object$nodes %in% c(decision_nodes, 
+                                          utility_nodes,
+                                          deterministic_nodes)]
   cat("Decision Nodes: \n",
-      decision_node_summary(decision_nodes),
+      decision_node_summary(object, decision_nodes),
       "\n\n",
       "Utility Nodes: \n",
-      utility_node_summary(utility_nodes),
+      utility_node_summary(object, utility_nodes),
       "\n\n",
       "Deterministic Nodes: \n",
-      utility_node_summary(deterministic_nodes),
+      utility_node_summary(object, deterministic_nodes),
       "\n\n",
       "Random Nodes: \n",
-      random_node_summary(random_nodes),
+      random_node_summary(object, random_nodes),
       sep = ""
   )
 }
 
-decision_node_summary <- function(nodes)
+decision_node_summary <- function(object, nodes)
 {
   name_summary <- summarise_node_name(nodes)
-  parent_summary <- summarise_parents(nodes, max(nchar(name_summary)))
-  policy_summary <- summarise_policy(nodes, 
+  parent_summary <- summarise_parents(object, nodes, max(nchar(name_summary)))
+  policy_summary <- summarise_policy(object, nodes, 
                                      max(nchar(name_summary)), 
                                      max(nchar(parent_summary)))
   
   paste0(name_summary, parent_summary, policy_summary, collapse = "\n")
 }
 
-utility_node_summary <- function(nodes)
+utility_node_summary <- function(object, nodes)
 {
   name_summary <- summarise_node_name(nodes)
-  parent_summary <- summarise_parents(nodes, max(nchar(name_summary)), end_sep = "")
+  parent_summary <- summarise_parents(object, nodes, max(nchar(name_summary)), end_sep = "")
   
   paste0(name_summary, parent_summary, collapse = "\n")
 }
 
-random_node_summary <- function(nodes)
+random_node_summary <- function(object, nodes)
 {
   name_summary <- summarise_node_name(nodes)
-  parent_summary <- summarise_parents(nodes, max(nchar(name_summary)))
-  type_summary <- summarise_type(nodes)
+  parent_summary <- summarise_parents(object, nodes, max(nchar(name_summary)))
+  type_summary <- summarise_type(object, nodes)
   
   paste0(name_summary, parent_summary, type_summary, collapse = "\n")
 }
@@ -74,14 +76,14 @@ summarise_node_name <- function(nodes, max.width = 20)
          paste0(stringr::str_pad(nodes, max.width - 2, "right"), "  |  "))
 }
 
-summarise_parents <- function(nodes, name_width, end_sep = "  |  ")
+summarise_parents <- function(object, nodes, name_width, end_sep = "  |  ")
 {
   max.width <- floor((getOption("width") - name_width) / 2)
-  parents <- vapply(network$parents[nodes],
+  parents <- vapply(object$parents[nodes],
                     paste0,
                     character(1),
                     collapse = ", ")
-  nparents <- vapply(network$parents[nodes],
+  nparents <- vapply(object$parents[nodes],
                      length,
                      numeric(1))
   
@@ -95,11 +97,11 @@ summarise_parents <- function(nodes, name_width, end_sep = "  |  ")
   paste0(stringr::str_pad(parents, max(nchar(parents)), "right"), end_sep)
 }
 
-summarise_policy <- function(nodes, name_width, parent_width)
+summarise_policy <- function(object, nodes, name_width, parent_width)
 {
   max.width <- getOption("width") - name_width - parent_width
   decision_policy <-
-    vapply(network$nodePolicyValues[name],
+    vapply(object$nodePolicyValues[nodes],
            paste0,
            character(1),
            collapse = ", ")
@@ -113,7 +115,7 @@ summarise_policy <- function(nodes, name_width, parent_width)
          decision_policy)
 }
 
-summarise_type <- function(nodes)
+summarise_type <- function(object, nodes)
 {
-  unlist(network$nodeType[name])
+  unlist(object$nodeType[nodes])
 }

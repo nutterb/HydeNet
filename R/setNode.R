@@ -162,7 +162,7 @@ setNode <- function(network, node, nodeType,
                     fromData=!is.null(network$data), ...,
                     nodeData = NULL, factorLevels = NULL,
                     validate=TRUE, fitModel=getOption("Hyde_fitModel"),
-                    policyValues = NULL){
+                    policyValues = factorLevels){
   
   network.t <- as.character(substitute(network))
   node.t <- as.character(substitute(node))

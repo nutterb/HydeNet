@@ -5,10 +5,10 @@
 \alias{summary.HydeNetwork}
 \title{HydeNet Summary Objects}
 \usage{
-\method{summary}{HydeNetwork}(x, ...)
+\method{summary}{HydeNetwork}(object, ...)
 }
 \arguments{
-\item{x}{A \code{HydeNet} object to be summarized}
+\item{object}{A \code{HydeNet} object to be summarized}
 
 \item{...}{Additional arguments.}
 }
