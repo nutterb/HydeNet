@@ -121,18 +121,13 @@ decisionOptions <- function(node, network){
 makeJagsReady <- function(mdl, regex, nodes){
   term_name <- NULL # avoids global binding NOTE on check
   
-  mdl$term_name <- termName(as.character(mdl$term), regex)
-  mdl$term_name <- matchVars(mdl$term_name, nodes)
-  mdl$level_name <- if (!is.null(regex)) gsub(regex, "", mdl$term) else mdl$term
-  mdl$factor <- if (!is.null(regex)) grepl(regex, mdl$term) else FALSE
-  
-  factorRef <- mdl[mdl$factor & !grepl(":", mdl$term_name), 
-                   c("term_name", "level_name"), 
+  factorRef <- mdl[mdl$level != "" & !grepl(":", mdl$term_plain), 
+                   c("term_plain", "level"), 
                    drop=FALSE]
   if (nrow(factorRef) > 0){
     factorRef <- factorRef %>%
-      dplyr::group_by_('term_name') %>%
-      dplyr::mutate(level_value = 2:(length(term_name) + 1))
+      dplyr::group_by_('term_plain') %>%
+      dplyr::mutate(level_value = 2:(length(term_plain) + 1))
   }
 #   factorRef <- plyr::ddply(factorRef,
 #                            "term_name",
@@ -140,11 +135,11 @@ makeJagsReady <- function(mdl, regex, nodes){
 #                            level_value = 2:(length(term_name)+1))
   
   mdl <- merge(mdl, factorRef,
-               by=c("term_name", "level_name"), all=TRUE)
+               by=c("term_plain", "level"), all=TRUE)
   
-  mdl$jagsVar <- if (nrow(factorRef) > 0)
-                   mapply(matchLevelNumber, mdl$term_name, mdl$level_value)
-                 else mdl$term_name
+  mdl$jagsVar <- {if (nrow(factorRef) > 0)
+                   mapply(matchLevelNumber, mdl$term_plain, mdl$level_value)
+                 else mdl$term_plain}
   
   #* Change 'poly' to 'pow'
   mdl$jagsVar <- sapply(mdl$jagsVar, polyToPow)

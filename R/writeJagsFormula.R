@@ -65,16 +65,18 @@ writeJagsFormula.glm <- function(fit, nodes, ...){
   if (fit$family$family == "gaussian" & fit$family$link == "identity") 
     return(writeJagsFormula.lm(fit))
   
-  mdl <- broom::tidy(fit)[, c("term", "estimate")] 
+  mdl <- pixiedust::dust(fit, descriptors = c("term", "term_plain", "level")) %>%
+    as.data.frame(sprinkled = FALSE)
   
   regex <- factorRegex(fit)
   
-  mdl <- makeJagsReady(mdl, regex, nodes)
+  mdl <- makeJagsReady(mdl, regex, nodes) %>%
+    mutate(term_plain = gsub(":", "*", term_plain))
   
   #* rhs = right hand side
   rhs <- paste(round(mdl$estimate, getOption("Hyde_maxDigits")), 
-               ifelse(mdl$jagsVar == "(Intercept)", "", "*"),
-               ifelse(mdl$jagsVar == "(Intercept)", "", mdl$jagsVar), 
+               ifelse(is.na(mdl$term_plain), "", "*"),
+               ifelse(is.na(mdl$term_plain), "", mdl$term_plain), 
                collapse=" + ")
   
   #* Binomial Proportion
@@ -97,16 +99,18 @@ writeJagsFormula.glm <- function(fit, nodes, ...){
 #' 
 
 writeJagsFormula.lm <- function(fit, nodes, ...){
-  mdl <- broom::tidy(fit)[, c("term", "estimate")] 
+  mdl <- pixiedust::dust(fit, descriptors = c("term", "term_plain", "level")) %>%
+    as.data.frame(sprinkled = FALSE)
   
   regex <- factorRegex(fit)
   
-  mdl <- makeJagsReady(mdl, regex, nodes)
+  mdl <- makeJagsReady(mdl, regex, nodes) %>%
+    mutate(term_plain = gsub(":", "*", term_plain))
   
   #* rhs = right hand side
   rhs <- paste(round(mdl$estimate, getOption("Hyde_maxDigits")), 
-               ifelse(mdl$jagsVar == "(Intercept)", "", "*"),
-               ifelse(mdl$jagsVar == "(Intercept)", "", mdl$jagsVar), 
+               ifelse(is.na(mdl$term_plain), "", "*"),
+               ifelse(is.na(mdl$term_plain), "", mdl$term_plain), 
                collapse=" + ")
   
   out_fm <- paste0(as.character(fit$call$formula)[2], " ~ ", rhs)

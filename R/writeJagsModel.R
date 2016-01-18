@@ -102,7 +102,7 @@ writeJagsModel <- function(network, node){
                  ")"))
       }
       else{
-        model_code <- paste0(network$nodeParams[[node_str]]['pi'], "\n",
+        model_code <- paste0(network$nodeParams[[node_str]]['pi'], "\n   ",
                               node_str, " ~ ", network$nodeType[[node_str]],
                               "(pi.", node_str, ")")
     }
