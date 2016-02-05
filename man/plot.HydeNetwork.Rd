@@ -10,7 +10,7 @@
 \alias{plotHydeNetwork}
 \title{Plotting Utilities Probabilistic Graphical Network}
 \source{
-\url{http://rich-iannone.github.io/DiagrammeR/graphviz.html}\cr
+\url{http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html}\cr
   See especially the section on Attributes
 
   \url{http://graphviz.org/}\cr
@@ -18,7 +18,7 @@
 }
 \usage{
 \method{plot}{HydeNetwork}(x, customNodes = NULL, customEdges = NULL, ...,
-  useHydeDefaults = TRUE)
+  removeDeterm = FALSE, useHydeDefaults = TRUE)
 
 mergeCustomNodes(node_df, customNodes)
 
@@ -43,6 +43,11 @@ between nodes.}
 \item{...}{for the \code{plot} method, additional arguments to be passed to
 \code{DiagrammeR::render_graph}.  For \code{customNode},
 named node attributes to assign to a node's plotting characteristics.}
+
+\item{removeDeterm}{A logical value.  When \code{FALSE} (the default),
+it has no effect.  When \code{TRUE}, deterministic nodes are removed
+from the network and a reduced plot with no deterministic nodes
+is rendered.}
 
 \item{useHydeDefaults}{A logical value indicating if the default plot
   parameters in \code{options("Hyde_plotOptions")} should be applied

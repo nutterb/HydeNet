@@ -10,7 +10,7 @@ setNode(network, node, nodeType, nodeFitter, nodeFormula, fitterArgs = list(),
   decision = "current", utility = "current",
   fromData = !is.null(network$data), ..., nodeData = NULL,
   factorLevels = NULL, validate = TRUE,
-  fitModel = getOption("Hyde_fitModel"))
+  fitModel = getOption("Hyde_fitModel"), policyValues = factorLevels)
 
 fromData()
 
@@ -28,7 +28,9 @@ in \code{data(jagsDists)} for a complete list.}
 will probably only be needed when \code{fromData = TRUE}.}
 
 \item{nodeFormula}{A formula object specifying the relationship between a
-node and its parents.  It must use as a term every parent of \code{node}.}
+node and its parents.  It must use as a term every parent of \code{node}. This formula
+will be pushed through the unexported function \code{factorFormula}.  See
+"Coding Factor Levels" for more details.}
 
 \item{fitterArgs}{Additional arguments to be passed to \code{fitter}.  This does not
 yet have any effect as I haven't yet decided out where to store this and
@@ -88,8 +90,18 @@ When passing raw JAGS code (ie, character strings), this will be ignored
 as the validation is applicable to numerical/formula values.}
 
 \item{fitModel}{Logical. Toggles if the model is fit within the function call.
-  This may be set globally using \code{options('Hyde_fitModel')}.  See Details
-  for more about when to use this option.}
+This may be set globally using \code{options('Hyde_fitModel')}.  See Details
+for more about when to use this option.}
+
+\item{policyValues}{A vector of values to be used in the policy matrix when
+  the node is decision node.  This may be left \code{NULL} for factor
+  variables, which will then draw on the factor levels.  For numerical
+  variables, it can be more important: if left \code{NULL} and data are
+  available for the node, the first, second, and third quartiles will
+  be used to populate the policy values.  If no data are available and no
+  values are provided, \code{policyMatrix} and \code{compileDecisionModel}
+  are likely to return errors when they are called.  Policy values may
+  also be set with \code{setPolicyValues} after a network has been defined.}
 }
 \description{
 The relationship between a node and its parents must be defined
@@ -114,6 +126,25 @@ The functions \code{fromFormula()} and \code{fromData()} help to control
   will cause the model to be fit and the JAGS code for the parameters to be
   stored in the \code{nodeParams} attribute.
 }
+\section{Coding Factor Levels}{
+
+The \code{nodeFormula} argument will accept any valid R formula.  If desired, you
+may use a specific formulation to indicate the presence of factor levels in the
+formula.  For instance, consider the case of a variable \code{y} with a binary
+categorical parent \code{x} coded as 0 = No, and 1 = Yes.  JAGS expects the
+formula \code{y ~ c * x == 1} (where \code{c} is a constant).  However, in
+factor variables with a large number of levels, it can be difficult to remember
+what value corresponds to what level.
+
+\code{HydeNet} uses an internal (unexported) function within \code{setNode} to allow
+an alternate specification: \code{y ~ c * (x == "Yes")}.  So long as the factors in
+the formula are previously defined within the network structure, \code{HydeNet}
+will translate the level into its numeric code.
+
+Note that it is required to write \code{x == "Yes"}.  \code{"Yes" == x} will not
+translate correctly.
+}
+
 \section{Validation}{
 
 The validation of parameters is performed by comparing the values provided with

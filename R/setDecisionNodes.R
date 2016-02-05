@@ -31,3 +31,5 @@ setUtilityNodes <- function(network, ...){
   network$nodeUtility[nodes] <- lapply(network$nodeUtility[nodes], function(x) TRUE)
   network
 }
+
+

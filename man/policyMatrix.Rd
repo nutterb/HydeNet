@@ -5,7 +5,7 @@
 \alias{policyMatrix}
 \title{Construct Policy and Decision Matrices}
 \usage{
-policyMatrix(network, ...)
+policyMatrix(network, ..., useDefaultPolicies = TRUE)
 
 defaultPolicyMatrix(network)
 }
@@ -13,6 +13,11 @@ defaultPolicyMatrix(network)
 \item{network}{A HydeNetwork object}
 
 \item{...}{Named arguments with vectors of the policy values.}
+
+\item{useDefaultPolicies}{A logical indicating if the default policy
+  values from decision nodes should be used for any decision nodes
+  not named in \code{...}.  If a node is named in \code{...} and also
+  has default policy values, the user supplied values take precedence.}
 }
 \value{
 Returns a data frame built by \code{expand.grid} and intended to be
@@ -38,7 +43,7 @@ When \code{...} is not used, the default policy matrix is defined
   node to be considered.  When manually supplying values, the nodes must
   exist in network, but the requirement that they be decision nodes is not
   enforced.  Thus, it is possible to include numeric values in a decision
-  matrix, though it is strongly discouraged.
+  matrix.
 
   Policy matrices can be passed to \code{HydePosterior} to run posterior
   distributions on each row of the policy matrix.  There is nothing
@@ -47,6 +52,9 @@ When \code{...} is not used, the default policy matrix is defined
   from the nodes in the network.  Any data frame can be passed to
   \code{HydePosterior} and a check is done there to confirm all of the
   column names match a node in the network.
+
+  Whenever a node is identified as a deterministic node, its policy values
+  are forced to \code{NULL}, regardless of what the user has specified.
 }
 \examples{
 data(PE, package="HydeNet")

@@ -1,3 +1,18 @@
+### 0.10.3 (18 January 2015)
+* Added dependency to `pixiedust` to allow better parsing of term names.  This
+  also resulted in removing the dependency on `broom` (which is alright, because
+  `pixiedust` depends on `broom`.
+
+### 0.10.2 (13 November 2015)
+* Expanded options for specifying policy matrices (per Issue #95)
+
+### 0.10.1 (30 October 2015)
+* Corrected a serious bug in how character values were handled in the 
+  `data` argument of `compileDecisionModel`.
+* Adds `factorFormula` to assist in writing formulae that make use 
+  of factor levels instead of their numeric codes.
+* Deterministic nodes are now represented as diamonds by default.
+
 ### 0.10.0 (26 Sept 2015)
 * Implements the `factorLevels` element in network objects 
   and arguments in `setNode`.  See Issue #81

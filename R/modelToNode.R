@@ -61,6 +61,7 @@ modelToNode.cpt <- function(model, nodes, ...)
        fromData = TRUE,
        nodeData = attributes(model)$model,
        factorLevels = levels(attributes(model)$model[[node_name]]),
+       nodePolicyValues = levels(attributes(model)$model[[node_name]]),
        nodeModel = model)
 }
 
@@ -91,6 +92,8 @@ modelToNode.glm <- function(model, nodes, ...){
          else model$model
        } else NULL,
        factorLevels = if (is.factor(model$model[[1]])) levels(model$model[[1]]) else NULL,
+       nodePolicyValues = if (is.factor(model$model[[1]])) levels(model$model[[1]]) 
+                          else unique(model$model[[1]]),
        nodeModel = model)
 }
 
@@ -122,6 +125,7 @@ modelToNode.lm <- function(model, nodes, ...){
          else model$model
        } else NULL,
        factorLevels = NULL,
+       policyValues = stats::quantile(model$model[[1]], probs=c(.25, .5, .75), na.rm=TRUE),
        nodeModel = model)
 }
 
@@ -150,6 +154,8 @@ modelToNode.multinom <- function(model, nodes, ...){
        fromData = TRUE,
        nodeData = if (!is.null(model$model)) model$model else NULL,
        factorLevels = if (is.factor(model$model[[1]])) levels(model$model[[1]]) else NULL,
+       policyValues = if (is.factor(model$model[[1]])) levels(model$model[[1]])
+                      else unique(model$model[[1]]),
        nodeModel = model)
 }
 
@@ -171,6 +177,7 @@ modelToNode.xtabs <- function(model, nodes, ...){
        fromData = FALSE,
        nodeData = NULL,
        factorLevels = names(model),
+       policyValues = names(model),
        nodeModel = model)
 }
 
