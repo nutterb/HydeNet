@@ -10,7 +10,7 @@
 \alias{plotHydeNetwork}
 \title{Plotting Utilities Probabilistic Graphical Network}
 \source{
-\url{http://rich-iannone.github.io/DiagrammeR/graphviz.html}\cr
+\url{http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html}\cr
   See especially the section on Attributes
 
   \url{http://graphviz.org/}\cr

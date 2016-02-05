@@ -32,7 +32,7 @@ Imports:
     graph,
     gRbase,
     magrittr,
-    pixiedust (>= 0.6.2),
+    pixiedust (>= 0.6.1),
     stats,
     stringr,
     utils

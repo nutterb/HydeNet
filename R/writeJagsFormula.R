@@ -196,3 +196,5 @@ writeJagsFormula.xtabs <- function(fit, ...){
   
   return(pi)
 }
+
+utils::globalVariables(c("term_plain"))
