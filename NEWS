@@ -1,4 +1,10 @@
-### 0.10.3 (18 January 2015)
+### 0.10.4 (11 March 2016)
+* Added methods for survreg models.  The predicted value returned is the predicted
+  survival time.
+* Made changes to unit tests to accommodate new version of `testthat`
+* Began migration from `ArgumentCheck` to `checkmate`
+
+### 0.10.3 (18 January 2016)
 * Added dependency to `pixiedust` to allow better parsing of term names.  This
   also resulted in removing the dependency on `broom` (which is alright, because
   `pixiedust` depends on `broom`.

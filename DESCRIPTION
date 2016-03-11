@@ -1,31 +1,32 @@
 Package: HydeNet
 Type: Package
 Title: Hybrid Bayesian Networks Using R and JAGS
-Version: 0.10.3
+Version: 0.10.4
 Date: 2015-01-18
-Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter <benjamin.nutter@gmail.com>
+Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter
+    <benjamin.nutter@gmail.com>
 Maintainer: Benjamin Nutter <benjamin.nutter@gmail.com>
 Description: Facilities for easy implementation of hybrid Bayesian networks
     using R. Bayesian networks are directed acyclic graphs representing joint
     probability distributions, where each node represents a random variable and
-    each edge represents conditionality. The full joint distribution is
-    therefore factorized as a product of conditional densities, where each node
-    is assumed to be independent of its non-descendents given information on its
-    parent nodes. Since exact, closed-form algorithms are computationally
-    burdensome for inference within hybrid networks that contain a combination
-    of continuous and discrete nodes, particle-based approximation techniques
-    like Markov Chain Monte Carlo are popular.  We provide a user-friendly
-    interface to constructing these networks and running inference using the 'rjags' package.
-    Econometric analyses (maximum expected utility under competing policies,
-    value of information) involving decision and utility nodes are also
-    supported.
+    each edge represents conditionality. The full joint distribution is therefore
+    factorized as a product of conditional densities, where each node is assumed
+    to be independent of its non-descendents given information on its parent nodes.
+    Since exact, closed-form algorithms are computationally burdensome for inference
+    within hybrid networks that contain a combination of continuous and discrete
+    nodes, particle-based approximation techniques like Markov Chain Monte Carlo
+    are popular. We provide a user-friendly interface to constructing these networks
+    and running inference using the 'rjags' package. Econometric analyses (maximum
+    expected utility under competing policies, value of information) involving
+    decision and utility nodes are also supported.
 License: MIT + file LICENSE
 Depends:
     R (>= 3.0.0),
     nnet,
     rjags
 Imports:
-    ArgumentCheck, 
+    ArgumentCheck,
+    checkmate,
     DiagrammeR (>= 0.8),
     plyr,
     dplyr,
@@ -46,3 +47,4 @@ LazyLoad: yes
 LazyData: true
 URL: https://github.com/nutterb/HydeNet,
 BugReports: https://github.com/nutterb/HydeNet/issues
+RoxygenNote: 5.0.1

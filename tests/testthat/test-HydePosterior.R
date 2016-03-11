@@ -35,8 +35,7 @@ test_that("Unbound HydePosterior print method",
                              variable.names = c("d.dimer", "death"),
                              n.iter = 1000, 
                              bind = FALSE)  
-  expect_that(print(Posterior), 
-              not(throws_error()))
+  expect_output(print(Posterior))
 })
 
 test_that("bindPosterior returns relabeled data",

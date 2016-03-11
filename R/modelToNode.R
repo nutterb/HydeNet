@@ -26,9 +26,9 @@ modelToNode <- function(model, nodes, ...) UseMethod("modelToNode")
 
 modelToNode.default <- function(model, nodes, ...){
   fitter <- utils::tail(as.character(as.list(model$call)[[1]]), 1)
-  if (!fitter %in% c("lm", "glm", "multinom", "xtabs"))
+  if (!fitter %in% c("lm", "glm", "multinom", "survreg", "xtabs"))
     stop(paste0("The Hyde package only accepts models built by the following functions:\n",
-                "  lm, glm (family=\"binomial\" only), multinom, xtabs"))
+                "  lm, glm (family=\"binomial\" only), multinom, survreg, xtabs"))
 }
 
 #' @rdname modelToNode
@@ -157,6 +157,55 @@ modelToNode.multinom <- function(model, nodes, ...){
        policyValues = if (is.factor(model$model[[1]])) levels(model$model[[1]])
                       else unique(model$model[[1]]),
        nodeModel = model)
+}
+
+#' @rdname modelToNode
+#' @export
+
+modelToNode.survreg <- function(model, nodes, ...){
+  if (missing(nodes))
+    nodes <- nodeFromFunction(names(attributes(stats::terms(model))$dataClasses))
+  list(nodes = node_tmp <- gsub("(Surv[(]|,.+$)", "", as.character(stats::terms(model))[2]),
+       parents = parents_tmp <- if (length(names(attributes(stats::terms(model))$dataClasses)[-1]) == 0)
+         NULL
+       else 
+         matchVars(names(attributes(stats::terms(model))$dataClasses)[-1],
+                   nodes),
+       nodeType = "dnorm",
+       nodeFormula = model$call$formula,
+       nodeFitter = as.character(model$call)[1],
+       nodeFitterArgs = as.list(model$call)[-c(1, which(names(as.list(model$call)) %in% c("formula", "data")))],
+       nodeParams = list(mu = gsub("[[:print:]]+~", "", 
+                                   writeJagsFormula(model,
+                                                    nodes)),
+                         tau = survreg_tau(model, 
+                                           node_str = node_tmp,
+                                           parents = parents_tmp)[["tau"]]),
+       nodeDecision = FALSE,
+       nodeUtility = FALSE,
+       fromData = TRUE,
+       nodeData = if ("data" %in% names(as.list(model$call)[-c(1, which(names(as.list(model$call)) == "formula"))])){
+         survreg_data(model)
+       } else NULL,
+       factorLevels = NULL,
+       policyValues = stats::quantile(model$y[,1], probs=c(.25, .5, .75), na.rm=TRUE),
+       nodeModel = model,
+       nodePrelim = survreg_tau(model,
+                                node_str = node_tmp,
+                                parents = parents_tmp)[["prelim"]]
+  )
+}
+
+survreg_data <- function(fit)
+{
+  cbind(as.data.frame(as.matrix(stats::model.frame(fit)[[1]])), 
+              stats::model.frame(fit)[, -1]) %>%
+    stats::setNames(
+      gsub("(Surv[(]|[)])", "", names(stats::model.frame(fit))[1]) %>%
+        strsplit(", ") %>%
+        unlist() %>%
+        c(names(stats::model.frame(fit))[-1])
+    )
 }
 
 #' @rdname modelToNode

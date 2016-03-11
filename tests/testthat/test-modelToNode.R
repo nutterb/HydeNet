@@ -14,6 +14,6 @@ test_that("modelToNode: coxph should return an error",
 test_that("modelToNode: multinom",
 {
   fit.gear <- multinom(gear ~ mpg + factor(am), data=mtcars)
-  expect_that(modelToNode(fit.gear), not(throws_error()))
+  expect_output(modelToNode(fit.gear))
 })
   

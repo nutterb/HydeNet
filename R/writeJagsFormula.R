@@ -180,6 +180,50 @@ writeJagsFormula.multinom <- function(fit, nodes, ...){
 #' @rdname writeJagsFormula
 #' @export
 
+writeJagsFormula.survreg <- function(fit, ...)
+{
+  mdl <- pixiedust::dust(fit, descriptors = c("term", "term_plain", "level")) %>%
+    as.data.frame(sprinkled = FALSE)
+  
+  regex <- factorRegex(fit)
+  
+  mdl <- makeJagsReady(mdl, regex, nodes) %>%
+    dplyr::mutate(term_plain = gsub(":", "*", term_plain))
+  
+  #* rhs = right hand side
+  rhs <- paste(round(mdl$estimate, getOption("Hyde_maxDigits")), 
+               ifelse(is.na(mdl$term_plain), "", "*"),
+               ifelse(is.na(mdl$term_plain), "", mdl$term_plain), 
+               collapse=" + ") %>%
+    trimws()
+  
+  inverse_fn <- survival::survreg.distributions[[fit$dist]][["itrans"]] 
+  
+  if (!is.null(inverse_fn)) 
+  {
+    inverse_fn <- 
+      inverse_fn %>%
+      deparse() %>%
+      `[`(2) %>%
+      sub("[(].+$", "", .)
+    
+    rhs <- paste0(inverse_fn, "(", rhs, ")")
+  }
+  
+  lhs <- as.character(fit$call$formula)[2] %>%
+    sub("Surv[(]", "", .) %>%
+    sub(",.+$", "", .) %>%
+    trimws()
+  
+  out_fm <- paste0(lhs, " ~ ", rhs) %>%
+    trimws()
+  
+  rToJags(stats::as.formula(out_fm)) 
+}
+
+#' @rdname writeJagsFormula
+#' @export
+
 writeJagsFormula.xtabs <- function(fit, ...){
   fm <- attributes(fit)$call$formula
   out_fm <- paste(fm[2], fm[1])
@@ -197,4 +241,4 @@ writeJagsFormula.xtabs <- function(fit, ...){
   return(pi)
 }
 
-utils::globalVariables(c("term_plain"))
+utils::globalVariables(c("term_plain", "."))

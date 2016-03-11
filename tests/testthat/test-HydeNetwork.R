@@ -16,7 +16,7 @@ test_that("HydeNetwork.formula returns expected attributes",
                  "nodeFitterArgs", "nodeParams", "fromData", "nodeData", 
                  "factorLevels",
                  "nodeModel", "nodeDecision", "nodePolicyValues", 
-                 "nodeUtility", "dag", 
+                 "nodeUtility", "nodePrelim", "dag", 
                  "data", "network_formula"))
 })
 
@@ -50,6 +50,7 @@ test_that("HydeNetwork.list returns expected attributes",
                c("nodes", "parents", "nodeType", "nodeFormula", "nodeFitter",
                  "nodeFitterArgs", "nodeParams", "fromData", "nodeData",
                  "factorLevels", 
-                 "nodeModel", "nodeDecision", "nodePolicyValues", "nodeUtility", "dag", 
+                 "nodeModel", "nodeDecision", "nodePolicyValues", "nodeUtility", 
+                 "nodePrelim", "dag", 
                  "network_formula"))
 })

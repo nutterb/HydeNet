@@ -24,7 +24,12 @@
 rToJags <- function(f){
   f <- as.character(f)
   f <- unlist(strsplit(f, "[+]"))
-  f <- stringr::str_trim(f)
+  f <- trimws(f)
+  
+  #* Strip Surv 
+  surv_factor <- grepl("Surv[(]", f)
+  f[surv_factor] <- sub("^Surv[(]", "", f[surv_factor])
+  f[surv_factor] <- sub(",.+$", "", f[surv_factor])
   
   #* Easy translations
   f <- gsub("acos[(]", "arccos(", f)

@@ -13,7 +13,7 @@
 #' 
 #' 
 #' @title Plotting Utilities Probabilistic Graphical Network
-#' @details Generate and customize plots of a \code{HydeNetwork} 
+#' @description Generate and customize plots of a \code{HydeNetwork} 
 #'   class network. \code{HydeNet} provides some initial defaults for standard 
 #'   variable nodes, deterministic nodes, decision nodes, and utility nodes.
 #'   Since these nodes are assumed to be of inherent difference and interest, 

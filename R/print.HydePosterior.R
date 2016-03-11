@@ -3,7 +3,7 @@
 #' @method print HydePosterior
 #' 
 #' @title Print a Hyde Posterior Distribution Object
-#' @details Prints a brief description of a HydePosterior object.
+#' @description Prints a brief description of a HydePosterior object.
 #' 
 #' @param x a \code{HydePosterior} object
 #' @param ... additional arguments to be passed to print methods.  Currently 

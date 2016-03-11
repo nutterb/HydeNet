@@ -48,16 +48,35 @@
 #'                                    variable.names = c("d.dimer", "death"),
 #'                                    n.iter = 1000)
 #' 
-bindPosterior <- function(hydePost, relabel_factor=TRUE){
-
+bindPosterior <- function(hydePost, relabel_factor=TRUE)
+{
   if (class(hydePost$codas) == "mcmc.list")
-    bound <- dplyr::bind_rows(lapply(seq_along(hydePost$codas), bind_chains_mcmclist, hydePost))
+  {
+    bound <- 
+      dplyr::bind_rows(
+        lapply(seq_along(hydePost[["codas"]]), 
+               bind_chains_mcmclist, 
+               hydePost
+        )
+      )
+  }
   else 
-    bound <- dplyr::bind_rows(lapply(hydePost$codas, bind_chains_list))
+  {
+    bound <- 
+      dplyr::bind_rows(
+        lapply(hydePost[["codas"]], 
+               bind_chains_list
+        )
+    )
+  }
   
-  if (relabel_factor){
+  #* JAGS returns integers in place of factors.  If requested, 
+  #* replace the integers as factors.
+  if (relabel_factor)
+  {
     factors_to_relabel <- names(bound)[names(bound) %in% names(hydePost$factorRef)]
-    for(i in factors_to_relabel){
+    for(i in factors_to_relabel)
+    {
       bound[i] <- factor(bound[[i]], 
                          levels=hydePost$factorRef[[i]]$value,
                          labels=hydePost$factorRef[[i]]$label)
@@ -70,17 +89,29 @@ bindPosterior <- function(hydePost, relabel_factor=TRUE){
 
 
 #**** UTILITY FUNCTIONS
-bind_chains_mcmclist <- function(mcmc, hydePost){
+#**** bind_chains_mcmclist is used when there is a single network (not a decision network)
+#**** bind_chains_list is used when a list of mcmclists is being bound, such as 
+#****                  when a decision network was run.
+bind_chains_mcmclist <- function(mcmc, hydePost)
+{
   as.data.frame(hydePost$codas[[mcmc]]) %>%
-    dplyr::mutate_(chain_index = ~mcmc,
-            obs_index = ~1:n())
+    dplyr::mutate_(
+      chain_index = ~mcmc,
+      obs_index = ~1:n()
+    )
 }
 
-bind_chains_list <- function(mcmc){
+bind_chains_list <- function(mcmc)
+{
   lapply(1:length(mcmc),
          function(chain)
+         {
            as.data.frame(mcmc[[chain]]) %>%
-             dplyr::mutate_(chain_index = ~chain,
-                     obs_index = ~1:n())) %>%
-    dplyr::bind_rows()
+             dplyr::mutate_(
+               chain_index = ~chain,
+               obs_index = ~1:n()
+             )
+         }
+  ) %>%
+  dplyr::bind_rows()
 }

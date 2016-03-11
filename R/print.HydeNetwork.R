@@ -3,7 +3,7 @@
 #' @method print HydeNetwork
 #' 
 #' @title Print a HydeNetwork
-#' @details Prints a HydeNetwork object with a brief summary of each node.
+#' @description Prints a HydeNetwork object with a brief summary of each node.
 #' 
 #' @param x a \code{HydeNetwork object}
 #' @param ... additional arguments to be passed to print methods.  Currently 
