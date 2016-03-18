@@ -9,13 +9,13 @@ end.rcode-->
 
 <H3> Gallery of Sample Analyses </H3>
 
-<!--begin.rcode, echo = FALSE, results = 'asis'
+<!--begin.rcode, echo = FALSE, results = 'asis', warning = FALSE, message = FALSE
 pages <- list.files("vignettes", 
-                     pattern = "[.]html")
+                     pattern = "[.]Rmd")
 
 titles <- vector("character", length(pages))
 for (i in seq_along(pages)){
-  x <- readLines(gsub("[.]html", ".Rmd", file.path("vignettes", pages[i])))
+  x <- readLines(file.path("vignettes", pages[i]))
   x <- x[min(which(grepl("title:", x)))]
   x <- gsub("title:", "", x)
   x <- trimws(x)
@@ -23,7 +23,7 @@ for (i in seq_along(pages)){
   titles[i] <- x
 }
 
-cat(paste0("<a href = 'vignettes/", pages, "'>", titles, "</a>"))
+cat(paste0("<a href = 'vignettes/", pages, "'>", titles, "</a>"), sep = "<br>")
 end.rcode-->
 
 

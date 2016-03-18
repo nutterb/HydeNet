@@ -1,0 +1,18 @@
+{
+    "contents" : "devtools::document(\"C:/Users/Nutter/Documents/GitHub/HydeNet\")\ndevtools::test(\"C:/Users/Nutter/Documents/GitHub/HydeNet\")\ndevtools::check(\"C:/Users/Nutter/Documents/GitHub/HydeNet\", args = \"--as-cran\")\ndevtools::install_local(\"C:/Users/Nutter/Documents/GitHub/HydeNet\")\n# devtools::release(\"C:/Users/Nutter/Documents/GitHub/HydeNet\")\n\n#*** I FINISHED restructuring code at `compileJagsModel`\n#*** START AT `cpt`\n\n\nlibrary(HydeNet)\nlibrary(survival)\n\nNet <- HydeNetwork(~ futime | ecog.ps * rx,\n                   data = ovarian) %>%\n  setNode(futime, \n          nodeType = \"dnorm\",\n          nodeFormula = Surv(futime, fustat) ~ ecog.ps + rx,\n          fitterArgs = list(dist = \"weibull\", scale = 1),\n          nodeFitter = \"survreg\",\n          mu = fromData(),\n          tau = fromData()) %>%\n  setNode(ecog.ps,\n          nodeType = \"dcat\",\n          nodeFormula = ~ ecog.ps,\n          nodeFitter = \"xtabs\",\n          pi = fromData()) %>%\n  setNode(rx,\n          nodeType = \"dcat\",\n          nodeFormula = ~ rx,\n          nodeFitter = \"xtabs\",\n          pi = fromData())\n\nplot(Net)\n\nPost <-\n  compileJagsModel(Net,\n                   data = list(ecog.ps = 2,\n                               rx = 2)) %>%\n  HydePosterior(c(\"ecog.ps\", \"rx\", \"futime\"),\n                n.iter = 1000)\n\nmedian(Post$futime)\npredict(fit, newdata = data.frame(ecog.ps = 2, rx = 2))\n\nwriteNetworkModel(Net, TRUE)\n",
+    "created" : 1454673342834.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "2032922187",
+    "id" : "7F5C70B4",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

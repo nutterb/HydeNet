@@ -1,0 +1,330 @@
+---
+title: "Survival Analysis in `HydeNet`"
+author: "Jarrod Dalton and Benjamin Nutter"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Objective
+
+The analyses performed in this example are intended to illustrate the process of estimating survival times in hybrid decision networks using the `HydeNet` package.  It also gives a brief explanation of how the predicted survival times are calculated.  The analyses are not particularly practical and should not be taken seriously.
+
+```{r, echo = FALSE, message = FALSE}
+library(pixiedust)
+options(pixiedust_print_method = "html")
+hyde_medley <- function(x)
+{
+  x %>%
+    medley_bw() %>%
+    sprinkle_table(pad = 3,
+                   border = "all",
+                   border_color = "#CCCCCC") %>%
+    sprinkle(bg = "#AAAAAA",
+             part = "head") %>%
+    sprinkle(bg_pattern = c("#FFFFFF", "#DDDDDD"),
+             bg_pattern_by = "rows")
+}
+```
+
+## Introduction
+
+Beginning in `HydeNet` 0.10.4, you may include survival analysis nodes within a network.  These nodes have the same appearance and behavior as other nodes, and only require that you use a parametric survival model with the function `survival::survreg`.  The only significant difference in behavior is that you **must** explicitly define the `nodeFormula` argument in `setNode`.
+
+To explore the development of survival models in `HydeNet`, we may use the `veteran` dataset from the `survival` package.  The `veteran` dataset comes from a randomized trial of lung patients for two types of treatment.  A sample of the data, after some formatting, are presented in Table 1.
+
+```{r, message = FALSE, warning = FALSE}
+library(survival)
+library(dplyr)
+data(veteran)
+
+veteran %<>%
+  mutate(trt = factor(trt, 
+                      levels = 1:2,
+                      labels = c("standard", "test")),
+         prior = factor(prior,
+                        c(0, 10),
+                        c("no", "yes")))
+head(veteran) %>%
+  dust(caption = "Sample of Veterans Data") %>%
+  hyde_medley() 
+```
+
+A quick univariable analysis, presented in Table 2, illustrates that is apparent balance between the standard and test groups.  The balance by `celltype` is a little weak, but probably wasn't considered in the randomization anyway.
+
+```{r, echo = FALSE, results = 'asis'}
+library(lazyWeave)
+options(lazyReportFormat = "html")
+lazy.counter("table", 2, fn = "set")
+catconttable(veteran,
+             vars = c("time", "celltype", "karno", "diagtime", "age", "prior"),
+             byVar = "trt") %>%
+  write.ctable(caption = "Evaluation of the Balance of Randomization")
+```
+
+## Representation of the simple model
+
+The simplest representation of these data in `HydeNet` is developed as a single model with node `time` where all of the independent variables are parents.
+
+```{r, message = FALSE, warning = FALSE}
+library(HydeNet)
+library(magrittr)
+library(ggplot2)
+Lung_simple <- 
+  HydeNetwork( ~ time | trt * celltype * karno * diagtime * age * prior,
+               data = veteran)
+plot(Lung_simple)
+```
+
+Looking at the parameter specifications for the `time` node shows us that `HydeNet` assumes time is to be calculated from a linear regression.  We need to explicitly tell `HydeNet` to use a parametric survival regression.
+
+```{r}
+print(Lung_simple, time)
+
+Lung_simple %<>%
+  setNode(time, 
+          nodeType = "dnorm",
+          nodeFitter = "survreg",
+          nodeFormula = Surv(time, status) ~ trt + celltype + karno + 
+                          diagtime + age + prior,
+          fitterArgs = list(dist = "weibull", scale = 1),
+          mu = fromData(),
+          tau = fromData())
+```
+
+Notice that we declared the `nodeType` for the `time` node to be `"dnorm"`, just as we would have for linear regression.  We are able to do this because the outcome we are predicting is `time`, and the prediction has an approximately normal distribution.  The standard error of the predictions is calculated, in matrix notation, as 
+
+$$ X \cdot VV \cdot X' $$
+
+Where $X$ is the matrix of independent variables, $X'$ is it's transpose, and $VV$ is the variance covariance matrix.  These matrices are determined from the model built by `survreg` and written into the JAGS model.  As we're about to see, this adds quite a bit of additional text to our JAGS code.  But for the most part, this additional code is transparent to our analysis.  The additions appear in the code as `vvmat.time`, `xmat.time`, and `xmatprime.time`.
+
+```{r}
+writeNetworkModel(Lung_simple, pretty = TRUE)
+```
+
+From here, we perform our analysis as usual.  We compile the network model, generate a posterior distribution, and evaluate the results. As seen below, there doesn't appear to be much of a difference in survival time between the treatments.
+
+```{r}
+Post_simple <- 
+  compileJagsModel(Lung_simple) %>%
+  HydePosterior(variable.names = c("time", "trt", "celltype", "karno", "diagtime", 
+                                   "age", "prior"),
+                n.iter = 1000)
+
+options(pixie_count = 2)
+Post_simple %>%
+  group_by(trt) %>%
+  do(broom::tidy(as.data.frame(.))) %>%
+  ungroup() %>%
+  filter(column == "time") %>%
+  dust(caption = "Comparison of Survival Times Using Basic Survival Model") %>%
+  sprinkle(round = 3) %>%
+  hyde_medley()
+
+ggplot(Post_simple,
+       mapping = aes(x = trt,
+                     y = time,
+                     colour = trt)) + 
+  geom_boxplot()
+```
+
+For the purposes of comparison, let's run the model again, but let's observer the values for the first patient in the `veteran` dataset to see how `HydeNet` compares.
+
+```{r}
+fit <- survreg(Surv(time, status) ~ trt + celltype + karno + 
+                  diagtime + age + prior,
+               data = veteran,
+               dist = "weibull",
+               scale = 1)
+predict(fit)[1]
+
+veteran[1, ]
+
+compileJagsModel(Lung_simple, 
+                 data = list(trt = "standard",
+                             celltype = "squamous",
+                             karno = 60,
+                             diagtime = 7,
+                             age = 69,
+                             prior = "yes")) %>%
+  HydePosterior(variable.names = "time",
+                n.iter = 1000) %>%
+  summarise(median = median(time))
+```
+
+## A More Complex Model
+
+Now, for the sake of illustration, let's abandon the fact that this lung study was randomized.  Instead, we will look at the data as if it were an observational study.  Furthermore, let us assume we believe the following:
+
+* The `karno` score is dependent on `celltype`
+* The time to diagnosis (`diagtime`) is dependent on `karno` and `prior` (prior therapy)
+* There are differences among physicians with respect to how patients are assigned treatment. That is, it is neither random nor systematic, but determined based on physician judgment.
+
+With these beliefs, we construct our network as follows:
+
+```{r}
+Lung <- HydeNetwork(~ diagtime | prior * karno + 
+                      age + 
+                      celltype + 
+                      karno | celltype + 
+                      trt | celltype * karno * diagtime * age * prior + 
+                      time | trt * celltype * karno * diagtime * age * prior,
+                    data = veteran)
+
+plot(Lung)
+```
+
+Before proceeding, it would be prudent to determine if `HydeNet`'s default models will be suitable to the data.  The results are not displayed, but the code is provided.
+
+```{r, eval=FALSE}
+#* Plot settings
+par(mfrow=c(2, 2))
+
+#* Default karno model is acceptable.
+fit.karno <- lm(karno ~ celltype, data = veteran)
+plot(fit.karno)
+
+#* Default diagtime model is not ideal
+fit.diagtime <- lm(diagtime ~ karno + prior, data = veteran)
+plot(fit.diagtime)
+
+#* Log diagtime model is better
+fit.logdiag <- lm(log(diagtime) ~ karno + prior, data = veteran)
+plot(fit.logdiag)
+
+#* Restore plot settings
+par(mfrow = c(1, 1))
+```
+
+For convenience, we will create a variable for the log-diagnostic time in our data set and reconstruct the network appropriately.
+
+```{r}
+veteran %<>%
+  mutate(log_diagtime = log(diagtime))
+
+Lung <- HydeNetwork(~ log_diagtime | prior * karno + 
+                      age + 
+                      celltype + 
+                      karno | celltype + 
+                      trt | celltype * karno * log_diagtime * age * prior + 
+                      time | trt * celltype * karno * log_diagtime * age * prior,
+                    data = veteran)
+
+plot(Lung)
+```
+
+First, we define the model for `time`, as was done previously.  
+
+```{r}
+Lung %<>%
+  setNode(time, 
+          nodeType = "dnorm",
+          nodeFitter = "survreg",
+          nodeFormula = Surv(time, status) ~ trt + celltype + karno + 
+                          log_diagtime + age + prior ,
+          fitterArgs = list(dist = "weibull", scale = 1),
+          mu = fromData(),
+          tau = fromData())
+```
+
+Lastly, since we have assumed the decision to treat is based on physician judgment, we will declare `trt` a decision node so that we can evaluate if patients would do better on one treatment or another.
+
+```{r}
+Lung %<>%
+  setDecisionNodes(trt)
+
+plot(Lung)
+```
+
+Our next step is to estimate the survival time for the first patient in the `veteran` data set.  
+
+```{r}
+Post <- 
+  Lung %>%
+  compileDecisionModel(data = list(celltype = "squamous", 
+                                   karno = 60, 
+                                   log_diagtime = 1.94591,
+                                   age = 69,
+                                   prior = "no")) %>%
+  HydePosterior(variable.names=c("trt", "time"),
+                n.iter = 1000)
+
+ggplot(Post,
+       mapping = aes(x = trt,
+                     y = time, 
+                     colour = trt)) + 
+  geom_boxplot()
+```
+
+It appears that survival time isn't much different by treatment. This isn't a terribly surprising result, considering the results of the survival model itself.  The hazard ratio for treatment indicates only a `r round((1 - exp(coef(fit)[2])) * 100, 1)`% reduction in hazard for patients on the test treatment.  The `celltype` appears to have a greater impact on survival than the treatment.
+
+```{r}
+dust(fit,
+     descriptors = c("term_plain", "level"),
+     caption = "Summary of Survival Model") %>%
+  sprinkle(cols = c(3, 7, 8), 
+           fn = quote(exp(value))) %>%
+  sprinkle(cols = 3:8,
+           halign = "right") %>%
+  sprinkle(cols = 1:2,
+           rows = 1,
+           replace = c("(Intercept)", "")) %>%
+  sprinkle_colnames("Term", "Level", "HR", "Std. Error", 
+                    "Z", "P-value", "LCL", "UCL") %>%
+  medley_model() %>%
+  hyde_medley()
+```
+
+Out of curiosity, let's modify the network again to explore the hypothesis that the new treatment may benefit some cell types better than others.  To do this, we'll declare `celltype` a decision node.
+
+```{r}
+Lung %<>%
+  setDecisionNodes(celltype)
+
+plot(Lung)
+```
+```{r, results = 'hide'}
+Post2 <- 
+  Lung %>%
+  compileDecisionModel() %>%
+  HydePosterior(variable.names = "time",
+                n.iter = 1000)
+```
+```{r}
+ggplot(Post2,
+       mapping = aes(x = trt,
+                     y = time,
+                     colour = trt)) + 
+  geom_boxplot() + 
+  facet_grid(~ celltype)
+```
+
+## Defining the Network with Model Objects
+
+As with other `HydeNet` network objects, it is permissible to define network nodes using R model objects.  Suppose we constructed our models for the network before building the network.  
+
+The representation below renders differently than the earlier version of the network. It is, in fact, the same network, but the nodes are placed differently due to the order in which nodes are identified and renderd by GraphViz.
+
+```{r}
+fit <- survreg(Surv(time, status) ~ trt + celltype + karno + 
+                  log_diagtime + age + prior,
+               data = veteran,
+               dist = "weibull",
+               scale = 1)
+fit.logdiag <- lm(log_diagtime ~ karno + prior, data = veteran)
+
+LungMod <- 
+  HydeNetwork(list(fit, fit.logdiag)) %>%
+  update( ~ . + 
+            karno | celltype + 
+            trt | age * prior * log_diagtime * celltype * karno) %>%
+  setDecisionNodes(trt, celltype)
+
+plot(LungMod)
+```
+
+The structure of the network is the same and any subsequent analyses (obtaining the posterior distribution and the summaries that follow) are done using the same methods described above.
+
+```{r}
+print(LungMod)
+```
+
