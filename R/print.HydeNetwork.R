@@ -60,7 +60,10 @@ print.HydeNetwork <- function(x, ...){
                  }
     if (nodeType != "Unspecified") nodeType <- paste0(nodeType, "(", nodeParam, ")")
     
-    Formula <- paste0(x$nodeFitter[[node]], ": ", deparse(x$nodeFormula[[node]]))
+    Formula <- paste0(x$nodeFitter[[node]], ": ", 
+                      deparse(x$nodeFormula[[node]]) %>%
+                        trimws() %>%
+                        paste0(collapse = " "))
    
     return(paste(nodeName, nodeType, Formula, sep="\n"))
   }

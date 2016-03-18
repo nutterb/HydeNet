@@ -193,7 +193,7 @@ writeJagsFormula.survreg <- function(fit, ...)
   #* rhs = right hand side
   rhs <- paste(round(mdl$estimate, getOption("Hyde_maxDigits")), 
                ifelse(is.na(mdl$term_plain), "", "*"),
-               ifelse(is.na(mdl$term_plain), "", mdl$term_plain), 
+               ifelse(is.na(mdl$term_plain), "", mdl$jagsVar), 
                collapse=" + ") %>%
     trimws()
   

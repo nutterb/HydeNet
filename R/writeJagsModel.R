@@ -348,6 +348,30 @@ survreg_tau <- function(fit, node_str, parents)
   vv <- fit$var[1:length(coef(fit)), 1:length(coef(fit))]
   vv_str <- vector("character", 
                    length = length(vv))
+  
+  mframe <- model.frame(fit)[, -1, drop = FALSE]
+  
+  nms <- 
+    sapply(names(mframe),
+           function(x)
+           {
+             if (is.factor(mframe[[x]]))
+             {
+               if (nlevels(mframe[[x]]) > 2)
+               {
+                 paste0("(", x, " == ", 2:nlevels(mframe[[x]]), ")")
+               }
+               else 
+               {
+                 x
+               }
+             }
+             else 
+             {
+               x
+             }
+           })
+  
   for (i in 1:ncol(vv))
   {
     for (j in 1:nrow(vv))
@@ -366,18 +390,18 @@ survreg_tau <- function(fit, node_str, parents)
   
   xmat <- 
     paste0("xmat.", node_str, "[1,", 1:length(coef(fit)), "] <- ",
-           c(1, parents), 
+           c(1, unlist(nms)), 
            collapse = "; ")
   
   xmat_prime <- 
     paste0("xmatprime.", node_str, "[", 1:length(coef(fit)), ",1] <- ",
-           c(1, parents),
+           c(1, unlist(nms)),
            collapse = "; ")
   
   list(prelim = paste0(vv_str, "\n   ",
                        xmat, "\n   ",
                        xmat_prime, "   \n"),
-       tau = paste0("xmat.", node_str, "[,] %*% vv.", node_str, "[,] %*% xmatprime.", node_str, "[,]")
+       tau = paste0("1 / (xmat.", node_str, "[,] %*% vv.", node_str, "[,] %*% xmatprime.", node_str, "[,])")
   )
 }
 
