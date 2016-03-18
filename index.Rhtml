@@ -23,7 +23,8 @@ for (i in seq_along(pages)){
   titles[i] <- x
 }
 
-cat(paste0("<a href = 'vignettes/", pages, "'>", titles, "</a>"), sep = "<br>")
+cat(paste0("<a href = 'vignettes/", 
+           gsub("[.]Rmd$", "[.]html", pages), "'>", titles, "</a>"), sep = "<br>")
 end.rcode-->
 
 

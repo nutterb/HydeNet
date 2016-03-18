@@ -1,12 +1,12 @@
 {
-    "contents" : "<!--begin.rcode, echo = FALSE, results = 'asis'\nbaseCode <- readLines(\"index_default.html\")\n\nw <- which(grepl(\"</section>\", baseCode))\nbaseCodeEnd <- baseCode[w:length(baseCode)]\nbaseCode <- baseCode[1:(w-1)]\ncat(baseCode, sep = \"\\n\")\nend.rcode-->\n\n<H3> Gallery of Sample Analyses </H3>\n\n<!--begin.rcode, echo = FALSE, results = 'asis', warning = FALSE, message = FALSE\npages <- list.files(\"vignettes\", \n                     pattern = \"[.]Rmd\")\n\ntitles <- vector(\"character\", length(pages))\nfor (i in seq_along(pages)){\n  x <- readLines(file.path(\"vignettes\", pages[i]))\n  x <- x[min(which(grepl(\"title:\", x)))]\n  x <- gsub(\"title:\", \"\", x)\n  x <- trimws(x)\n  x <- gsub(\"('|\\\")\", \"\", x)\n  titles[i] <- x\n}\n\ncat(paste0(\"<a href = 'vignettes/\", pages, \"'>\", titles, \"</a>\"), sep = \"<br>\")\nend.rcode-->\n\n\n<!--begin.rcode, echo = FALSE, results = 'asis'\ncat(baseCodeEnd, sep = \"\\n\")\nend.rcode-->\n</body>\n</html>",
+    "contents" : "<!--begin.rcode, echo = FALSE, results = 'asis'\nbaseCode <- readLines(\"index_default.html\")\n\nw <- which(grepl(\"</section>\", baseCode))\nbaseCodeEnd <- baseCode[w:length(baseCode)]\nbaseCode <- baseCode[1:(w-1)]\ncat(baseCode, sep = \"\\n\")\nend.rcode-->\n\n<H3> Gallery of Sample Analyses </H3>\n\n<!--begin.rcode, echo = FALSE, results = 'asis', warning = FALSE, message = FALSE\npages <- list.files(\"vignettes\", \n                     pattern = \"[.]Rmd\")\n\ntitles <- vector(\"character\", length(pages))\nfor (i in seq_along(pages)){\n  x <- readLines(file.path(\"vignettes\", pages[i]))\n  x <- x[min(which(grepl(\"title:\", x)))]\n  x <- gsub(\"title:\", \"\", x)\n  x <- trimws(x)\n  x <- gsub(\"('|\\\")\", \"\", x)\n  titles[i] <- x\n}\n\ncat(paste0(\"<a href = 'vignettes/\", \n           gsub(\"[.]Rmd$\", \"[.]html\", pages), \"'>\", titles, \"</a>\"), sep = \"<br>\")\nend.rcode-->\n\n\n<!--begin.rcode, echo = FALSE, results = 'asis'\ncat(baseCodeEnd, sep = \"\\n\")\nend.rcode-->\n</body>\n</html>",
     "created" : 1458322184621.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "2777557437",
+    "hash" : "1918762761",
     "id" : "1FE97C8B",
-    "lastKnownWriteTime" : 1458322544,
+    "lastKnownWriteTime" : 1458322707,
     "path" : "~/GitHub/HydeNet/index.Rhtml",
     "project_path" : "index.Rhtml",
     "properties" : {
