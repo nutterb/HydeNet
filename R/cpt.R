@@ -87,7 +87,10 @@
 #'          reduce = FALSE)
 #' }
 #' 
-cpt <- function(x, data, wt, ...) UseMethod("cpt")
+cpt <- function(x, data, wt, ...)
+{
+  UseMethod("cpt")
+}
 
 #' @rdname cpt
 #' @export
@@ -96,45 +99,58 @@ cpt.formula <- function(formula, data, wt, ...)
   variables       <- as.character(attr(stats::terms(formula), "variables"))[-1]
   dependentVar    <- variables[1]
   independentVars <- variables[-1]
-  cpt_workhorse(variables, dependentVar, independentVars, data, wt, ...)
+  cpt_workhorse(variables = variables, 
+                dependentVar = dependentVar, 
+                independentVars = independentVars, 
+                data = data, 
+                wt = wt, ...)
 }
 
 #' @rdname cpt
 #' @export 
 cpt.list <- function(x, data, wt, ...)
 {
-  Check <- ArgumentCheck::newArgCheck()
+  coll <- checkmate::makeAssertCollection()
+
+  checkmate::assertSubset(names(x), c("x", "y"),
+                          add = coll)
   
-  if (!all(c("y","x") %in% names(x)))
-  ArgumentCheck::addError(paste0("List object 'x' must contain character vectors ",
-                                 "'y' and 'x'. See help('cpt')."),
-                          Check)
-  
-  if (!all(unlist(lapply(x,is.character))))
-  ArgumentCheck::addError(paste0("List object 'x' must contain character vectors ",
-                                 "'y' and 'x'. See help('cpt')."),
-                          Check)
-  
-  if (length(x[["y"]]) != 1)
-  ArgumentCheck::addError(paste0("Element 'y' of list object 'x' must be a character ",
-                                 "vector of length 1. See help('cpt')."),
-                          Check)
-  
-  ArgumentCheck::finishArgCheck(Check)
-  
+  checkmate::assertCharacter(x[["x"]],
+                             add = coll)
+  checkmate::assertCharacter(x[["y"]],
+                             len = 1,
+                             add = coll)
+
+  checkmate::reportAssertions(coll)
+
   variables       <- c(x[["y"]], x[["x"]])
   dependentVar    <- x[["y"]]
   independentVars <- x[["x"]]
   
-  cpt_workhorse(variables, dependentVar, independentVars, data, wt, ...)
+  cpt_workhorse(variables = variables, 
+                dependentVar = dependentVar, 
+                independentVars = independentVars, 
+                data = data, 
+                wt = wt, ...)
 }
 
 #******** UNEXPORTED FUNCTION
 cpt_workhorse <- function(variables, dependentVar, independentVars,
                           data, wt, ...)
 {
-  wt_text <- if (missing(wt)) NULL
-    else if (is.character(wt)) wt else NULL
+  wt_text <- 
+    if (missing(wt))
+    {
+      NULL
+    }
+    else if (is.character(wt))
+    {
+      wt 
+    }
+    else 
+    {
+      NULL
+    }
   
   err.flag <- 0
   err.msg <- ""
@@ -142,93 +158,101 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   wrn.flag <- 0
   wrn.msg <- ""
   
-  Check <- ArgumentCheck::newArgCheck()
+  coll <- checkmate::makeAssertCollection()
+
+  checkmate::assertDataFrame(data)
   
-  if (!is.data.frame(data))
-  ArgumentCheck::addError("Object 'data' must be of class 'data.frame'",
-                          Check)
   n <- nrow(data)
   
-  ArgumentCheck::finishArgCheck(Check)
+  checkmate::assertSubset(variables, 
+                          choices = names(data))
   
-  missingVariables <- which(!variables %in% names(data))
-  if(length(missingVariables)>0){
-    tmp <- paste0("'",paste0(variables[missingVariables], collapse="', '"),"'")
-    ArgumentCheck::addError(paste0("These variables do not exist in the inputted data object: ",
-                                   tmp, "."),
-                            Check)
-    ArgumentCheck::finishArgCheck(Check)
+  lapply(data[, variables],
+         assertFactor,
+         add = coll)
+
+  if(missing(wt)) 
+  {
+    wt <- rep(1,n) 
   }
-  
-  if (!all(unlist(lapply(data[,variables],function(x) "factor" %in% class(x)))))
-  ArgumentCheck::addError("All variables must be of class 'factor'",
-                          Check)
-  
-  if(missing(wt)) wt <- rep(1,n) 
-  else {
+  else 
+  {
     if(is.character(wt))
     {
       if(length(wt)>1)
       {
-        ArgumentCheck::addWarning(paste0("Character vector of length >1 given for 'wt'. ",
-                                         "Using only the first element."),
-                                  Check)
+        warning("Character vector of length >1 given for 'wt'. ",
+                "Using only the first element.")
         wt <- wt[1]
         wt_text <- wt_text[1]
       }
+      
       if(wt %in% names(data))
       {
         wt <- data[,wt]
       } 
-      else{
-        ArgumentCheck::addError("'wt' must be a numeric vector or the name of a variable in 'data'",
-                                Check)
+      else
+      {
+        coll$push("'wt' must be a numeric vector or the name of a variable in 'data'")
       }
     }
     
     if(!is.numeric(wt))
     {
-      ArgumentCheck::addError("'wt' must be a numeric vector or the name of a variable in 'data'",
-                              Check)
+      coll$push("'wt' must be a numeric vector or the name of a variable in 'data'")
     } 
     else if(length(wt) != n)
     {
-      ArgumentCheck::addError("Length of 'wt' not equal to number of rows in 'data'",
-                              Check)
+      coll$push("Length of 'wt' not equal to number of rows in 'data'")
     } 
     else if(min(wt) < 0)
     {
-      ArgumentCheck::addError("Negative values in parameter 'wt' not allowed",
-                              Check)
+      coll$push("Negative values in parameter 'wt' not allowed")
     }
   }
   
-  ArgumentCheck::finishArgCheck(Check)
+  checkmate::reportAssertions(coll)
   
   vars  <- c(dependentVar, independentVars)  
-  ..vars <- lapply(vars, as.symbol)
-  ..independentVars <- lapply(independentVars, as.symbol)
+  ..vars <- lapply(X = vars, 
+                   FUN = as.symbol)
+  ..independentVars <- lapply(X = independentVars, 
+                              FUN = as.symbol)
   
   data     <- dplyr::bind_cols(dplyr::tbl_df(data[,vars]),
                                dplyr::tbl_df(data.frame(wt = wt)))
   
-  joint    <- data %>% dplyr::group_by_(.dots = ..vars) %>%  
+  joint <- 
+    data %>% 
+    dplyr::group_by_(.dots = ..vars) %>%  
     dplyr::summarise_(wt = ~sum(wt))
  
-  marginal <- joint %>% dplyr::group_by_(.dots = ..independentVars) %>% 
+  marginal <- 
+    joint %>% 
+    dplyr::group_by_(.dots = ..independentVars) %>% 
     dplyr::summarise_(sumWt = ~sum(wt))
   
-  cpt      <- dplyr::left_join(joint, marginal, by = independentVars) %>%
+  cpt <- 
+    dplyr::left_join(joint, marginal, 
+                     by = independentVars) %>%
     dplyr::mutate_(p = ~ wt / sumWt) %>% 
     dplyr::select_(~-c(wt, sumWt)) %>%
-    plyr::daply(c(vars[-1], vars[1]), function(x) x$p)
+    plyr::daply(c(vars[-1], vars[1]), 
+                function(x) x$p)
   
   cpt[is.na(cpt)] <- 0
 
   model <- data[, c(names(dimnames(cpt)), "wt")]
+  
   if ("wt" %in% names(model) && !is.null(wt_text)) 
+  {
     names(model)[length(model)] <- wt_text
-  if (is.null(wt_text)) model <- cbind(model, wt)
+  }
+  
+  if (is.null(wt_text))
+  {
+    model <- cbind(model, wt)
+  }
 
   attr(cpt, "model") <- model
   
