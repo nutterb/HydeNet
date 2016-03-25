@@ -1,0 +1,18 @@
+{
+    "contents" : "devtools::document(\"C:/Users/Nutter/Documents/GitHub/HydeNet\")\ndevtools::install_local(\"C:/Users/Nutter/Documents/GitHub/HydeNet\")\n# devtools::test(\"C:/Users/Nutter/Documents/GitHub/HydeNet\")\n# devtools::check(\"C:/Users/Nutter/Documents/GitHub/HydeNet\")\n\nlibrary(HydeNet)\nlibrary(dplyr)\nlibrary(magrittr)\nlibrary(survival)\ndata(veteran)\nveteran %<>%\n  mutate(trt = factor(trt, \n                      levels = 1:2,\n                      labels = c(\"standard\", \"test\")),\n         prior = factor(prior,\n                        c(0, 10),\n                        c(\"no\", \"yes\")))\n\nLung_simple <- \n  HydeNetwork( ~ time | trt * celltype * karno * diagtime * age * prior,\n               data = veteran)\nplot(Lung_simple)\n\nLung_simple %<>%\n  setNode(time, \n          nodeType = \"dnorm\",\n          nodeFitter = \"survreg\",\n          nodeFormula = Surv(time, status) ~ trt + celltype + karno + \n            diagtime + age + prior,\n          fitterArgs = list(dist = \"weibull\", scale = 1),\n          mu = fromData(),\n          tau = fromData())\nwriteNetworkModel(Lung_simple, pretty = TRUE)\n\ncompileJagsModel(Lung_simple, \n                 data = list(trt = \"standard\",\n                             celltype = \"squamous\",\n                             karno = 60,\n                             diagtime = 7,\n                             age = 69,\n                             prior = \"no\")) %>%\n  HydePosterior(variable.names = \"time\",\n                n.iter = 1000) %>%\n  summarise(median = median(time))\n\nfit <- survreg(Surv(time, status) ~ trt + celltype + karno + \n                 diagtime + age + prior,\n               data = veteran,\n               dist = \"weibull\",\n               scale = 1)\n\npredict(fit)[1]\n\nx <- c(intercept = 1,\n       trt = 0,\n       celltypesmallcell = 0,\n       celltypeadeno = 0,\n       celltypelarge = 0,\n       karno = 60,\n       diagtime = 7,\n       age = 69,\n       prior = 1)\n\nexp(sum(coef(fit) * x))\n",
+    "created" : 1458894522768.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "4091363158",
+    "id" : "4ED76545",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

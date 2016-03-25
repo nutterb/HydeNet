@@ -145,7 +145,7 @@ compileJagsModel(Lung_simple,
                              karno = 60,
                              diagtime = 7,
                              age = 69,
-                             prior = "yes")) %>%
+                             prior = "no")) %>%
   HydePosterior(variable.names = "time",
                 n.iter = 1000) %>%
   summarise(median = median(time))
