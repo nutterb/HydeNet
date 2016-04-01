@@ -12,14 +12,22 @@
 #' @method summary HydeNetwork
 #' @export
 
-summary.HydeNetwork <- function(object, ...){
+summary.HydeNetwork <- function(object, ...)
+{
+  decision_nodes <- 
+    names(object[["nodeDecision"]])[vapply(X = object[["nodeDecision"]], 
+                                           FUN = identity,
+                                           FUN.VALUE = logical(1))]
+  utility_nodes <- 
+    names(object[["nodeUtility"]])[vapply(X = object[["nodeUtility"]], 
+                                          FUN = identity,
+                                          FUN.VALUE = logical(1))]
+  deterministic_nodes <- 
+    names(object[["nodeType"]])[vapply(X = object[["nodeType"]],
+                                       FUN = function(x) x == "determ",
+                                       FUN.VALUE = logical(1))]
   
-  decision_nodes <- names(object$nodeDecision)[sapply(object$nodeDecision, identity)]
-  utility_nodes <- names(object$nodeUtility)[sapply(object$nodeUtility, identity)]
-  deterministic_nodes <- names(object$nodeType)[sapply(object$nodeType, 
-                                                        function(x) x == "determ")]
-  
-  random_nodes <- object$nodes[!object$nodes %in% c(decision_nodes, 
+  random_nodes <- object[["nodes"]][!object[["nodes"]] %in% c(decision_nodes, 
                                           utility_nodes,
                                           deterministic_nodes)]
   cat("Decision Nodes: \n",
@@ -71,51 +79,57 @@ summarise_node_name <- function(nodes, max.width = 20)
   max.width <- min(c(max.width, 
                      max(nchar(nodes)) + 3))
   
-  ifelse(nchar(nodes) > (max.width - 2),
-         paste0(substr(nodes, 1, 14), "...  |  "),
-         paste0(stringr::str_pad(nodes, max.width - 2, "right"), "  |  "))
+  ifelse(test = nchar(nodes) > (max.width - 2),
+         yes = paste0(substr(nodes, 1, 14), "...  |  "),
+         no = paste0(stringr::str_pad(string = nodes, 
+                                      width = max.width - 2, 
+                                      side = "right"), 
+                     "  |  "))
 }
 
 summarise_parents <- function(object, nodes, name_width, end_sep = "  |  ")
 {
   max.width <- floor((getOption("width") - name_width) / 2)
-  parents <- vapply(object$parents[nodes],
+  parents <- vapply(object[["parents"]][nodes],
                     paste0,
                     character(1),
                     collapse = ", ")
-  nparents <- vapply(object$parents[nodes],
+  nparents <- vapply(object[["parents"]][nodes],
                      length,
                      numeric(1))
   
   parents <- 
     ifelse(nchar(parents) > (max.width - 2),
-           ifelse(nparents == 1,
-                  "1 parent",
-                  paste0(nparents, " parents  ")),
+           ifelse(test = nparents == 1,
+                  yes = "1 parent",
+                  no = paste0(nparents, " parents  ")),
            parents)
   
-  paste0(stringr::str_pad(parents, max(nchar(parents)), "right"), end_sep)
+  paste0(stringr::str_pad(string = parents, 
+                          width = max(nchar(parents)), 
+                          side = "right"), 
+         end_sep)
 }
 
 summarise_policy <- function(object, nodes, name_width, parent_width)
 {
   max.width <- getOption("width") - name_width - parent_width
   decision_policy <-
-    vapply(object$nodePolicyValues[nodes],
+    vapply(object[["nodePolicyValues"]][nodes],
            paste0,
            character(1),
            collapse = ", ")
   
-  decision_policy <- ifelse(decision_policy == "",
-                            "(no policies defined)",
-                            decision_policy)
+  decision_policy <- ifelse(test = decision_policy == "",
+                            yes = "(no policies defined)",
+                            no = decision_policy)
   
-  ifelse(nchar(decision_policy) > max.width,
-         paste0(substr(decision_policy, 1, max.width - 3), "..."),
-         decision_policy)
+  ifelse(test = nchar(decision_policy) > max.width,
+         yes = paste0(substr(decision_policy, 1, max.width - 3), "..."),
+         no = decision_policy)
 }
 
 summarise_type <- function(object, nodes)
 {
-  unlist(object$nodeType[nodes])
+  unlist(object[["nodeType"]][nodes])
 }

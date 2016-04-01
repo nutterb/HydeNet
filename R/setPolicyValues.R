@@ -20,10 +20,12 @@
 #'   
 #' @author Jarrod Dalton and Benjamin Nutter
 
-setPolicyValues <- function(network, ...){
+setPolicyValues <- function(network, ...)
+{
   policyValues <- list(...)
-  for (i in names(policyValues)){
-    network$nodePolicyValues[[i]] <- policyValues[[i]]
+  for (i in names(policyValues))
+  {
+    network[["nodePolicyValues"]][[i]] <- policyValues[[i]]
   }
   network
 }

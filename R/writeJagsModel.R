@@ -349,7 +349,7 @@ survreg_tau <- function(fit, node_str, parents)
   vv_str <- vector("character", 
                    length = length(vv))
   
-  mframe <- model.frame(fit)[, -1, drop = FALSE]
+  mframe <- stats::model.frame(fit)[, -1, drop = FALSE]
   
   nms <- 
     sapply(names(mframe),

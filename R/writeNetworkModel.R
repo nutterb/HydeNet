@@ -33,8 +33,9 @@
 #' writeNetworkModel(Net, pretty=TRUE)
 #' 
 
-writeNetworkModel <- function(network, pretty=FALSE){
-  model <- lapply(network$nodes, function(x) writeJagsModel(network, x))
+writeNetworkModel <- function(network, pretty=FALSE)
+{
+  model <- lapply(network[["nodes"]], function(x) writeJagsModel(network, x))
   model <- paste("  ", unlist(model), collapse="\n")
   model <- paste("model{", model, "}", sep="\n")
   

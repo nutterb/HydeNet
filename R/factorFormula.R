@@ -39,36 +39,47 @@
 #'               network = Net)
 #' }
 #' 
-factorFormula <- function(form, network){
+factorFormula <- function(form, network)
+{
   form <- deparse(form)
   form <- trimws(form)
   form <- paste0(form, collapse = "")
   
   relabel <- extractFactors(form)
   
-  relabel_mat <- isolateVariableFromLabel(relabel, network)
+  relabel_mat <- isolateVariableFromLabel(relabel = relabel, 
+                                          network = network)
   
   new_label <- 
     mapply(getNumericLevel, 
            varname = relabel_mat[, 1], 
            label = relabel_mat[, 2],
            nodeType = relabel_mat[, 3],
-           MoreArgs = list(network = network))
+           MoreArgs = list(network = network)
+    )
   
   if (any(vapply(new_label, length, numeric(1)) == 0))
   {
-    noFactors <- unique(names(new_label[vapply(new_label, length, numeric(1)) == 0]))
+    noFactors <- 
+      unique(
+        names(new_label[vapply(X = new_label, 
+                               FUN = length, 
+                               FUN.VALUE = numeric(1)) == 0])
+      )
     stop(paste0("The following nodes do not have factor levels defined ",
                 "in the 'factorLevels' element of the HydeNetwork object: ", 
                 paste0(noFactors, collapse = ", ")))
   }
   
-  form <- rewriteFormula(relabel, new_label, form)
+  form <- rewriteFormula(relabel = relabel, 
+                         new_label = new_label, 
+                         form = form)
   
   as.formula(form)
 }
 
-extractFactors <- function(form){
+extractFactors <- function(form)
+{
   #* This pattern looks for any combination of numbers, letters, 
   #* periods or underscores, 
   #* followed by a space (or not), 
@@ -79,33 +90,50 @@ extractFactors <- function(form){
   #* followed by a quote (single or double)
   #* It is intened to catch a [variable_name] == [factor_level]
   relabel <- 
-    stringr::str_extract_all(string = form, 
-        pattern = "[[:alpha:],[0-9],[.],[_]]+( |)[=][=]( |)('|\").*?('|\")")
+    stringr::str_extract_all(
+      string = form, 
+      pattern = "[[:alpha:],[0-9],[.],[_]]+( |)[=][=]( |)('|\").*?('|\")"
+    )
   unlist(relabel)
 }
 
-isolateVariableFromLabel <- function(relabel, network){
-  relabel_mat <- stringr::str_split_fixed(relabel, "[=][=]", 2)
+isolateVariableFromLabel <- function(relabel, network)
+{
+  relabel_mat <- stringr::str_split_fixed(string = relabel, 
+                                          pattern = "[=][=]", 
+                                          n = 2)
   relabel_mat <- trimws(relabel_mat)
-  relabel_mat <- gsub("('|\")", "", relabel_mat)
+  relabel_mat <- gsub(pattern = "('|\")", 
+                      replacement = "", 
+                      x = relabel_mat)
   cbind(relabel_mat,
-        unlist(network$nodeType[relabel_mat[, 1]]))
+        unlist(network[["nodeType"]][relabel_mat[, 1]]))
 }
 
-getNumericLevel <- function(varname, label, nodeType, network){
-  value <- which(network$factorLevels[[varname]] == label)
-  if (nodeType == "dbern") value <- as.numeric(value) - 1
+getNumericLevel <- function(varname, label, nodeType, network)
+{
+  value <- which(network[["factorLevels"]][[varname]] == label)
+  if (nodeType == "dbern")
+  {
+    value <- as.numeric(value) - 1
+  }
   as.character(value)
 }
 
-rewriteFormula <- function(relabel, new_label, form){
-  for (i in seq_along(relabel)){
-    new_label[i] <- sub("(?<=('|\")).*?(?=('|\"))", 
-                        new_label[i], 
-                        relabel[i], 
+rewriteFormula <- function(relabel, new_label, form)
+{
+  for (i in seq_along(relabel))
+  {
+    new_label[i] <- sub(pattern = "(?<=('|\")).*?(?=('|\"))", 
+                        replacement = new_label[i], 
+                        x = relabel[i], 
                         perl = TRUE)
-    new_label[i] <- gsub("('|\")", "", new_label[i])
-    form <- sub(relabel[i], new_label[i], form)
+    new_label[i] <- gsub(pattern = "('|\")", 
+                         replacement = "", 
+                         x = new_label[i])
+    form <- sub(pattern = relabel[i], 
+                replacement = new_label[i], 
+                x = form)
   }
   form
 }

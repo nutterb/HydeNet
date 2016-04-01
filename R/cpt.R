@@ -168,7 +168,7 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
                           choices = names(data))
   
   lapply(data[, variables],
-         assertFactor,
+         checkmate::assertFactor,
          add = coll)
 
   if(missing(wt)) 

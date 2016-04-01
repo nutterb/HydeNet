@@ -35,19 +35,20 @@
 #' plot(Net)
 #'  
                    
-update.HydeNetwork <- function(object, formula, ...){
-  new_formula <- rewriteHydeFormula(object$network_formula, formula)
+update.HydeNetwork <- function(object, formula, ...)
+{
+  new_formula <- rewriteHydeFormula(object[["network_formula"]], formula)
   
-  NEW <- HydeNetwork(new_formula, data=object$data)
+  NEW <- HydeNetwork(new_formula, data=object[["data"]])
   
-  lostParents <- lapply(names(NEW$parents),
+  lostParents <- lapply(names(NEW[["parents"]]),
          function(nm){
-           setdiff(object$parents[[nm]], NEW$parents[[nm]])
+           setdiff(object[["parents"]][[nm]], NEW[["parents"]][[nm]])
          })
-  names(lostParents) <- names(NEW$parents)
+  names(lostParents) <- names(NEW[["parents"]])
   
-  if (any(sapply(lostParents, length) > 0)){
-    lostParents <- lostParents[sapply(lostParents, length) > 0]
+  if (any(vapply(lostParents, length, numeric(1)) > 0)){
+    lostParents <- lostParents[vapply(lostParents, length, numeric(1)) > 0]
     warning(paste0("The following nodes lost parents in the update--please redefine the node formula:\n",
                    paste0("    ", names(lostParents), ": ", sapply(lostParents, paste, collapse=", "),
                           collapse="\n")))
@@ -56,12 +57,12 @@ update.HydeNetwork <- function(object, formula, ...){
   
   
   
-  NEW$nodeType[names(object$nodeType)] <- object$nodeType
-  NEW$nodeFormula[names(object$nodeFormula)] <- object$nodeFormula
-  NEW$nodeFitter[names(object$nodeFitter)] <- object$nodeFitter
-  NEW$nodeFitterArgs[names(object$nodeFitterArgs)] <- object$nodeFitterArgs
-  NEW$nodeParams[names(object$nodeParams)] <- object$nodeParams
-  NEW$nodeData[names(object$nodeData)] <- object$nodeData
+  NEW[["nodeType"]][names(object[["nodeType"]])] <- object[["nodeType"]]
+  NEW[["nodeFormula"]][names(object[["nodeFormula"]])] <- object[["nodeFormula"]]
+  NEW[["nodeFitter"]][names(object[["nodeFitter"]])] <- object[["nodeFitter"]]
+  NEW[["nodeFitterArgs"]][names(object[["nodeFitterArgs"]])] <- object[["nodeFitterArgs"]]
+  NEW[["nodeParams"]][names(object[["nodeParams"]])] <- object[["nodeParams"]]
+  NEW[["nodeData"]][names(object[["nodeData"]])] <- object[["nodeData"]]
   
   return(NEW)  
 }

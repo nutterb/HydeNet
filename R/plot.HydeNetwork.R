@@ -120,13 +120,16 @@ plot.HydeNetwork <- function(x,
 {
   if (removeDeterm) x <- plot_nondeterm_only(x)
   
-  node_df <- data.frame(nodes = x$nodes,
+  node_df <- data.frame(nodes = x[["nodes"]],
                         stringsAsFactors = FALSE)
   if (useHydeDefaults) node_df <- mergeDefaultPlotOpts(x, node_df)
   
   if (!is.null(customNodes)) node_df <- mergeCustomNodes(node_df, customNodes)
 
-  edge_table <- do.call("rbind", mapply(mapEdges, x$nodes, x$parents))
+  edge_table <- do.call("rbind", 
+                        mapply(FUN = mapEdges, 
+                               x[["nodes"]], 
+                               x[["parents"]]))
   
   edge_df <- DiagrammeR::create_edges(from = edge_table[, 2], 
                                       to = edge_table[, 1])
@@ -143,24 +146,36 @@ plot.HydeNetwork <- function(x,
 #' @param network a \code{HydeNetwork} object
 #' @param node_df A data frame of node attributes.
 #' 
-mergeDefaultPlotOpts <- function(network, node_df){
-  nodes <- network$nodes
+mergeDefaultPlotOpts <- function(network, node_df)
+{
+  nodes <- network[["nodes"]]
   node_df <- node_df %>%
-    dplyr::mutate(type = ifelse(network$nodeUtility[nodes], 
-                                "utility",
-                                ifelse(network$nodeDecision[nodes], 
-                                       "decision",
-                                       ifelse(network$nodeType[nodes] == "determ", 
-                                              "determ",
-                                              "variable"))))
+    dplyr::mutate(
+      type = 
+        ifelse(test = network[["nodeUtility"]][nodes], 
+               yes = "utility",
+               no = ifelse(test = network[["nodeDecision"]][nodes], 
+                           yes = "decision",
+                           no = ifelse(test = network[["nodeType"]][nodes] == "determ", 
+                                       yes = "determ",
+                                       no = "variable"
+                                       )
+                           )
+               )
+      )
 
-  node_df <- dplyr::left_join(node_df, getOption("Hyde_plotOptions"),
-                   by="type") %>%
-    dplyr::select_("-type")
+  node_df <- 
+    dplyr::left_join(
+      node_df, 
+      getOption("Hyde_plotOptions"),
+      by="type") %>%
+    dplyr::select(-type)
   
   node_df[, -which(names(node_df) == "nodes")] <- 
     lapply(node_df[, -which(names(node_df) == "nodes"), drop=FALSE],
-           function(x) ifelse(is.na(x), "", x))
+           function(x) ifelse(test = is.na(x), 
+                              yes = "", 
+                              no = x))
   node_df
 }
 
@@ -171,38 +186,54 @@ mergeCustomNodes <- function(node_df, customNodes)
 {
 #   node_df <- dplyr::mutate(node_df, index=2)
 #   customNodes <- dplyr::mutate(customNodes, index=1)
-  node_df <- dplyr::full_join(customNodes, node_df,
-                              by = c("nodes" = "nodes"))
+  node_df <- 
+    dplyr::full_join(
+      customNodes, 
+      node_df,
+      by = c("nodes" = "nodes")
+    )
   
-  duplicated_names.x <- names(node_df)[grepl("[.]x", names(node_df))]
+  duplicated_names.x <- names(node_df)[grepl(pattern = "[.]x", 
+                                             x = names(node_df))]
   if (length(duplicated_names.x) > 0)
   {
-    duplicated_names.y <- gsub("[.]x", ".y", duplicated_names.x)
+    duplicated_names.y <- gsub(pattern = "[.]x", 
+                               replacement = ".y", 
+                               x = duplicated_names.x)
     for(i in 1:length(duplicated_names.y))
     {
-      node_df[[duplicated_names.x[i]]] <- ifelse(is.na(node_df[[duplicated_names.x[i]]]),
-                                                 node_df[[duplicated_names.y[i]]],
-                                                 node_df[[duplicated_names.x[i]]])
+      node_df[[duplicated_names.x[i]]] <- 
+        ifelse(test = is.na(node_df[[duplicated_names.x[i]]]),
+               yes = node_df[[duplicated_names.y[i]]],
+               no = node_df[[duplicated_names.x[i]]])
     }
   }
   
   
-  if (any(grepl("[.]y", names(node_df))))
-    node_df <- dplyr::select_(node_df, "-ends_with('.y')")
+  if (any(grepl(pattern = "[.]y", 
+                x = names(node_df))))
+    node_df <- dplyr::select(node_df, -dplyr::ends_with('.y'))
 
-  names(node_df) <- gsub("[.]x", "", names(node_df))
+  names(node_df) <- gsub(pattern = "[.]x", 
+                         replacement = "", 
+                         x = names(node_df))
 
   node_df[, -which(names(node_df) == "nodes")] <- 
-    lapply(node_df[, -which(names(node_df) == "nodes")],
-           function(x) ifelse(is.na(x), "", x))
+    lapply(X = node_df[, -which(names(node_df) == "nodes")],
+           FUN = function(x) ifelse(test = is.na(x), 
+                                    yes = "", 
+                                    no = x))
   return(node_df)
 }
 
 #' @rdname plot.HydeNetwork
 #' @param n node names from a network object
 #' @param p the list of parents from a network object
-mapEdges <- function(n, p) cbind(rep(n, length(p)),
-                                 p)
+mapEdges <- function(n, p)
+{
+  cbind(rep(n, length(p)),
+        p)
+}
 
 #' @rdname plot.HydeNetwork
 #' @param edge_df The default edge attribute data frame
@@ -211,11 +242,11 @@ mergeCustomEdges <- function(edge_df, customEdges)
 {
   edge_df <- dplyr::mutate(edge_df, index = 2)
   customEdges <- dplyr::mutate(customEdges, index = 1)
-  edge_df <- dplyr::bind_rows(customEdges, edge_df) %>%
-    dplyr::group_by_("from", "to")  %>%
-    dplyr::filter_("rank(index, ties.method='first')==1") %>%
-    dplyr::select_("-index")
-  edge_df  
+
+  dplyr::bind_rows(customEdges, edge_df) %>%
+    dplyr::group_by(from, to)  %>%
+    dplyr::filter(rank(index, ties.method='first')==1) %>%
+    dplyr::select(-index)
 }
 
 #' @rdname plot.HydeNetwork 
@@ -223,7 +254,8 @@ mergeCustomEdges <- function(edge_df, customEdges)
 #' @param node_id The name of a node in a \code{HydeNetwork} object.
 #'   May be quoted or unquoted.
 #'   
-customNode <- function(node_id, ...){
+customNode <- function(node_id, ...)
+{
   node_id <- as.character(substitute(node_id))
   nodeAttrs <- as.data.frame(c(list(nodes = node_id),
                                list(...)), 
@@ -241,7 +273,8 @@ HydePlotOptions <- function(variable = NULL,
                             determ = NULL,
                             decision = NULL,
                             utility = NULL, 
-                            restorePackageDefaults = FALSE){
+                            restorePackageDefaults = FALSE)
+{
   if (restorePackageDefaults)
     options(Hyde_plotOptions = 
               data.frame(type = c("variable", "determ", "decision", "utility"),
@@ -265,27 +298,35 @@ HydePlotOptions <- function(variable = NULL,
     
     new_options <- dplyr::full_join(new_options, current_options,
                                     by = c("type" = "type"))
-    shared_names <- names(new_options)[grepl("[.]x", names(new_options))]
+    shared_names <- names(new_options)[grepl(pattern = "[.]x", 
+                                             x = names(new_options))]
     if (length(shared_names) > 0)
     {
       for (s in shared_names)
       {
         new_options[, s] <- 
-          mapply(function(x, y) ifelse(is.na(x), 
-                                       y, 
-                                       x),
+          mapply(FUN = function(x, y) ifelse(is.na(x), 
+                                             y, 
+                                             x),
                  new_options[s],
                  new_options[gsub("[.]x", ".y", s)])
       }
-      new_options <- dplyr::select_(new_options, "-ends_with('.y')")                                      
+      new_options <- dplyr::select(new_options, -dplyr::ends_with('.y'))                                      
     }
     
-    names(new_options) <- gsub("[.]x", "", names(new_options))
+    names(new_options) <- gsub(pattern = "[.]x", 
+                               replacement = "", 
+                               x = names(new_options))
     
     new_options[, which(names(new_options) == "type")] <- 
-      lapply(new_options[, which(names(new_options) == "type"), drop=FALSE],
-             function(x) ifelse(is.na(x), "", x))
+      lapply(X = new_options[, which(names(new_options) == "type"), drop=FALSE],
+             FUN = function(x) ifelse(test = is.na(x), 
+                                      yes = "", 
+                                      no = x))
     
     options(Hyde_plotOptions = new_options)
   }
 }
+
+
+utils::globalVariables(c("from", "to", "index", "type"))

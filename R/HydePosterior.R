@@ -67,35 +67,51 @@
 #' 
 
 HydePosterior <- function(cHN, variable.names, n.iter, thin=1, ...,
-                          monitor_observed=TRUE, bind=TRUE){
-  if (monitor_observed){
+                          monitor_observed=TRUE, bind=TRUE)
+{
+  if (monitor_observed)
+  {
     variable.names <- 
-      if (class(cHN$jags) == "jags")
+      if (class(cHN[["jags"]]) == "jags")
+      {
         unique(c(variable.names, names(cHN$observed)))
-      else unique(c(variable.names, names(cHN[[1]]$observed)))
+      }
+      else 
+      {
+        unique(c(variable.names, names(cHN[[1]]$observed)))
+      }
   }
     
   
   
-  if (class(cHN$jags) == "jags"){
-    codas <- coda.samples(cHN$jags, variable.names, n.iter, thin, ...)
+  if (class(cHN$jags) == "jags")
+  {
+    codas <- coda.samples(model = cHN[["jags"]], 
+                          variable.names = variable.names, 
+                          n.iter = n.iter, 
+                          thin = thin, 
+                          ...)
     HydePost <- list(codas = codas,
                      observed = cHN$observed,
                      dag = cHN$dag,
                      factorRef = cHN$factorRef)
   }
-  else{ 
-    codas <- lapply(1:length(cHN),
-                    function(j, ...){
-                      rjags::coda.samples(cHN[[j]]$jags,
-                                    variable.names = variable.names,
-                                    n.iter = n.iter,
-                                    thin = thin,
-                                    ...)
-                    },
+  else
+  { 
+    codas <- lapply(X = 1:length(cHN),
+                    FUN = 
+                      function(j, ...)
+                      {
+                        rjags::coda.samples(model = cHN[[j]][["jags"]],
+                                            variable.names = variable.names,
+                                            n.iter = n.iter,
+                                            thin = thin,
+                                            ...)
+                      },
                     ...)
-    observed <- do.call("rbind", lapply(cHN,
-                                        function(x) x$observed))
+    observed <- do.call("rbind", 
+                        lapply(X = cHN,
+                               FUN = function(x) x[["observed"]]))
     
     HydePost <- list(codas = codas,
                      observed = observed,
@@ -106,6 +122,13 @@ HydePosterior <- function(cHN, variable.names, n.iter, thin=1, ...,
   
   
   class(HydePost) <- "HydePosterior"
-  if (bind) return(bindPosterior(HydePost)) else return(HydePost)
+  if (bind)
+  {
+    bindPosterior(HydePost)
+  }
+  else 
+  {
+    HydePost
+  }
   
 }
