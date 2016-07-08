@@ -9,8 +9,7 @@ test_that("cpt.list",
     di3 = as.factor(1:6 %*% rmultinom(n,1,prob=c(.15,.10,.02,.3,.4,.03)))
   )
   
-  expect_that(cpt(list(y = "di3", x = c("di1", "di2")), data= df),
-              not(throws_error()))
+  expect_silent(cpt(list(y = "di3", x = c("di1", "di2")), data= df))
 })
 
 test_that("cpt with weights",
@@ -18,8 +17,7 @@ test_that("cpt with weights",
   echodata <- cbind(expand.grid(list(echo = c("Negative", "Positive"),
                                      cad = c("No","Yes"))),
                     data.frame(pr=c(0.83,0.17,0.12,0.88)))
-  expect_that(cpt(echo ~ cad, data=echodata, wt=echodata$pr),
-              not(throws_error()))
+  expect_silent(cpt(echo ~ cad, data=echodata, wt=echodata$pr))
 })
 
 test_that("cpt with character string naming weights",
@@ -27,8 +25,7 @@ test_that("cpt with character string naming weights",
   echodata <- cbind(expand.grid(list(echo = c("Negative", "Positive"),
                                      cad = c("No","Yes"))),
                     data.frame(pr=c(0.83,0.17,0.12,0.88)))
-  expect_that(cpt(echo ~ cad, echodata, wt="pr"),
-              not(throws_error()))
+  expect_silent(cpt(echo ~ cad, echodata, wt="pr"))
 })
 
 test_that("cpt with multiple character string naming weights",
@@ -77,6 +74,6 @@ test_that("print.cpt succeeds",
                                      cad = c("No","Yes"))),
                     data.frame(pr=c(0.83,0.17,0.12,0.88)))
   x <- cpt(echo ~ cad, echodata, wt="pr")
-  expect_that(print(x), not(throws_error()))
+  expect_output(print(x))
 })
   

@@ -11,6 +11,5 @@ Net <- HydeNetwork(~ wells +
 
 test_that("compileDecisionModel",
 {
-  expect_that(compileDecisionModel(Net),
-              not(throws_error()))
+  expect_output(compileDecisionModel(Net))
 })

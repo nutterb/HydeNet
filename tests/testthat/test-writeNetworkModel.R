@@ -10,12 +10,10 @@ Net <- HydeNetwork(~ wells +
 
 test_that("writeNetworkModel with pretty output succeeds",
 {
-  expect_that(writeNetworkModel(Net, pretty = TRUE),
-              not(throws_error()))
+  expect_output(writeNetworkModel(Net, pretty = TRUE))
 })
 
 test_that("writeNetworkModel with non-pretty output succeeds",
 {
-  expect_that(writeNetworkModel(Net, pretty = FALSE),
-              not(throws_error()))
+  expect_silent(writeNetworkModel(Net, pretty = FALSE))
 })

@@ -22,14 +22,12 @@ test_that("writeJagsModel - determ",
   #* Because of how `writeJagsModel` processes the network object 
   #* it needs to be used within `writeNetworkModel`, which is 
   #* intended anyway since it is an unexported function
-  expect_that(writeNetworkModel(craps, TRUE),
-              not(throws_error()))
+  expect_output(writeNetworkModel(craps, TRUE))
 })
 
 test_that("writeJagsModel - dcat with pi defined by user",
 {
-  expect_that(writeNetworkModel(craps, TRUE),
-              not(throws_error()))
+  expect_output(writeNetworkModel(craps, TRUE))
 })
 
 test_that("writeJagsModel - dpois",
@@ -39,7 +37,6 @@ test_that("writeJagsModel - dpois",
   setNode(gear, nodeType = "dpois", nodeFitter = "glm",
             fitterArgs = list(family = poisson),
             lambda = fromData())
-  expect_that(writeNetworkModel(carNet, TRUE),
-              not(throws_error()))
+  expect_output(writeNetworkModel(carNet, TRUE))
 })
 

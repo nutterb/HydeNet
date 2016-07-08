@@ -16,5 +16,5 @@ Post <- compileDecisionModel(Net) %>%
 
 test_that("bindPosterior from Decision Model",
 {
-  expect_that(bindPosterior(Post), not(throws_error()))
+  expect_silent(bindPosterior(Post))
 })

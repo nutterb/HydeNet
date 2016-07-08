@@ -12,8 +12,7 @@ compiledNet <- compileJagsModel(Net, n.chains=5, data = list(pe = "Yes"))
 
 test_that("print.HydePosterior with observed values",
 {
-  expect_that(HydePosterior(compiledNet, 
+  expect_output(HydePosterior(compiledNet, 
                             variable.names = c("wells", "death"),
-                            n.iter = 100, bind = FALSE),
-              not(throws_error()))
+                            n.iter = 100, bind = FALSE))
 })

@@ -2,7 +2,7 @@ context("setUtilityNodes")
 
 test_that("setUtiltyNodes",
 {
-  expect_that(
+  expect_silent(
     Net <- HydeNetwork(~ wells +
                        pe | wells +
                        d.dimer | pregnant*pe +
@@ -10,6 +10,5 @@ test_that("setUtiltyNodes",
                        treat | d.dimer*angio +
                        death | pe*treat,
                      data = PE) %>%
-    setUtilityNodes(treat, angio),
-    not(throws_error()))
+    setUtilityNodes(treat, angio))
 })

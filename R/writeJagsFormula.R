@@ -65,8 +65,8 @@ writeJagsFormula.glm <- function(fit, nodes, ...){
   if (fit$family$family == "gaussian" & fit$family$link == "identity") 
     return(writeJagsFormula.lm(fit))
   
-  mdl <- pixiedust::dust(fit, descriptors = c("term", "term_plain", "level")) %>%
-    as.data.frame(sprinkled = FALSE)
+  mdl <- suppressWarnings(pixiedust::dust(fit, descriptors = c("term", "term_plain", "level")) %>%
+    as.data.frame(sprinkled = FALSE))
   
   regex <- factorRegex(fit)
   

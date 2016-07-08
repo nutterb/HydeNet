@@ -25,24 +25,21 @@ test_that("validation error",
 
 test_that("fit the model for dbern",
 {
-  expect_that(setNode(Net, treat, nodeType = "dbern", p = fromData(),
-                 fitModel = TRUE),
-              not(throws_error()))
+  expect_silent(setNode(Net, treat, nodeType = "dbern", p = fromData(),
+                 fitModel = TRUE))
 })
 
 test_that("fit the model for dcat",
 {
-  expect_that(setNode(Net, pregnant, nodeType = "dcat", pi = fromData(),
-                      fitModel = TRUE),
-              not(throws_error()))
+  expect_silent(setNode(Net, pregnant, nodeType = "dcat", pi = fromData(),
+                      fitModel = TRUE))
 })
 
 test_that("fit the model for dnorm",
 {
-  expect_that(setNode(Net, d.dimer, nodeType = "dnorm",
+  expect_silent(setNode(Net, d.dimer, nodeType = "dnorm",
                       mu = fromData(), tau = fromData(),
-                      fitModel = TRUE),
-              not(throws_error()))
+                      fitModel = TRUE))
 })
 
 test_that("fit the model for dpois",
@@ -50,12 +47,11 @@ test_that("fit the model for dpois",
   carNet <- HydeNetwork(~gear | mpg + am,
                                   data = mtcars)
 
-  expect_that(
+  expect_silent(
     setNode(carNet, gear, nodeType = "dpois", nodeFitter = "glm",
             fitterArgs = list(family = poisson),
             lambda = fromData(),
-            fitModel = TRUE),
-    not(throws_error()))
+            fitModel = TRUE))
 })
 
 test_that("setNode factorLevels with non-dcat or dbern",

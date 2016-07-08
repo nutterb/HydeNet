@@ -5,8 +5,7 @@ carNet <- HydeNetwork(~gear | mpg * am,
 
 test_that("update by adding a node",
 {
-  expect_that(update(carNet, ~ . + cyl | am),
-              not(throws_error()))
+  expect_silent(update(carNet, ~ . + cyl | am))
 })
   
 test_that("update and lose a parent",

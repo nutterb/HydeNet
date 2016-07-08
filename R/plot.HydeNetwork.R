@@ -188,7 +188,7 @@ mergeCustomNodes <- function(node_df, customNodes)
   
   
   if (any(grepl("[.]y", names(node_df))))
-    node_df <- dplyr::select_(node_df, "-ends_with('.y')")
+    node_df <- dplyr::select_(node_df, "-dplyr::ends_with('.y')")
 
   names(node_df) <- gsub("[.]x", "", names(node_df))
 
@@ -277,7 +277,7 @@ HydePlotOptions <- function(variable = NULL,
                  new_options[s],
                  new_options[gsub("[.]x", ".y", s)])
       }
-      new_options <- dplyr::select_(new_options, "-ends_with('.y')")                                      
+      new_options <- dplyr::select_(new_options, "-dplyr::ends_with('.y')")                                      
     }
     
     names(new_options) <- gsub("[.]x", "", names(new_options))

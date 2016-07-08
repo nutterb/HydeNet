@@ -19,8 +19,7 @@ bagOfModels <- list(g1,g2,g3,g4,g5,g6,g7)
 
 test_that("Returns a network",
 {
-  expect_that(setNodeModels(Net, g1,g2,g3,g4,g5,g6,g7),
-              not(throws_error()))
+  expect_silent(setNodeModels(Net, g1,g2,g3,g4,g5,g6,g7))
 })
 
 test_that("Cast error when no models given",

@@ -4,23 +4,21 @@ data(BlackJack)
 
 test_that("plot.HydeNetwork returns a plot under default settings",
 {
-  expect_that(plot(BlackJack), 
-              not(throws_error()))
+  expect_silent(plot(BlackJack))
 })
 
 test_that("plot.HydeNetwork returns a plot with custome Node settings",
 {
-  expect_that(plot(BlackJack,
+  expect_silent(plot(BlackJack,
                    customNodes = customNode(node_id = "hit1",
                                             fillcolor = "purple", shape = "circle",
                                             fontcolor = "white", height = "2",
-                                            style="filled")),
-              not(throws_error()))
+                                            style="filled")))
 })
 
 test_that("HydePlotOptions",
 {
-  expect_that({
+  expect_silent({
     HydePlotOptions(variable=list(shape = "rect", fillcolor = "#A6DBA0"),
                   determ = list(shape = "rect", fillcolor = "#E7D4E8",
                                 fontcolor = "#1B7837", linecolor = "#1B7837"),
@@ -28,21 +26,18 @@ test_that("HydePlotOptions",
                                   linecolor = "white"),
                   utility = list(shape = "circle", fillcolor = "#762A83", 
                                  fontcolor = "white"))
-    plot(BlackJack)},
-    not(throws_error()))
+    plot(BlackJack)})
 })
 
 test_that("HydePlotOptions - restoreDefaults",
 {
-  expect_that({
+  expect_silent({
     HydePlotOptions(restorePackageDefaults = TRUE)
-    plot(BlackJack)},
-    not(throws_error()))
+    plot(BlackJack)})
 })
 
 test_that("Remove Deterministic Nodes",
 {
-  expect_that({
-    plot(BlackJack, removeDeterm = TRUE)},
-    not(throws_error()))
+  expect_silent({
+    plot(BlackJack, removeDeterm = TRUE)})
 })
