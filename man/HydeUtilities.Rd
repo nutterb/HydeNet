@@ -19,7 +19,7 @@ termName(term, reg)
 
 decisionOptions(node, network)
 
-makeJagsReady(mdl, regex, nodes)
+makeJagsReady(mdl)
 
 matchLevelNumber(t, lev)
 
@@ -48,10 +48,6 @@ dataframeFactors(dataframe)
 \item{network}{A Hyde Network Object}
 
 \item{mdl}{Output from \code{broom::tidy()}}
-
-\item{regex}{A regular expression, usually returned by \code{factorRegex}}
-
-\item{nodes}{A vector of node names, usually passed from \code{network$nodes}.}
 
 \item{t}{Usually the \code{term_name} column generated within 
 \code{makeJagsReady}}

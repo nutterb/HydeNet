@@ -261,7 +261,7 @@ writeJagsModel_dnorm_default <- function(network, node_str, node_params)
   {
     if (node_params["tau"] == fromData())
     {
-      node_params["tau"] <- round(x = 1/summary(fit)[["sigma"]], 
+      node_params["tau"] <- round(x = 1/summary(fit)[["sigma"]] ^ 2, 
                                   digits = getOption("Hyde_maxDigits"))
     }
     else if (node_params["tau"] == fromFormula())

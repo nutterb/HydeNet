@@ -9,5 +9,5 @@ test_that("writeJagsFormula: Poisson Regression",
 test_that("writeJagsFormula: Multinomial Regression",
 {
   fit.gear <- multinom(gear ~ mpg + factor(am), data=mtcars)
-  expect_output(writeJagsFormula(fit.gear))
+  expect_silent(writeJagsFormula(fit.gear))
 })

@@ -142,43 +142,35 @@ decisionOptions <- function(node, network)
 
 #' @rdname HydeUtilities 
 #' @param mdl Output from \code{broom::tidy()}
-#' @param regex A regular expression, usually returned by \code{factorRegex}
-#' @param nodes A vector of node names, usually passed from \code{network$nodes}.
 
-makeJagsReady <- function(mdl, regex, nodes)
+makeJagsReady <- function(mdl)
 {
-  factorRef <- mdl[mdl$level != "" & !grepl(":", mdl$term_plain), 
-                   c("term_plain", "level"), 
-                   drop=FALSE]
-  if (nrow(factorRef) > 0)
-  {
-    factorRef <- factorRef %>%
-      dplyr::group_by(term_plain) %>%
-      dplyr::mutate(level_value = 2:(length(term_plain) + 1))
-  }
-
-  mdl <- merge(mdl, factorRef,
-               by = c("term_plain", "level"), 
-               all=TRUE)
+  factors <- 
+    dplyr::filter(.data = mdl, 
+                  !grepl(":", level) & !is.na(level) & level != "") %>%
+    dplyr::distinct(term_plain) %$%
+    term_plain
   
-  mdl[["jagsVar"]] <- 
-    if (nrow(factorRef) > 0)
-    {
-      mapply(FUN = matchLevelNumber, 
-             mdl[["term_plain"]], 
-             mdl[["level_value"]]
-      )
-    }
-    else 
-    {
-      mdl[["term_plain"]]
-    }
+  mdl
   
-  
-  #* Change 'poly' to 'pow'
-  mdl[["jagsVar"]] <- vapply(X = mdl[["jagsVar"]], 
-                             FUN = polyToPow,
-                             FUN.VALUE = character(1))
+  mdl$jagsVar <- 
+    mapply(
+      function(term, level, factors)
+      {
+        ifelse(term %in% factors,
+               sprintf("(%s == %s)", term, level),
+               term)
+      },
+      term = stringr::str_split(mdl$term_plain, ":"),
+      level = stringr::str_split(mdl$level, ":"),
+      MoreArgs = list(factors = factors),
+      SIMPLIFY = FALSE
+    ) %>%
+    vapply(
+      paste0,
+      character(1),
+      collapse = "*"
+    )
   
   mdl
 }
