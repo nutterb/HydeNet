@@ -143,8 +143,18 @@ decisionOptions <- function(node, network)
 #' @rdname HydeUtilities 
 #' @param mdl Output from \code{broom::tidy()}
 
-makeJagsReady <- function(mdl)
+makeJagsReady <- function(mdl, factorRef, bern)
 {
+  factorRef[bern] <- 
+    lapply(factorRef[bern],
+           function(x)
+           {
+             if (is.null(x)) return(NULL)
+             x$level <- x$level - 1
+             x
+           }
+    )
+  
   factors <- 
     dplyr::filter(.data = mdl, 
                   !grepl(":", level) & !is.na(level) & level != "") %>%
@@ -155,15 +165,33 @@ makeJagsReady <- function(mdl)
   
   mdl$jagsVar <- 
     mapply(
-      function(term, level, factors)
+      function(term, level, factors, factorRef)
       {
+        val <- 
+          mapply(
+            function(fr, term, level)
+            {
+              val <- fr[[term]]$level[fr[[term]]$label == level]
+              if (is.null(val)) val <- NA
+              val
+            },
+            term = term,
+            level = level,
+            MoreArgs = list(fr = factorRef),
+            SIMPLIFY = FALSE
+          ) %>%
+            unlist()
+          
         ifelse(term %in% factors,
-               sprintf("(%s == %s)", term, level),
+               sprintf("(%s == %s)", 
+                       term, 
+                       val),
                term)
       },
       term = stringr::str_split(mdl$term_plain, ":"),
       level = stringr::str_split(mdl$level, ":"),
-      MoreArgs = list(factors = factors),
+      MoreArgs = list(factors = factors, 
+                      factorRef = factorRef),
       SIMPLIFY = FALSE
     ) %>%
     vapply(
@@ -364,4 +392,22 @@ dataframeFactors <- function(dataframe)
                                         stringsAsFactors=FALSE))
   names(reference_list) <- factor_vars
   reference_list
+}
+
+#' @rdname HydeUtilities
+#' @param data A data frame.  
+
+factor_reference <- function(data)
+{
+  Ref <- 
+    lapply(data,
+           function(x)
+           {
+             if (is.factor(x)) data.frame(level = seq_along(levels(x)),
+                                          label = levels(x))
+             else NULL
+           }
+    )
+  
+  Ref[!vapply(Ref, is.null, logical(1))]
 }

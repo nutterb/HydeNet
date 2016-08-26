@@ -64,7 +64,7 @@ writeJagsFormula.cpt <- function(fit, nodes, ...)
 #' @importFrom stringr str_trim
 #' 
 
-writeJagsFormula.glm <- function(fit, nodes, ...)
+writeJagsFormula.glm <- function(fit, nodes, bern = bern, ...)
 {
   if (fit[["family"]][["family"]] == "gaussian" & fit[["family"]][["link"]] == "identity")
   {
@@ -79,7 +79,9 @@ writeJagsFormula.glm <- function(fit, nodes, ...)
   
   regex <- factorRegex(fit)
   
-  mdl <- makeJagsReady(mdl) %>%
+  mdl <- makeJagsReady(mdl, 
+                       factorRef = factor_reference(model.frame(fit)),
+                       bern = bern) %>%
     mutate(term_plain = gsub(pattern = ":", 
                              replacement = "*", 
                              x = term_plain))
@@ -117,7 +119,7 @@ writeJagsFormula.glm <- function(fit, nodes, ...)
 #' @importFrom stringr str_trim
 #' 
 
-writeJagsFormula.lm <- function(fit, nodes, ...)
+writeJagsFormula.lm <- function(fit, nodes, bern, ...)
 {
   mdl <- pixiedust::dust(fit, 
                          descriptors = c("term", "term_plain", "level")) %>%
@@ -125,7 +127,9 @@ writeJagsFormula.lm <- function(fit, nodes, ...)
   
   regex <- factorRegex(fit)
   
-  mdl <- makeJagsReady(mdl) %>%
+  mdl <- makeJagsReady(mdl, 
+                       factorRef = factor_reference(model.frame(fit)),
+                       bern = bern) %>%
     mutate(term_plain = gsub(pattern = ":", 
                              replacement = "*", 
                              x = term_plain))
@@ -150,14 +154,16 @@ writeJagsFormula.lm <- function(fit, nodes, ...)
 #' @import nnet
 #'
 
-writeJagsFormula.multinom <- function(fit, nodes, ...)
+writeJagsFormula.multinom <- function(fit, nodes, bern = bern, ...)
 {
   mdl <- pixiedust::dust(fit, 
                          exponentiate = FALSE, 
                          descriptors = c("term", "term_plain", "level")) %>%
     as.data.frame(sprinkled = FALSE)
   
-  mdl <- makeJagsReady(mdl)
+  mdl <- makeJagsReady(mdl, 
+                       factorRef = factor_reference(model.frame(fit)),
+                       bern = bern)
   mdl <- dplyr::arrange(mdl, y.level, term_plain)
 
   mdl <- split(mdl, mdl$y.level)
@@ -202,14 +208,16 @@ writeJagsFormula.multinom <- function(fit, nodes, ...)
 #' @rdname writeJagsFormula
 #' @export
 
-writeJagsFormula.survreg <- function(fit, ...)
+writeJagsFormula.survreg <- function(fit, bern = bern, ...)
 {
   mdl <- pixiedust::dust(fit, descriptors = c("term", "term_plain", "level")) %>%
     as.data.frame(sprinkled = FALSE)
   
   regex <- factorRegex(fit)
   
-  mdl <- makeJagsReady(mdl) %>%
+  mdl <- makeJagsReady(mdl, 
+                       factorRef = factor_reference(model.frame(fit)),
+                       bern = bern) %>%
     dplyr::mutate(term_plain = gsub(pattern = ":", 
                                     replacement = "*", 
                                     x = term_plain))
