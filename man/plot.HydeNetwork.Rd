@@ -22,7 +22,7 @@
 
 mergeCustomNodes(node_df, customNodes)
 
-mapEdges(n, p)
+mapEdges(n, p, node_df)
 
 mergeCustomEdges(edge_df, customEdges)
 

@@ -1,14 +1,6 @@
 #' @name plot.HydeNetwork
 #' @aliases plot.HydeNetwork plotHydeNetwork
 #' @export 
-#' @importFrom DiagrammeR create_edges
-#' @importFrom DiagrammeR create_graph
-#' @importFrom DiagrammeR render_graph
-#' @importFrom dplyr bind_rows
-#' @importFrom dplyr filter
-#' @importFrom dplyr left_join
-#' @importFrom dplyr mutate
-#' @importFrom dplyr select
 #' @method plot HydeNetwork
 #' 
 #' 
@@ -120,24 +112,32 @@ plot.HydeNetwork <- function(x,
 {
   if (removeDeterm) x <- plot_nondeterm_only(x)
   
-  node_df <- data.frame(nodes = x[["nodes"]],
-                        stringsAsFactors = FALSE)
+  node_df <- 
+    DiagrammeR::create_node_df(n = length(x[["nodes"]]),
+                               label = x[["nodes"]])
+  # 
+  # node_df <- data.frame(nodes = x[["nodes"]],
+  #                       stringsAsFactors = FALSE)
   if (useHydeDefaults) node_df <- mergeDefaultPlotOpts(x, node_df)
   
   if (!is.null(customNodes)) node_df <- mergeCustomNodes(node_df, customNodes)
-
+  
   edge_table <- do.call("rbind", 
                         mapply(FUN = mapEdges, 
                                x[["nodes"]], 
-                               x[["parents"]]))
+                               x[["parents"]],
+                               MoreArgs = list(node_df = node_df)))
   
-  edge_df <- DiagrammeR::create_edges(from = edge_table[, 2], 
-                                      to = edge_table[, 1])
+  edge_df <- DiagrammeR::create_edge_df(from = edge_table[, 2], 
+                                        to = edge_table[, 1])
   
   if (!is.null(customEdges)) mergeCustomEdges(edge_df, customEdges)
-
-  DiagrammeR::create_graph(nodes_df = as.data.frame(node_df),
-                             edges_df = edge_df) %>%
+  
+  
+  
+  DiagrammeR::create_graph(nodes_df = node_df,
+                           edges_df = edge_df,
+                           attr_theme = NULL) %>%
     DiagrammeR::render_graph()
   
 }
@@ -159,11 +159,11 @@ mergeDefaultPlotOpts <- function(network, node_df)
                            no = ifelse(test = network[["nodeType"]][nodes] == "determ", 
                                        yes = "determ",
                                        no = "variable"
-                                       )
                            )
                )
-      )
-
+        )
+    )
+  
   node_df <- 
     dplyr::left_join(
       node_df, 
@@ -184,8 +184,8 @@ mergeDefaultPlotOpts <- function(network, node_df)
 #' 
 mergeCustomNodes <- function(node_df, customNodes)
 {
-#   node_df <- dplyr::mutate(node_df, index=2)
-#   customNodes <- dplyr::mutate(customNodes, index=1)
+  #   node_df <- dplyr::mutate(node_df, index=2)
+  #   customNodes <- dplyr::mutate(customNodes, index=1)
   node_df <- 
     dplyr::full_join(
       customNodes, 
@@ -213,11 +213,11 @@ mergeCustomNodes <- function(node_df, customNodes)
   if (any(grepl(pattern = "[.]y", 
                 x = names(node_df))))
     node_df <- dplyr::select(node_df, -dplyr::ends_with('.y'))
-
+  
   names(node_df) <- gsub(pattern = "[.]x", 
                          replacement = "", 
                          x = names(node_df))
-
+  
   node_df[, -which(names(node_df) == "nodes")] <- 
     lapply(X = node_df[, -which(names(node_df) == "nodes")],
            FUN = function(x) ifelse(test = is.na(x), 
@@ -229,8 +229,10 @@ mergeCustomNodes <- function(node_df, customNodes)
 #' @rdname plot.HydeNetwork
 #' @param n node names from a network object
 #' @param p the list of parents from a network object
-mapEdges <- function(n, p)
+mapEdges <- function(n, p, node_df)
 {
+  n <- node_df[["id"]][match(n, node_df[["label"]])]
+  p <- node_df[["id"]][match(p, node_df[["label"]])]
   cbind(rep(n, length(p)),
         p)
 }
@@ -242,7 +244,7 @@ mergeCustomEdges <- function(edge_df, customEdges)
 {
   edge_df <- dplyr::mutate(edge_df, index = 2)
   customEdges <- dplyr::mutate(customEdges, index = 1)
-
+  
   dplyr::bind_rows(customEdges, edge_df) %>%
     dplyr::group_by(from, to)  %>%
     dplyr::filter(rank(index, ties.method='first')==1) %>%
@@ -288,9 +290,9 @@ HydePlotOptions <- function(variable = NULL,
     current_options <- getOption("Hyde_plotOptions")
     
     new_options <- dplyr::bind_rows(
-                           lapply(list(variable, determ, decision, utility),
-                                  as.data.frame,
-                                  stringsAsFactors=FALSE))
+      lapply(list(variable, determ, decision, utility),
+             as.data.frame,
+             stringsAsFactors=FALSE))
     new_options$type <- c(if (is.null(variable)) NULL else "variable", 
                           if (is.null(determ)) NULL else "determ", 
                           if (is.null(decision)) NULL else "decision", 
