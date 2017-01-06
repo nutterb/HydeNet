@@ -190,7 +190,7 @@ mergeCustomNodes <- function(node_df, customNodes)
     dplyr::full_join(
       customNodes, 
       node_df,
-      by = c("nodes" = "nodes")
+      by = c("nodes" = "label")
     )
   
   duplicated_names.x <- names(node_df)[grepl(pattern = "[.]x", 

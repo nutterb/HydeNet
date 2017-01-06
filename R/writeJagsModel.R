@@ -117,7 +117,7 @@ writeJagsModel_dbern <- function(network, node_str, node_params)
     {
       node_params["p"] <- writeJagsFormula(fit = fit, 
                                            nodes = network[["nodes"]],
-                                           bern = names(Net$nodeType)[vapply(Net$nodeType, function(x) x == "dbern", logical(1))])
+                                           bern = names(network$nodeType)[vapply(network$nodeType, function(x) x == "dbern", logical(1))])
     }
     else if (node_params["p"] == fromFormula())
     {
@@ -166,7 +166,7 @@ writeJagsModel_dcat <- function(network, node_str, node_params)
                                 network[["nodeData"]][[node_str]]))
     pi <- writeJagsFormula(fit = pi, 
                            nodes = network$nodes,
-                           bern = names(Net$nodeType)[vapply(Net$nodeType, function(x) x == "dbern", logical(1))])
+                           bern = names(network$nodeType)[vapply(network$nodeType, function(x) x == "dbern", logical(1))])
     
     sprintf("%s \n%s ~ %s(%s)",
             pi,
@@ -243,7 +243,7 @@ writeJagsModel_dnorm_default <- function(network, node_str, node_params)
     {
       node_params["mu"] <- writeJagsFormula(fit = fit, 
                                             nodes = network[["nodes"]],
-                                            bern = names(Net$nodeType)[vapply(Net$nodeType, function(x) x == "dbern", logical(1))])
+                                            bern = names(network$nodeType)[vapply(network$nodeType, function(x) x == "dbern", logical(1))])
     }
     else if (node_params["mu"] == fromFormula())
     {
@@ -295,7 +295,7 @@ writeJagsModel_dnorm_survreg <- function(network, node_str, node_params)
   {
     node_params["mu"] <- writeJagsFormula(fit = fit, 
                                           nodes = network[["nodes"]],
-                                          bern = names(Net$nodeType)[vapply(Net$nodeType, function(x) x == "dbern", logical(1))])
+                                          bern = names(network$nodeType)[vapply(network$nodeType, function(x) x == "dbern", logical(1))])
   }
   else if (node_params["mu"] == fromFormula())
   {
@@ -432,7 +432,7 @@ writeJagsModel_dpois <- function(network, node_str, node_params)
     {
       node_params["lambda"] <- writeJagsFormula(fit = fit, 
                                                 nodes = network$nodes,
-                                                bern = names(Net$nodeType)[vapply(Net$nodeType, function(x) x == "dbern", logical(1))])
+                                                bern = names(network$nodeType)[vapply(network$nodeType, function(x) x == "dbern", logical(1))])
     }
     else if (node_params["lambda"] == fromFormula())
     {
