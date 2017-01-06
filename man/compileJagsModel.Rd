@@ -53,7 +53,9 @@ Posterior
 #* For a single model (ie, not a decision model), the user may choose to 
 #* use the \\code{rjags} function \\code{coda.samples}.
 #* However, this does not have a succinct print method
+
 library(rjags)
+
 s <- coda.samples(compiledNet$jags, 
                   variable.names = c("d.dimer", "death"), 
                   n.iter=1000)

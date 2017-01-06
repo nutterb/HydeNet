@@ -209,7 +209,6 @@ mergeCustomNodes <- function(node_df, customNodes)
     }
   }
   
-  
   if (any(grepl(pattern = "[.]y", 
                 x = names(node_df))))
     node_df <- dplyr::select(node_df, -dplyr::ends_with('.y'))
@@ -217,7 +216,7 @@ mergeCustomNodes <- function(node_df, customNodes)
   names(node_df) <- gsub(pattern = "[.]x", 
                          replacement = "", 
                          x = names(node_df))
-  
+ 
   node_df[, -which(names(node_df) == "nodes")] <- 
     lapply(X = node_df[, -which(names(node_df) == "nodes")],
            FUN = function(x) ifelse(test = is.na(x), 
