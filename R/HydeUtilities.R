@@ -63,19 +63,29 @@
 #'   \code{broom::tidy()}
 #' @param reg A regular expression, usually provided by \code{factorRegex}
 
-termName <- function(term, reg){
-  if (!is.null(reg)){
-    return(sapply(term, 
-                  function(t, reg){
-                    t <- unlist(strsplit(t, ":"))
-                    t <- ifelse(grepl(reg, t),
-                                stringr::str_extract(t, reg),
-                                t)
-                    t <- paste(t, collapse=":")
-                  },
-                  reg))
+termName <- function(term, reg)
+{
+  if (!is.null(reg))
+  {
+    sapply(X = term, 
+           FUN = 
+             function(t, reg)
+             {
+               t <- unlist(strsplit(x = t, 
+                                    split = ":"))
+               t <- ifelse(test = grepl(pattern = reg, 
+                                        x = t),
+                           yes = stringr::str_extract(string = t, 
+                                                      pattern = reg),
+                           no = t)
+               t <- paste(t, collapse=":")
+             },
+           reg = reg)
   }
-  else return(term)   
+  else 
+  {
+    term
+  }
 }
 
 #' @rdname HydeUtilities
@@ -85,15 +95,25 @@ termName <- function(term, reg){
 #' @param node Character string indicating a node in a network
 #' @param network A Hyde Network Object
 
-decisionOptions <- function(node, network){
+decisionOptions <- function(node, network)
+{
   #* In some cases, nodeFitter isn't set for a node.  When nodeFitter is NULL,
   #* we want to skip the "cpt" check and move on to other possibilities.
   #* If it isn't NULL and "cpt" is the fitter, we return dist immediately
   #* to avoid overwriting it in subsequent checks
-  if (!is.null(network$nodeFitter[[node]])){
-    if (network$nodeFitter[[node]] == "cpt"){
-      D <- {if (!is.null(network$nodeData[[node]])) network$nodeData[[node]][[node]] 
-            else network$data[[node]]}
+  if (!is.null(network[["nodeFitter"]][[node]]))
+  {
+    if (network[["nodeFitter"]][[node]] == "cpt")
+    {
+      D <- 
+        if (!is.null(network[["nodeData"]][[node]])) 
+        {
+          network[["nodeData"]][[node]][[node]] 
+        }
+        else 
+        {
+          network[["data"]][[node]]
+        }
       dist <- 1:length(unique(D))
       return(dist)
     }
@@ -102,12 +122,19 @@ decisionOptions <- function(node, network){
   #* the node JAGS model.  For instance
   #* pi.var[1] <- .123; pi.var[2] <- .321; ...
   #* the regular expression pulls out the numbers in between each set of [].
-  if (network$nodeType[[node]] == "dcat"){
-    dist <- writeJagsModel(network, node)[1]
-    dist <- unlist(strsplit(dist, ";"))
-    dist <- as.numeric(stringr::str_extract(dist, stringr::regex("(?<=[\\[]).*(?=[\\]])")))
+  if (network$nodeType[[node]] == "dcat")
+  {
+    dist <- writeJagsModel(network = network, 
+                           node = node)[1]
+    dist <- unlist(strsplit(x = dist, 
+                            split = ";"))
+    dist <- 
+      stringr::str_extract(string = dist, 
+                           pattern = stringr::regex("(?<=[\\[]).*(?=[\\]])")) %>%
+      as.numeric()
   }
-  else if (network$nodeType[[node]] == "dbern"){
+  else if (network$nodeType[[node]] == "dbern")
+  {
     dist <- 0:1
   }
   dist
@@ -115,34 +142,65 @@ decisionOptions <- function(node, network){
 
 #' @rdname HydeUtilities 
 #' @param mdl Output from \code{broom::tidy()}
-#' @param regex A regular expression, usually returned by \code{factorRegex}
-#' @param nodes A vector of node names, usually passed from \code{network$nodes}.
+#' @param factorRef A list of data frames mapping factors to levels
+#' @param bern bernoulli node names.
 
-makeJagsReady <- function(mdl, regex, nodes){
-  term_name <- NULL # avoids global binding NOTE on check
+makeJagsReady <- function(mdl, factorRef, bern)
+{
+  factorRef[bern] <- 
+    lapply(factorRef[bern],
+           function(x)
+           {
+             if (is.null(x)) return(NULL)
+             x$level <- x$level - 1
+             x
+           }
+    )
   
-  factorRef <- mdl[mdl$level != "" & !grepl(":", mdl$term_plain), 
-                   c("term_plain", "level"), 
-                   drop=FALSE]
-  if (nrow(factorRef) > 0){
-    factorRef <- factorRef %>%
-      dplyr::group_by_('term_plain') %>%
-      dplyr::mutate(level_value = 2:(length(term_plain) + 1))
-  }
-#   factorRef <- plyr::ddply(factorRef,
-#                            "term_name",
-#                            transform,
-#                            level_value = 2:(length(term_name)+1))
+  factors <- 
+    dplyr::filter(.data = mdl, 
+                  !grepl(":", level) & !is.na(level) & level != "") %>%
+    dplyr::distinct(term_plain) %$%
+    term_plain
   
-  mdl <- merge(mdl, factorRef,
-               by=c("term_plain", "level"), all=TRUE)
+  mdl
   
-  mdl$jagsVar <- {if (nrow(factorRef) > 0)
-                   mapply(matchLevelNumber, mdl$term_plain, mdl$level_value)
-                 else mdl$term_plain}
-  
-  #* Change 'poly' to 'pow'
-  mdl$jagsVar <- sapply(mdl$jagsVar, polyToPow)
+  mdl$jagsVar <- 
+    mapply(
+      function(term, level, factors, factorRef)
+      {
+        val <- 
+          mapply(
+            function(fr, term, level)
+            {
+              val <- fr[[term]]$level[fr[[term]]$label == level]
+              if (is.null(val)) val <- NA
+              val
+            },
+            term = term,
+            level = level,
+            MoreArgs = list(fr = factorRef),
+            SIMPLIFY = FALSE
+          ) %>%
+            unlist()
+          
+        ifelse(term %in% factors,
+               sprintf("(%s == %s)", 
+                       term, 
+                       val),
+               term)
+      },
+      term = stringr::str_split(mdl$term_plain, ":"),
+      level = stringr::str_split(mdl$level, ":"),
+      MoreArgs = list(factors = factors, 
+                      factorRef = factorRef),
+      SIMPLIFY = FALSE
+    ) %>%
+    vapply(
+      paste0,
+      character(1),
+      collapse = "*"
+    )
   
   mdl
 }
@@ -153,12 +211,23 @@ makeJagsReady <- function(mdl, regex, nodes){
 #' @param lev usually the \code{level_value} column generated within
 #'   \code{makeJagsReady}
 
-matchLevelNumber <- function(t, lev){
-  t <- unlist(strsplit(t, ":"))
-  l <- unlist(strsplit(as.character(lev), ":"))
-  for (i in 1:length(t)){
-    t[i] <- {if (is.na(l[i])) t[i]
-             else paste0("(", t[i], " == ", l[i], ")")}
+matchLevelNumber <- function(t, lev)
+{
+  t <- unlist(strsplit(x = t, 
+                       split = ":"))
+  l <- unlist(strsplit(x = as.character(lev), 
+                       split = ":"))
+  for (i in 1:length(t))
+  {
+    t[i] <- 
+      if (is.na(l[i]))
+      {
+        t[i]
+      }
+      else 
+      {
+        paste0("(", t[i], " == ", l[i], ")")
+      }
   }
   paste0(t, collapse="*")
 }
@@ -169,11 +238,20 @@ matchLevelNumber <- function(t, lev){
 
 matchVars <- function(terms, vnames)
 {
-  Matches <- sapply(vnames, function(p) stringr::str_extract(terms, p))
-  Matches <- apply(as.matrix(Matches), 1, function(s) ifelse(is.na(s), "", s))
-  Matches <- apply(as.matrix(Matches), 2, function(s) s[which.max(nchar(s))])
-  Matches[which(grepl("Intercept", terms))] <- 
-    terms[which(grepl("Intercept", terms))]
+  Matches <- sapply(X = vnames, 
+                    FUN = function(p) stringr::str_extract(string = terms, 
+                                                           pattern = p))
+  Matches <- apply(X = as.matrix(Matches), 
+                   MARGIN = 1, 
+                   FUN = function(s) ifelse(test = is.na(s), 
+                                            yes = "", 
+                                            no = s))
+  Matches <- apply(X = as.matrix(Matches), 
+                   MARGIN = 2, 
+                   FUN = function(s) s[which.max(nchar(s))])
+  Matches[which(grepl(pattern = "Intercept", x = terms))] <- 
+    terms[which(grepl(pattern = "Intercept", x = terms))]
+  
   Matches
 }
 
@@ -182,18 +260,32 @@ matchVars <- function(terms, vnames)
 
 nodeFromFunction <- function(node_fn)
 {
-  node <- stringr::str_extract(node_fn, "(?<=[(]).+?(?=[)])")
-  node <- gsub("([*]|[,]|[/]|\\^)[[:print:]]+", "", node)
-  ifelse(is.na(node), node_fn, node)
+  node <- stringr::str_extract(string = node_fn, 
+                               pattern = "(?<=[(]).+?(?=[)])")
+  node <- gsub(pattern = "([*]|[,]|[/]|\\^)[[:print:]]+", 
+               replacement = "", 
+               x = node)
+  ifelse(test = is.na(node), 
+         yes = node_fn, 
+         no = node)
 }
 
 #' @rdname HydeUtilities
 #' 
 
-policyMatrixValues <- function(node, network){
-  policy <- network$nodePolicyValues[[node]]
-  if (!is.numeric(policy)) policy <- seq_along(policy)
-  if (network$nodeType[[node]] == "dbern") policy <- policy - 1
+policyMatrixValues <- function(node, network)
+{
+  policy <- network[["nodePolicyValues"]][[node]]
+  if (!is.numeric(policy))
+  {
+    policy <- seq_along(policy)
+  }
+  
+  if (network$nodeType[[node]] == "dbern")
+  {
+    policy <- policy - 1
+  }
+  
   policy
 }
 
@@ -201,17 +293,26 @@ policyMatrixValues <- function(node, network){
 #' @param poly A single term for which the polynomial components should be 
 #'   converted to the JAGS pow() function.
 
-polyToPow <- function(poly){
-  poly <- unlist(strsplit(poly, "[*]"))
-  poly <- gsub("poly[(]", "pow(", poly)
-  poly <- ifelse(grepl("pow[(]", poly),
-                 gsub("\\d{1,2}[)]", "", poly),
-                 poly)
-  poly <- ifelse(grepl("pow[(]", poly),
-                 paste0(poly, ")"),
-                 poly)
+polyToPow <- function(poly)
+{
+  poly <- unlist(strsplit(x = poly, 
+                          split = "[*]"))
+  poly <- gsub(pattern = "poly[(]", 
+               replacement = "pow(", 
+               x = poly)
+  poly <- ifelse(test = grepl("pow[(]", poly),
+                 yes = gsub(pattern = "\\d{1,2}[)]", 
+                            replacement = "", 
+                            x = poly),
+                 no = poly)
+  poly <- ifelse(test = grepl(pattern = "pow[(]", 
+                              x = poly),
+                 yes = paste0(poly, ")"),
+                 no = poly)
+  
   poly <- paste0(poly, collapse="*")
-  return(poly)
+  
+  poly
 }
 
   
@@ -221,11 +322,14 @@ polyToPow <- function(poly){
 #' @param dist The JAGS distribution function name.  Appropriate names are
 #'   in the \code{FnName} column of the \code{jagsDists} data object.
 
-validateParameters <- function(params, dist){
-  expr <- jagsDists$paramLogic[jagsDists$FnName == dist]
-  valid <- sapply(expr, function(e) with(params, eval(parse(text=e))))  
-  valid[sapply(params, function(p) p %in% c("fromData", "fromFormula"))] <- TRUE
-  return(valid)
+validateParameters <- function(params, dist)
+{
+  expr <- jagsDists[["paramLogic"]][jagsDists[["FnName"]] == dist]
+  valid <- sapply(X = expr, 
+                  FUN = function(e) with(params, eval(parse(text=e))))  
+  valid[sapply(X = params, 
+               FUN = function(p) p %in% c("fromData", "fromFormula"))] <- TRUE
+  valid
 }
 
 #' @rdname HydeUtilities
@@ -233,47 +337,41 @@ validateParameters <- function(params, dist){
 makeFactorRef <- function(network)
 {
   network_factors <- 
-    names(network$factorLevels)[!vapply(network$factorLevels, is.null, logical(1))]
+    names(network[["factorLevels"]])[!vapply(X = network[["factorLevels"]], 
+                                             FUN = is.null, 
+                                             FUN.VALUE = logical(1))]
   
-  if (length(network_factors) == 0) return(NULL)
+  if (length(network_factors) == 0)
+  {
+    return(NULL)
+  }
   
-  Ref <- lapply(network_factors,
-         function(f){
-           data.frame(value = 1:length(network$factorLevels[[f]]),
-                      label = network$factorLevels[[f]],
-                      stringsAsFactors = FALSE)
-         })
+  Ref <- 
+    lapply(X = network_factors,
+           FUN = 
+             function(f)
+             {
+               data.frame(value = 1:length(network[["factorLevels"]][[f]]),
+                          label = network[["factorLevels"]][[f]],
+                          stringsAsFactors = FALSE)
+             }
+    )
   names(Ref) <- network_factors
   
-  types <- unlist(network$nodeType[network_factors])
+  types <- unlist(network[["nodeType"]][network_factors])
   types <- types[types %in% "dbern"]
   
   Ref[names(types)] <- 
-    lapply(Ref[names(types)], 
-           function(f){
-             f$value <- f$value - 1
-             f
-           })
+    lapply(X = Ref[names(types)], 
+           FUN = 
+             function(f)
+             {
+               f$value <- f$value - 1
+               f
+             }
+    )
   
   Ref[unique(names(Ref))]
-  #* The code below was the old way of doing this
-  #* before we implemented the `factorLevels` element.
-  #* I'm just hesitant to give it up before the 
-  #* new system is well tested.
-#   dataList <- c(list(network$data), network$nodeData)
-#   names(dataList) <- NULL
-#   Ref <- do.call("c", lapply(dataList, dataframeFactors))
-#   
-#   types <- unlist(network$nodeType[names(Ref)])
-#   types <- types[types %in% "dbern"]
-#   
-#   Ref[names(types)] <- 
-#     lapply(Ref[names(types)], 
-#            function(f){
-#              f$value <- f$value - 1
-#              f
-#            })
-#   Ref[unique(names(Ref))]
 }
 
 #' @rdname HydeUtilities
@@ -282,13 +380,38 @@ makeFactorRef <- function(network)
 #'   
 dataframeFactors <- function(dataframe)
 {
-  if (is.null(dataframe)) return(NULL)
-  factor_vars <- names(dataframe)[sapply(dataframe, class) == "factor"]
+  if (is.null(dataframe))
+  {
+    return(NULL)
+  }
+  
+  factor_vars <- names(dataframe)[sapply(X = dataframe, 
+                                         FUN = class) == "factor"]
   reference_list <- 
-    lapply(factor_vars,
-           function(f) data.frame(value = sort(unique(as.numeric(dataframe[[f]]))),
-                                  label = levels(dataframe[[f]]),
-                                  stringsAsFactors=FALSE))
+    lapply(X = factor_vars,
+           FUN = function(f) data.frame(value = sort(unique(as.numeric(dataframe[[f]]))),
+                                        label = levels(dataframe[[f]]),
+                                        stringsAsFactors=FALSE))
   names(reference_list) <- factor_vars
   reference_list
 }
+
+#' @rdname HydeUtilities
+#' @param data A data frame.  
+
+factor_reference <- function(data)
+{
+  Ref <- 
+    lapply(data,
+           function(x)
+           {
+             if (is.factor(x)) data.frame(level = seq_along(levels(x)),
+                                          label = levels(x))
+             else NULL
+           }
+    )
+  
+  Ref[!vapply(Ref, is.null, logical(1))]
+}
+
+utils::globalVariables("level")

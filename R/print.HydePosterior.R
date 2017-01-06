@@ -3,7 +3,7 @@
 #' @method print HydePosterior
 #' 
 #' @title Print a Hyde Posterior Distribution Object
-#' @details Prints a brief description of a HydePosterior object.
+#' @description Prints a brief description of a HydePosterior object.
 #' 
 #' @param x a \code{HydePosterior} object
 #' @param ... additional arguments to be passed to print methods.  Currently 
@@ -43,17 +43,43 @@
 #' 
 
 print.HydePosterior <- function(x, ...){
-  n_distributions <- if (class(x$codas) == "mcmc.list") 1 else length(x$codas)
-  n_chains <- if (class(x$codas) == "mcmc.list") length(x$codas) else length(x$codas[[1]])
-  n_iterations <- if (class(x$codas) == "mcmc.list") nrow(x$codas[[1]]) else nrow(x$codas[[1]][[1]])
+  n_distributions <- 
+    if (class(x$codas) == "mcmc.list")
+    {
+      1 
+    }
+    else 
+    {
+      length(x[["codas"]])
+    }
+  
+  n_chains <- 
+    if (class(x[["codas"]]) == "mcmc.list")
+    {
+      length(x[["codas"]]) 
+    }
+    else 
+    {
+      length(x[["codas"]][[1]])
+    }
+  
+  n_iterations <- 
+    if (class(x[["codas"]]) == "mcmc.list") 
+    {
+      nrow(x[["codas"]][[1]]) 
+    }
+    else 
+    {
+      nrow(x[["codas"]][[1]][[1]])
+    }
   
   cat(paste0("Posterior distributions of a Hyde Network\n",
              "number of posterior distributions: ", n_distributions, "\n",
              "number of chains: ", n_chains, "\n",
              "number of iterations: ", n_iterations, "\n"))
   
-  if (!is.null(x$observed)){
+  if (!is.null(x[["observed"]])){
     cat("\nObserved at the values:\n")
-    print(x$observed)
+    print(x[["observed"]])
   }
 }

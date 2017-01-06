@@ -12,9 +12,10 @@
 \item{...}{additional arguments to be passed to print methods.  Currently 
 none in use.}
 }
-\details{
+\description{
 Prints a HydeNetwork object with a brief summary of each node.
-
+}
+\details{
 The summary of each node follows the format\cr
   node name | parents\cr
   node type (parameter)\cr

@@ -162,185 +162,248 @@ setNode <- function(network, node, nodeType,
                     fromData=!is.null(network$data), ...,
                     nodeData = NULL, factorLevels = NULL,
                     validate=TRUE, fitModel=getOption("Hyde_fitModel"),
-                    policyValues = factorLevels){
+                    policyValues = factorLevels)
+{
   
   network.t <- as.character(substitute(network))
   node.t <- as.character(substitute(node))
-  
-#   data(jagsDists, package='Hyde')
-  Check <- ArgumentCheck::newArgCheck()
-  
+
+  coll <- checkmate::makeAssertCollection()  
+
   if (is.character(decision))
   {
     if (decision != "current")
     {
-      ArgumentCheck::addWarning(paste0("'decision' must be logical or 'current'.  You provided ",
-                                       "an unrecognized character value.  'HydeNet' is assuming you mean ",
-                                       "'current'."),
-                                Check)
+      warning("'decision' must be logical or 'current'.  You provided ",
+              "an unrecognized character value.  'HydeNet' is assuming you mean ",
+              "'current'.")
       decision <- "current"
     }
-    decision <- network$nodeDecision[[node.t]]
+    decision <- network[["nodeDecision"]][[node.t]]
   }
   
   if (is.character(utility))
   {
     if (utility != "current")
     {
-      ArgumentCheck::addWarning(paste0("'utility' must be logical or 'current'.  You provided ",
-                                       "an unrecognized character value.  'HydeNet' is assuming you mean ",
-                                       "'current'."),
-                                Check)
+      warning("'utility' must be logical or 'current'.  You provided ",
+              "an unrecognized character value.  'HydeNet' is assuming you mean ",
+              "'current'.")
       utility <- "current"
     }
-    utility <- network$nodeUtility[[node.t]]
+    utility <- network[["nodeUtility"]][[node.t]]
   }
 
-  if (!missing(nodeType)){
-    if (length(nodeType) > 1){
-      ArgumentCheck::addWarning("nodeType must have length 1. The first element is being used.",
-                                Check)
+  if (missing(nodeType))
+  {
+    nodeType <- network[["nodeType"]][[node.t]]
+  }
+  else
+  {
+    if (length(nodeType) > 1)
+    {
+      warning("nodeType must have length 1. The first element is being used.")
       nodeType <- nodeType[1]
     }
   }
   
-  if (!missing(nodeType)){
-    if (!nodeType %in% jagsDists$FnName)
-    ArgumentCheck::addError(paste0("nodeType must be one of the following -\n    ",
-                                   paste(unique(jagsDists$FnName), collapse=", ")),
-                            Check)
-  }
-
-  if (!missing(nodeType)) network$nodeType[[node.t]] <- nodeType
-  exp_param <- eval(substitute(expectedParameters(network, node, TRUE)))
+  checkmate::assertSubset(x = nodeType,
+                          choices = jagsDists[["FnName"]],
+                          add = coll)
+  
+  if (!missing(nodeType)) network[["nodeType"]][[node.t]] <- nodeType
+  exp_param <- eval(substitute(expectedParameters(network = network, 
+                                                  node = node, 
+                                                  returnVector = TRUE)))
   params <- list(...)[exp_param]
   
-  if (!all(exp_param %in% names(params)))
-  ArgumentCheck::addError(paste0("Nodes of type ", network$nodeType[[node.t]], 
-                                 " must have all of the following parameters--",
-                                 paste(exp_param, collapse=", "), "."),
-                          Check)
-
+  checkmate::assertSubset(x = exp_param,
+                          choices = names(params),
+                          add = coll)
+  
   if (validate){
-    valid <- validateParameters(params, network$nodeType[[node.t]]) 
+    valid <- validateParameters(params, network[["nodeType"]][[node.t]]) 
     
     if (any(sapply(params, is.character) & 
             !sapply(params, function(p) p %in% c("fromData", "fromFormula"))))
     {
-      ArgumentCheck::addMessage("Validation has been ignored for parameters defined with character strings",
-                                Check)
+      message("Validation has been ignored for parameters defined with character strings")
       valid[sapply(params, is.character)] <- TRUE
     }
 
-    if (!all(valid)){
+    if (!all(valid))
+    {
       not_valid <- which(!valid)
       msg <- paste0("Please define ", names(params)[not_valid], " such that ", names(valid)[not_valid], 
                     " (or use validate=FALSE).")
       msg <- paste(msg, collapse="\n")
-      ArgumentCheck::addError(msg,
-                              Check)
+      coll$push(msg)
     }
   }
 
   if (decision){
     if (!nodeType %in% c("dbern", "dcat")){
-      ArgumentCheck::addWarning(paste0("Only nodes of type 'dbern' and 'dcat' may be decision nodes. ",
-                                       "'decision' has been set to FALSE"),
-                                Check)
+      warning("Only nodes of type 'dbern' and 'dcat' may be decision nodes. ",
+              "'decision' has been set to FALSE")
       decision <- FALSE
     }
   }
 
   if (utility){
-    if (!nodeType %in% c("determ"))
-    ArgumentCheck::addError("Utility nodes must be of type 'determ'.",
-                            Check)
+    checkmate::assertSubset(x = nodeType,
+                            choices = "determ",
+                            add = coll)
     
-    if (any(sapply(network$parents, function(p, t) t %in% p, node.t)))
-    ArgumentCheck::addError("Utility nodes may not have children.",
-                            Check)
+
+    if (any(sapply(X = network$parents, 
+                   FUN = function(p, t) t %in% p, node.t)))
+    coll$push("Utility nodes may not have children.")
 
   }
 
-  if (length(list(...))) network$nodeParams[[node.t]] <- list(...)
-  if (!missing(nodeFormula)) network$nodeFormula[[node.t]] <- factorFormula(nodeFormula, network)
-  if (!missing(nodeFitter)) network$nodeFitter[[node.t]] <- nodeFitter
-  if (length(fitterArgs)) network$nodeFitterArgs[[node.t]] <- fitterArgs
-  if (!is.null(nodeData)) network$nodeData[[node.t]] <- nodeData
+  if (length(list(...)))
+  {
+    network[["nodeParams"]][[node.t]] <- list(...)
+  }
+  
+  if (!missing(nodeFormula))
+  {
+    network[["nodeFormula"]][[node.t]] <- 
+      factorFormula(nodeFormula, network)
+  }
+  
+  if (!missing(nodeFitter))
+  {
+    network[["nodeFitter"]][[node.t]] <- nodeFitter
+  }
+  
+  if (length(fitterArgs)){
+    network[["nodeFitterArgs"]][[node.t]] <- fitterArgs
+  }
+  
+  if (!is.null(nodeData))
+  {
+    network[["nodeData"]][[node.t]] <- nodeData
+  }
  
-  if (!is.null(factorLevels)){
-    nodeFitter <- if (is.null(network$nodeFitter[[node.t]])) "" else network$nodeFitter[[node.t]]
-    if (!(network$nodeType[[node.t]] %in% c("dcat", "dbern")) ||
+  if (!is.null(factorLevels))
+  {
+    nodeFitter <- 
+      if (is.null(network$nodeFitter[[node.t]]))
+      {
+        "" 
+      }
+      else
+      {
+        network$nodeFitter[[node.t]]
+      }
+    
+    if (!(network[["nodeType"]][[node.t]] %in% c("dcat", "dbern")) ||
           nodeFitter == "cpt" ||
-          !is.null(network$nodeData[[node.t]]) || 
-          (node.t %in% names(network$data))){
-      ArgumentCheck::addWarning(
-        msg = paste0("'", node.t, "' does not satisfy the conditions ",
-                     "to use 'factorLevels'.  See '?setNode' for details."),
-        argcheck = Check)
+          !is.null(network[["nodeData"]][[node.t]]) || 
+          (node.t %in% names(network[["data"]])))
+    {
+      warning("'", node.t, "' does not satisfy the conditions ",
+                     "to use 'factorLevels'.  See '?setNode' for details.")
       
-      if (nodeFitter == "cpt"){
-        if (!is.null(network$nodeData[[node.t]])){
-          network$factorLevels[[node.t]] <- 
-            if (!is.factor(network$nodeData[[node.t]][[node.t]]))
-              sort(unique(network$nodeData[[node.t]][[node.t]]))
-            else levels(network$nodeData[[node.t]][[node.t]])
+      if (nodeFitter == "cpt")
+      {
+        if (!is.null(network[["nodeData"]][[node.t]]))
+        {
+          network[["factorLevels"]][[node.t]] <- 
+            if (!is.factor(network[["nodeData"]][[node.t]][[node.t]]))
+            {
+              sort(unique(network[["nodeData"]][[node.t]][[node.t]]))
+            }
+            else
+            {
+              levels(network[["nodeData"]][[node.t]][[node.t]])
+            }
         }
-        else if (!is.null(network$data[[node.t]])){
-          network$factorLevels[[node.t]] <- 
-            if (!is.factor(network$data[[node.t]]))
-              sort(unique(network$data[[node.t]]))
-          else levels(network$data[[node.t]])
+        else if (!is.null(network[["data"]][[node.t]]))
+        {
+          network[["factorLevels"]][[node.t]] <- 
+            if (!is.factor(network[["data"]][[node.t]]))
+            {
+              sort(unique(network[["data"]][[node.t]]))
+            }
+            else 
+            {
+              levels(network[["data"]][[node.t]])
+            }
         }
       }
     } 
-    else{
-      network$factorLevels[[node.t]] <- factorLevels
+    else
+    {
+      network[["factorLevels"]][[node.t]] <- factorLevels
     }
   }
   else{
-    if (!is.null(network$nodeData[[node.t]])){
-      network$factorLevels[[node.t]] <- 
-        levels(network$nodeData[[node.t]][[node.t]])
+    if (!is.null(network[["nodeData"]][[node.t]]))
+    {
+      network[["factorLevels"]][[node.t]] <- 
+        levels(network[["nodeData"]][[node.t]][[node.t]])
     }
-    else if (!is.null(network$data)){
-      network$factorLevels[[node.t]] <- 
-        levels(network$data[[node.t]])
+    else if (!is.null(network[["data"]]))
+    {
+      network[["factorLevels"]][[node.t]] <- 
+        levels(network[["data"]][[node.t]])
     }
-    else{
-      network$factorLevels[[node.t]] <- NULL
+    else
+    {
+      network[["factorLevels"]][[node.t]] <- NULL
     }
   }
-  network$nodeDecision[[node.t]] <- decision
-  network$nodeUtility[[node.t]] <- utility
+  network[["nodeDecision"]][[node.t]] <- decision
+  network[["nodeUtility"]][[node.t]] <- utility
   
-  network$nodePolicyValues[[node.t]] <- policyValues
+  network[["nodePolicyValues"]][[node.t]] <- policyValues
 
-  if (fitModel) {
-    fit <- do.call(network$nodeFitter[[node.t]],
-                   c(list(formula = network$nodeFormula[[node.t]],
-                          data = if (is.null(network$nodeData[[node.t]])) network$data else network$nodeData[[node.t]]),
-                     network$nodeFitterArgs[[node.t]]))
-    network$nodeModel[[node.t]] <- fit
+  if (fitModel) 
+  {
+    fit <- do.call(network[["nodeFitter"]][[node.t]],
+                   c(list(formula = network[["nodeFormula"]][[node.t]],
+                          data = 
+                            if (is.null(network[["nodeData"]][[node.t]]))
+                            {
+                              network[["data"]] 
+                            }
+                            else
+                            {
+                              network[["nodeData"]][[node.t]]
+                            }
+                        ),
+                     network[["nodeFitterArgs"]][[node.t]]
+                    )
+                  )
+    network[["nodeModel"]][[node.t]] <- fit
     
-    if (network$nodeType[[node.t]] == "dbern"){
-      network$nodeParams[[node.t]]$p <- writeJagsFormula(fit, network$nodes)  
+    if (network[["nodeType"]][[node.t]] == "dbern")
+    {
+      network[["nodeParams"]][[node.t]][["p"]] <- 
+        writeJagsFormula(fit, network[["nodes"]])
     }
-    else if (network$nodeType[[node.t]] == "dcat"){
-      network$nodeParams[[node.t]]$pi <- writeJagsFormula(fit, network$nodes)
+    else if (network[["nodeType"]][[node.t]] == "dcat")
+    {
+      network[["nodeParams"]][[node.t]][["pi"]] <- 
+        writeJagsFormula(fit, network[["nodes"]])
     }
-    else if (network$nodeType[[node.t]] == "dnorm"){
-      network$nodeParams[[node.t]]$mu <- writeJagsFormula(fit, network$nodes)
-      network$nodeParams[[node.t]]$tau <- 1/summary(fit)$sigma
+    else if (network$nodeType[[node.t]] == "dnorm")
+    {
+      network[["nodeParams"]][[node.t]][["mu"]] <- 
+        writeJagsFormula(fit, network[["nodes"]])
+      network[["nodeParams"]][[node.t]][["tau"]] <- 1/summary(fit)[["sigma"]]
     }
-    else if (network$nodeType[[node.t]] == "dpois"){
-      network$nodeParams[[node.t]]$lambda <- writeJagsFormula(fit, network$nodes)
+    else if (network[["nodeType"]][[node.t]] == "dpois")
+    {
+      network[["nodeParams"]][[node.t]][["lambda"]] <- 
+        writeJagsFormula(fit, network[["nodes"]])
     }
   }
   
   
-  
-  ArgumentCheck::finishArgCheck(Check)
+  checkmate::reportAssertions(coll)
   return(network)  
 }
 

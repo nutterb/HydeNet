@@ -7,7 +7,7 @@ test_that("plot.HydeNetwork returns a plot under default settings",
   expect_silent(plot(BlackJack))
 })
 
-test_that("plot.HydeNetwork returns a plot with custome Node settings",
+test_that("plot.HydeNetwork returns a plot with custom Node settings",
 {
   expect_silent(plot(BlackJack,
                    customNodes = customNode(node_id = "hit1",

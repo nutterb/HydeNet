@@ -41,7 +41,11 @@ test_that("cpt with multiple character string naming weights, but choosing non-e
   echodata <- cbind(expand.grid(list(echo = c("Negative", "Positive"),
                                      cad = c("No","Yes"))),
                     data.frame(pr=c(0.83,0.17,0.12,0.88)))
-  expect_error(cpt(echo ~ cad, echodata, wt=c("wt", "pr")))
+  expect_error(
+    expect_warning(
+      cpt(echo ~ cad, echodata, wt=c("wt", "pr"))
+    )
+  )
 })
 
 test_that("cpt with logical weights should return error",

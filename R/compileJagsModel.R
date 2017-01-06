@@ -1,6 +1,5 @@
 #' @name compileJagsModel
 #' @export compileJagsModel
-#' @import rjags
 #' 
 #' @title Compile Jags Model from a Hyde Network
 #' @description Generates the JAGS code from the Hyde network and uses it to 
@@ -47,13 +46,14 @@
 #' #* For a single model (ie, not a decision model), the user may choose to 
 #' #* use the \code{rjags} function \code{coda.samples}.
 #' #* However, this does not have a succinct print method
+#' library(rjags)
 #' s <- coda.samples(compiledNet$jags, 
 #'                   variable.names = c("d.dimer", "death"), 
 #'                   n.iter=1000)
 #'                 
 
-compileJagsModel <- function(network, data=NULL, ...){
-  
+compileJagsModel <- function(network, data=NULL, ...)
+{
   factorRef <- makeFactorRef(network)
   
   #* convert label to value
@@ -62,12 +62,26 @@ compileJagsModel <- function(network, data=NULL, ...){
   cpt_arrays <- makeCptArrays(network) #* The utilty function is in the 
                                        #* file for compileDecisionModel
  
-  jags <- rjags::jags.model(textConnection(writeNetworkModel(network)), 
-                    data = if (is.null(data) & length(cpt_arrays) == 0) sys.frame(sys.parent()) 
-                             else c(data, cpt_arrays), ...)
+  jags <- 
+    rjags::jags.model(
+      file = textConnection(writeNetworkModel(network)), 
+      data = 
+        if (is.null(data) & length(cpt_arrays) == 0) 
+        {
+          sys.frame(sys.parent()) 
+        }
+        else 
+        {
+          c(data, cpt_arrays) 
+        },
+      ...
+    )
   
   #* cHN for compiled Hyde Network
-  cHN <- list(jags=jags, observed=data, dag=network$dag, factorRef=factorRef)
+  cHN <- list(jags=jags, 
+              observed=data, 
+              dag=network[["dag"]], 
+              factorRef=factorRef)
   
   class(cHN) <- c("compiledHydeNetwork")
   cHN
@@ -77,25 +91,43 @@ compileJagsModel <- function(network, data=NULL, ...){
 
 
 #****** UTILITY FUNCTIONS
-convertLabelToValue <- function(data, factorRef){
-  msg <- ""
-  for (i in names(data)){
+convertLabelToValue <- function(data, factorRef)
+{
+  #* This for loop converts labeled factors to integers for use in JAGS.
+  #* It isn't the most efficient bit of code, but was easier to reason this way
+  #* For each of the items being converted, if it isn't found, or if it has
+  #* an invalid value, a message is produced to be printed as an error.
+  #* All of the messages are gathered before printing the error.
+  msg <- character()
+  for (i in names(data))
+  {
     if (!is.numeric(data[[i]]))
     {
-      if (!i %in% names(factorRef)){
+      if (!i %in% names(factorRef))
+      {
         msg <- c(msg,
-                 paste0("'", i, "' was not numeric and no matching factor could be found in the data."))
+                 paste0("'", i, 
+                        "' was not numeric and no matching factor could be found in the data."))
       }
-      else if (!all(data[[i]] %in% factorRef[[i]]$label))
+      else if (!all(data[[i]] %in% factorRef[[i]][["label"]]))
       {
         msg <- c(msg,
                  paste0("Values observed in '", i, "' must be one of ",
-                        paste0(c(factorRef[[i]]$label, factorRef[[i]]$value), collapse = ", ")))
+                        paste0(c(factorRef[[i]][["label"]], 
+                                 factorRef[[i]][["value"]]), 
+                               collapse = ", ")))
       }
-      else data[[i]] <- factorRef[[i]]$value[which(factorRef[[i]]$label == data[[i]])]
+      else 
+      {
+        data[[i]] <- factorRef[[i]][["value"]][which(factorRef[[i]][["label"]] == data[[i]])]
+      }
     }
   }
 
-  if (length(msg) > 1) stop(paste(msg, collapse="\n"))
-  return(data)
+  if (length(msg)) 
+  {
+    stop(paste(msg, collapse="\n"))
+  }
+  
+  data
 }

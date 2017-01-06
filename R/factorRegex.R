@@ -18,17 +18,27 @@
 #' 
 
 factorRegex <- function(fit){
-  fctr <- attributes(stats::terms(fit))$dataClasses
-  if (any(fctr == "factor")){
+  fctr <- attributes(stats::terms(fit))[["dataClasses"]]
+  if (any(fctr == "factor"))
+  {
     fctr <- names(fctr)[fctr == "factor"]
     fctr_regex <- paste0(fctr, collapse="|")
-    fctr_regex <- gsub("[(]", "[(]", fctr_regex)
-    fctr_regex <- gsub("[)]", "[)]", fctr_regex)
-    fctr_regex <- gsub("[.]", "[.]", fctr_regex)
+    fctr_regex <- gsub(pattern = "[(]", 
+                       replacement = "[(]", 
+                       x = fctr_regex)
+    fctr_regex <- gsub(pattern = "[)]", 
+                       replacement = "[)]", 
+                       x = fctr_regex)
+    fctr_regex <- gsub(pattern = "[.]", 
+                       replacement = "[.]", 
+                       x = fctr_regex)
     fctr_regex <- paste0("(", fctr_regex, ")")
-    return(fctr_regex)
+    fctr_regex
   }
-  else NULL
+  else
+  {
+    NULL
+  }
 }
 
 

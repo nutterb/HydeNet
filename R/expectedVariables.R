@@ -40,28 +40,49 @@
 #' expectedParameters(Net, wells)
 #' expectedParameters(Net, wells, returnVector=TRUE)
 
-expectedVariables <- function(network, node, returnVector=FALSE){
+expectedVariables <- function(network, node, returnVector=FALSE)
+{
   node <- as.character(substitute(node))
-  inputs <- network$parents[[node]]
+  inputs <- network[["parents"]][[node]]
   
-  if (returnVector) return(inputs)
+  if (returnVector)
+  {
+    return(inputs)
+  }
   
-  if (is.null(inputs)) cat(paste(node, "~ 1"))
-  else cat(paste(node, "~", paste(inputs, collapse=" + ")))
+  if (is.null(inputs))
+  {
+    cat(paste(node, "~ 1"))
+  }
+  else 
+  {
+    cat(paste(node, "~", paste(inputs, collapse=" + ")))
+  }
 }
 
 #' @rdname expectedVariables
 #' @export expectedParameters
 
-expectedParameters <- function(network, node, returnVector=FALSE){
+expectedParameters <- function(network, node, returnVector=FALSE)
+{
   node <- as.character(substitute(node))
-  inputs <- network$nodeType[[node]]
+  inputs <- network[["nodeType"]][[node]]
   
-  #   return(list(node, inputs))
+  params <- jagsDists[["Parameters"]][jagsDists[["FnName"]] == inputs]
   
-  #   data(jagsDists, package='Hyde')
-  params <- jagsDists$Parameters[jagsDists$FnName == inputs]
-  
-  if (returnVector) return(params)
-  else cat(paste(paste(paste0(params, "= "), collapse=", ")))
+  if (returnVector)
+  {
+    return(params)
+  }
+  else 
+  {
+    cat(
+      paste(
+        paste(
+          paste0(params, "= "),
+          collapse=", "
+        )
+      )
+    )
+  }
 }

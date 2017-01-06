@@ -7,6 +7,7 @@
 \alias{modelToNode.glm}
 \alias{modelToNode.lm}
 \alias{modelToNode.multinom}
+\alias{modelToNode.survreg}
 \alias{modelToNode.xtabs}
 \title{Convert a Model Object to a Network Node}
 \usage{
@@ -21,6 +22,8 @@ modelToNode(model, nodes, ...)
 \method{modelToNode}{lm}(model, nodes, ...)
 
 \method{modelToNode}{multinom}(model, nodes, ...)
+
+\method{modelToNode}{survreg}(model, nodes, ...)
 
 \method{modelToNode}{xtabs}(model, nodes, ...)
 }

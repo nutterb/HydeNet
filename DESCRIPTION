@@ -1,8 +1,7 @@
 Package: HydeNet
 Type: Package
 Title: Hybrid Bayesian Networks Using R and JAGS
-Version: 0.10.3
-Date: 2015-01-18
+Version: 0.10.5
 Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter
     <benjamin.nutter@gmail.com>
 Maintainer: Benjamin Nutter <benjamin.nutter@gmail.com>
@@ -22,17 +21,17 @@ Description: Facilities for easy implementation of hybrid Bayesian networks
 License: MIT + file LICENSE
 Depends:
     R (>= 3.0.0),
-    nnet,
-    rjags
+    nnet
 Imports:
-    ArgumentCheck,
-    DiagrammeR (>= 0.8),
+    checkmate,
+    DiagrammeR (>= 0.9.0),
     plyr,
     dplyr,
     graph,
     gRbase,
     magrittr,
     pixiedust (>= 0.6.1),
+    rjags,
     stats,
     stringr,
     utils

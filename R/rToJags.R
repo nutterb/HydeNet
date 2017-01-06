@@ -21,44 +21,60 @@
 #' @author Jarrod Dalton and Benjamin Nutter
 #' @references \url{http://people.math.aau.dk/~kkb/Undervisning/Bayes14/sorenh/docs/jags_user_manual.pdf}
 
-rToJags <- function(f){
+rToJags <- function(f)
+{
   f <- as.character(f)
-  f <- unlist(strsplit(f, "[+]"))
-  f <- stringr::str_trim(f)
+  f <- unlist(strsplit(x = f, 
+                       split = "[+]"))
+  f <- trimws(f)
+  
+  #* Strip Surv 
+  surv_factor <- grepl(pattern = "Surv[(]", 
+                       x = f)
+  f[surv_factor] <- sub(pattern = "^Surv[(]", 
+                        replacement = "", 
+                        x = f[surv_factor])
+  f[surv_factor] <- sub(pattern = ",.+$", 
+                        replacement = "", 
+                        x = f[surv_factor])
   
   #* Easy translations
-  f <- gsub("acos[(]", "arccos(", f)
-  f <- gsub("acosh[(]", "arccosh(", f)
-  f <- gsub("asin[(]", "arcsin(", f)
-  f <- gsub("asinh[(]", "arcsinh(", f)
-  f <- gsub("atan[(]", "arctan(", f) 
-  f <- gsub("pnorm[(]", "phi(", f) 
-  f <- gsub("ceiling[(]", "round(", f) 
-  f <- gsub("floor[(]", "trunc(", f) 
+  f <- gsub(pattern = "acos[(]", 
+            replacement = "arccos(", 
+            x = f)
+  f <- gsub(pattern = "acosh[(]", 
+            replacement = "arccosh(", 
+            x = f)
+  f <- gsub(pattern = "asin[(]", 
+            replacement = "arcsin(", 
+            x = f)
+  f <- gsub(pattern = "asinh[(]", 
+            replacement = "arcsinh(", 
+            x = f)
+  f <- gsub(pattern = "atan[(]", 
+            replacement = "arctan(", 
+            x = f) 
+  f <- gsub(pattern = "pnorm[(]", 
+            replacement = "phi(", 
+            x = f) 
+  f <- gsub(pattern = "ceiling[(]", 
+            replacement = "round(", 
+            x = f) 
+  f <- gsub(pattern = "floor[(]", 
+            replacement = "trunc(", 
+            x = f) 
 
-  #* Not so easy translations
-  #* convert equals
-  #* 21 November 2014: Testing functionality without this.  Strictly
-  #*   speaking, this isn't necessary as the == notation works fine.  
-  #*   In fact, it may be preferable for dealing with factors.
-#   convertEquals <- function(x){
-#     if (grepl("[=][=]", x)){
-#       x <- stringr::str_trim(unlist(strsplit(x, "[=][=]")))
-#       for (i in length(x):2){
-#         x[i-1] <- paste0('equals(', x[i-1], ", ", x[i], ")")
-#         x <- x[1:(i-1)]
-#       }
-#       return(x)
-#     }
-#     else return(x)
-#   }
-#   f <- sapply(f, convertEquals)
-  
   #* convert caret to pow()
   convertCaret <- function(x){
-    if (grepl("^", x, fixed=TRUE)){
-      x <- stringr::str_trim(unlist(strsplit(x, "^", fixed=TRUE)))
-      for (i in length(x):2){
+    if (grepl(pattern = "^", 
+              x = x, 
+              fixed=TRUE))
+    {
+      x <- trimws(unlist(strsplit(x = x, 
+                                  split = "^", 
+                                  fixed=TRUE)))
+      for (i in length(x):2)
+      {
         x[i-1] <- paste0('pow(', x[i-1], ", ", x[i], ")")
         x <- x[1:(i-1)]
       }
@@ -66,21 +82,37 @@ rToJags <- function(f){
     }
     else return(x)
   }
-  f <- sapply(f, convertCaret)
+  f <- sapply(X = f, 
+              FUN = convertCaret)
   
   #* Convert logit with inverse to ilogit
-  convertLogit <- function(x){
-    x <- gsub(" ", "", x)
-    if (grepl("logit[(]", x)){
-      if (grepl("inverse[=]T", x)){
-        x <- gsub("(logit[(]|qlogis[(])", "ilogit(", x)
+  convertLogit <- function(x)
+  {
+    x <- gsub(pattern = " ", 
+              replacement = "", 
+              x = x)
+    if (grepl(pattern = "logit[(]", 
+              x = x))
+    {
+      if (grepl(pattern = "inverse[=]T", 
+                x = x))
+      {
+        x <- gsub(pattern = "(logit[(]|qlogis[(])", 
+                  replacement = "ilogit(", 
+                  x = x)
       }
-      x <- gsub(",[[:print:]]+[)]", ")", x)
+      x <- gsub(pattern = ",[[:print:]]+[)]", 
+                replacement = ")", 
+                x = x)
       return(x)
     }
-    else return(x)
+    else
+    {
+      return(x)
+    }
   }
-  f <- sapply(f, convertLogit)
+  f <- sapply(X = f, 
+              FUN = convertLogit)
   
   return(paste(f[2], f[1], paste(f[-(1:2)], collapse=" + ")) )
 }

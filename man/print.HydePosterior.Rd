@@ -12,9 +12,10 @@
 \item{...}{additional arguments to be passed to print methods.  Currently 
 none in use.}
 }
-\details{
+\description{
 Prints a brief description of a HydePosterior object.
-
+}
+\details{
 Prints the number of posterior distributions, chains, and 
   iterations, as well as the observed values.
 }

@@ -17,18 +17,24 @@
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
 
-setDecisionNodes <- function(network, ...){
+setDecisionNodes <- function(network, ...)
+{
   nodes <- as.character(substitute(list(...)))[-1]
-  network$nodeDecision[nodes] <- lapply(network$nodeDecision[nodes], function(x) TRUE)
+  network[["nodeDecision"]][nodes] <- 
+    lapply(X = network[["nodeDecision"]][nodes], 
+           FUN = function(x) TRUE)
   network
 }
 
 #' @rdname setDecisionNodes
 #' @export
 
-setUtilityNodes <- function(network, ...){
+setUtilityNodes <- function(network, ...)
+{
   nodes <- as.character(substitute(list(...)))[-1]
-  network$nodeUtility[nodes] <- lapply(network$nodeUtility[nodes], function(x) TRUE)
+  network[["nodeUtility"]][nodes] <- 
+    lapply(X = network[["nodeUtility"]][nodes], 
+           FUN = function(x) TRUE)
   network
 }
 

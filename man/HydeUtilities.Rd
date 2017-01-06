@@ -4,6 +4,7 @@
 \alias{HydeUtilities}
 \alias{dataframeFactors}
 \alias{decisionOptions}
+\alias{factor_reference}
 \alias{makeFactorRef}
 \alias{makeJagsReady}
 \alias{matchLevelNumber}
@@ -19,7 +20,7 @@ termName(term, reg)
 
 decisionOptions(node, network)
 
-makeJagsReady(mdl, regex, nodes)
+makeJagsReady(mdl, factorRef, bern)
 
 matchLevelNumber(t, lev)
 
@@ -36,6 +37,8 @@ validateParameters(params, dist)
 makeFactorRef(network)
 
 dataframeFactors(dataframe)
+
+factor_reference(data)
 }
 \arguments{
 \item{term}{Usually the \code{term} column from the output of 
@@ -49,9 +52,9 @@ dataframeFactors(dataframe)
 
 \item{mdl}{Output from \code{broom::tidy()}}
 
-\item{regex}{A regular expression, usually returned by \code{factorRegex}}
+\item{factorRef}{A list of data frames mapping factors to levels}
 
-\item{nodes}{A vector of node names, usually passed from \code{network$nodes}.}
+\item{bern}{bernoulli node names.}
 
 \item{t}{Usually the \code{term_name} column generated within 
 \code{makeJagsReady}}
@@ -76,6 +79,8 @@ in the \code{FnName} column of the \code{jagsDists} data object.}
 
 \item{dataframe}{A data frame.  The data frame will be searched for factors and
 a reference table (another data frame) is returned.}
+
+\item{data}{A data frame.}
 }
 \description{
 The functions described below are unexported functions that 

@@ -37,20 +37,26 @@
 #' 
 #' writeNetworkModel(Net, pretty=TRUE)
 
-setNodeModels <- function(network, ...){
-  Check <- ArgumentCheck::newArgCheck()
+setNodeModels <- function(network, ...)
+{
+  coll <- checkmate::makeAssertCollection()
   
   models <- list(...)
   
-  if (length(models) == 0)
-  ArgumentCheck::addError("No objects passed in '...' argument.",
-                          Check)
-  ArgumentCheck::finishArgCheck(Check)
+  if (!length(models))
+  {
+    coll$push("No objects passed in '...' argument.")
+  }
   
-  Attrs <- lapply(models, modelToNode, nodes=network$nodes)
+  checkmate::reportAssertions(coll)
+  
+  Attrs <- lapply(X = models, 
+                  FUN = modelToNode, 
+                  nodes=network[["nodes"]])
   #* assign names to list elements
-  for(i in 1:length(Attrs)){
-    names(Attrs)[i] <- Attrs[[i]]$nodes  
+  for(i in seq_along(Attrs))
+  {
+    names(Attrs)[i] <- Attrs[[i]][["nodes"]]
   }
   
   #* 1. check that network is a HydeNetwork
@@ -58,45 +64,45 @@ setNodeModels <- function(network, ...){
   #* 3. Check that all regression variables are parents of the response
   
   #* 1. check that network is a HydeNetwork
-  if (class(network) != "HydeNetwork")
-  ArgumentCheck::addError("'network' must be of class 'HydeNetwork'",
-                          Check)
+  checkmate::assertClass(x = network,
+                         classes = "HydeNetwork",
+                         add = coll)
   
   #* 2. Check that the response is the name of a node in 'network'
-  if (!all(names(Attrs) %in% network$nodes)){
-    not_nodes <- paste(names(Attrs)[!names(Attrs) %in% network$nodes], collapse=", ")
-    ArgumentCheck::addError(paste0("The following model responses are not nodes in 'network': ",
-                                   not_nodes),
-                            Check)
-  }
+  checkmate::assertSubset(x = names(Attrs),
+                          choices = network[["nodes"]],
+                          add = coll)
   
   #* 3. Check that all regression variables are parents of the response
   equalParents <- rep(NA, length(Attrs))
   names(equalParents) <- names(Attrs)
-  for(i in 1:length(Attrs)){
-    equalParents[i] <- setequal(Attrs[[i]]$parents, network$parents[[names(Attrs)[i]]])
+  for(i in seq_along(Attrs))
+  {
+    equalParents[i] <- setequal(Attrs[[i]][["parents"]], 
+                                network[["parents"]][[names(Attrs)[i]]])
   }
   
   if (!all(equalParents))
-  ArgumentCheck::addError(paste0("The following model independent variables ",
-                                 "are not identical to the node parent list: ",
-                                 paste(names(equalParents)[!equalParents], collapse=", ")),
-                          Check)
+  {
+    coll$push(paste0("The following model independent variables ",
+                     "are not identical to the node parent list: ",
+                     paste(names(equalParents)[!equalParents], collapse=", ")))
+  }
   
-  ArgumentCheck::finishArgCheck(Check)
+  checkmate::reportAssertions(coll)
 
   #* Translate new node features into network object  
   for (i in names(Attrs)){
-    network$parents[[i]] <- Attrs[[i]]$parents
-    network$nodeType[[i]] <- Attrs[[i]]$nodeType
-    network$nodeFormula[[i]] <- Attrs[[i]]$nodeFormula
-    network$nodeFitter[[i]] <- Attrs[[i]]$nodeFitter
-    network$nodeFitterArgs[[i]] <- Attrs[[i]]$nodeFitterArgs
-    network$nodeParams[[i]] <- Attrs[[i]]$nodeParams
-    network$nodeData[[i]] <- Attrs[[i]]$nodeData
-    network$nodeModel[[i]] <- Attrs[[i]]$nodeModel
-    network$factorLevels[[i]] <- Attrs[[i]]$factorLevels
+    network[["parents"]][[i]] <- Attrs[[i]][["parents"]]
+    network[["nodeType"]][[i]] <- Attrs[[i]][["nodeType"]]
+    network[["nodeFormula"]][[i]] <- Attrs[[i]][["nodeFormula"]]
+    network[["nodeFitter"]][[i]] <- Attrs[[i]][["nodeFitter"]]
+    network[["nodeFitterArgs"]][[i]] <- Attrs[[i]][["nodeFitterArgs"]]
+    network[["nodeParams"]][[i]] <- Attrs[[i]][["nodeParams"]]
+    network[["nodeData"]][[i]] <- Attrs[[i]][["nodeData"]]
+    network[["nodeModel"]][[i]] <- Attrs[[i]][["nodeModel"]]
+    network[["factorLevels"]][[i]] <- Attrs[[i]][["factorLevels"]]
   }
 
-  return(network) 
+  network
 }

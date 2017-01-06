@@ -65,54 +65,66 @@
 #' policyMatrix(Net, treat="No", angio = c("No", "Yes"))
 #' 
  
-policyMatrix <- function(network, ..., useDefaultPolicies = TRUE){
-  Check <- ArgumentCheck::newArgCheck()
-  utility_nodes <- names(network$nodeUtility)[sapply(network$nodeUtility,
-                                                     identity)]
+policyMatrix <- function(network, ..., useDefaultPolicies = TRUE)
+{
+  coll <- checkmate::makeAssertCollection()
   
-  decision_nodes <- names(network$nodeDecision)[sapply(network$nodeDecision, 
-                                                       identity)]
+  utility_nodes <- 
+    names(network[["nodeUtility"]])[vapply(X = network[["nodeUtility"]],
+                                         FUN = identity,
+                                         FUN.VALUE = logical(1))]
+  
+  decision_nodes <- 
+    names(network$nodeDecision)[vapply(X = network[["nodeDecision"]], 
+                                       FUN = identity,
+                                       FUN.VALUE = logical(1))]
+  
   decision_nodes <- decision_nodes[!decision_nodes %in% utility_nodes]
   
-  defaultPolicies <- network$nodePolicyValues[decision_nodes]
+  defaultPolicies <- network[["nodePolicyValues"]][decision_nodes]
   
   policies <- list(...)
   policies <- policies[!names(policies) %in% utility_nodes]
   
-  if (length(policies) < 1) return(defaultPolicyMatrix(network))
+  if (!length(policies)) return(defaultPolicyMatrix(network))
   
-  if (!(all(names(policies) %in% network$nodes))){
-    not_in_network <- names(policies)[!names(policies) %in% network$nodes]
-    ArgumentCheck::addError(paste0("The following input nodes do not exist in '",
-                                   substitute(network), "': ",
-                                   paste(not_in_network, collapse=", "), "."),
-                            Check)
-  }
-  
-  ArgumentCheck::finishArgCheck(Check)
+  checkmate::assertSubset(x = names(policies), 
+                          choices = network[["nodes"]],
+                          add = coll)
+
+  checkmate::reportAssertions(coll)
+
   
   if (any(names(policies) %in% names(defaultPolicies))){
-    defaultPolicies <- defaultPolicies[!names(defaultPolicies) %in% names(policies)]
+    defaultPolicies <- 
+      defaultPolicies[!names(defaultPolicies) %in% names(policies)]
   }
   
-  expand.grid(c(policies, defaultPolicies), stringsAsFactors=FALSE)
+  expand.grid(c(policies, defaultPolicies), 
+              stringsAsFactors=FALSE)
 }
 
 #' @rdname policyMatrix
 
-defaultPolicyMatrix <- function(network){
-  Check <- ArgumentCheck::newArgCheck()
-  utility_nodes <- names(network$nodeUtility)[sapply(network$nodeUtility,
-                                                     identity)]
+defaultPolicyMatrix <- function(network)
+{
+  coll <- checkmate::makeAssertCollection()
+
+  utility_nodes <- 
+    names(network[["nodeUtility"]])[vapply(X = network[["nodeUtility"]],
+                                           FUN = identity,
+                                           FUN.VALUE = logical(1))]
   
-  decision_nodes <- names(network$nodeDecision)[sapply(network$nodeDecision, 
-                                                       identity)]
+  decision_nodes <- 
+    names(network[["nodeDecision"]])[vapply(X = network[["nodeDecision"]], 
+                                            FUN = identity,
+                                            FUN.VALUE = logical(1))]
   
   decision_nodes <- decision_nodes[!decision_nodes %in% utility_nodes]
   
-  if (length(decision_nodes) == 0)
-  ArgumentCheck::addError(paste0("There are no decision nodes in '", substitute(network), "'."),
-                          Check)
+  if (!length(decision_nodes))
+    coll$push(paste0("There are no decision nodes in '", 
+                     substitute(network), "'."))
   
   decision_options <- lapply(decision_nodes, policyMatrixValues, network)
   names(decision_options) <- decision_nodes
