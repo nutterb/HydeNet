@@ -1,5 +1,9 @@
+This update fixes errors introduced with `DiagrammeR` 0.9.0
+
 ## Test environments
-* win-builder (devel[2016-07-08 r70868] and release)
+* win-builder (release)
+* local windows install R 3.3.2
+* local windows install R-devel 2017-01-05 r71919
 
 ## R CMD check results
 
