@@ -21,8 +21,7 @@ Description: Facilities for easy implementation of hybrid Bayesian networks
 License: MIT + file LICENSE
 Depends:
     R (>= 3.0.0),
-    nnet,
-    rjags
+    nnet
 Imports:
     checkmate,
     DiagrammeR (>= 0.9.0),
@@ -32,6 +31,7 @@ Imports:
     gRbase,
     magrittr,
     pixiedust (>= 0.6.1),
+    rjags,
     stats,
     stringr,
     utils

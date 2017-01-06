@@ -11,8 +11,6 @@ lhs \%$\% rhs
 }
 \arguments{
 \item{lhs, rhs}{A dataset and function to apply to it}
-
-\item{lhs, rhs}{A dataset and function to apply to it}
 }
 \description{
 This is a copy of the documentation for \code{\%>\%} in 

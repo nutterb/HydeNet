@@ -52,6 +52,10 @@ factor_reference(data)
 
 \item{mdl}{Output from \code{broom::tidy()}}
 
+\item{factorRef}{A list of data frames mapping factors to levels}
+
+\item{bern}{bernoulli node names.}
+
 \item{t}{Usually the \code{term_name} column generated within 
 \code{makeJagsReady}}
 

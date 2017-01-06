@@ -1,6 +1,5 @@
 #' @name compileJagsModel
 #' @export compileJagsModel
-#' @import rjags
 #' 
 #' @title Compile Jags Model from a Hyde Network
 #' @description Generates the JAGS code from the Hyde network and uses it to 
@@ -47,6 +46,7 @@
 #' #* For a single model (ie, not a decision model), the user may choose to 
 #' #* use the \code{rjags} function \code{coda.samples}.
 #' #* However, this does not have a succinct print method
+#' library(rjags)
 #' s <- coda.samples(compiledNet$jags, 
 #'                   variable.names = c("d.dimer", "death"), 
 #'                   n.iter=1000)

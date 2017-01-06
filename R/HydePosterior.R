@@ -86,7 +86,7 @@ HydePosterior <- function(cHN, variable.names, n.iter, thin=1, ...,
   
   if (class(cHN$jags) == "jags")
   {
-    codas <- coda.samples(model = cHN[["jags"]], 
+    codas <- rjags::coda.samples(model = cHN[["jags"]], 
                           variable.names = variable.names, 
                           n.iter = n.iter, 
                           thin = thin, 

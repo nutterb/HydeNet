@@ -12,6 +12,7 @@
 #'   
 #' @param fit a model object
 #' @param nodes a vector of node names, usually passed from \code{network$nodes}
+#' @param bern a vector of bernoulli node names
 #' @param ... Additional arguments to be passed to other methods
 #' 
 #' @details Methods for different model objects can be written so that 
@@ -80,7 +81,7 @@ writeJagsFormula.glm <- function(fit, nodes, bern = bern, ...)
   regex <- factorRegex(fit)
   
   mdl <- makeJagsReady(mdl, 
-                       factorRef = factor_reference(model.frame(fit)),
+                       factorRef = factor_reference(stats::model.frame(fit)),
                        bern = bern) %>%
     mutate(term_plain = gsub(pattern = ":", 
                              replacement = "*", 
@@ -128,7 +129,7 @@ writeJagsFormula.lm <- function(fit, nodes, bern, ...)
   regex <- factorRegex(fit)
   
   mdl <- makeJagsReady(mdl, 
-                       factorRef = factor_reference(model.frame(fit)),
+                       factorRef = factor_reference(stats::model.frame(fit)),
                        bern = bern) %>%
     mutate(term_plain = gsub(pattern = ":", 
                              replacement = "*", 
@@ -162,7 +163,7 @@ writeJagsFormula.multinom <- function(fit, nodes, bern = bern, ...)
     as.data.frame(sprinkled = FALSE)
   
   mdl <- makeJagsReady(mdl, 
-                       factorRef = factor_reference(model.frame(fit)),
+                       factorRef = factor_reference(stats::model.frame(fit)),
                        bern = bern)
   mdl <- dplyr::arrange(mdl, y.level, term_plain)
 
@@ -208,7 +209,7 @@ writeJagsFormula.multinom <- function(fit, nodes, bern = bern, ...)
 #' @rdname writeJagsFormula
 #' @export
 
-writeJagsFormula.survreg <- function(fit, bern = bern, ...)
+writeJagsFormula.survreg <- function(fit, ..., bern = bern)
 {
   mdl <- pixiedust::dust(fit, descriptors = c("term", "term_plain", "level")) %>%
     as.data.frame(sprinkled = FALSE)
@@ -216,7 +217,7 @@ writeJagsFormula.survreg <- function(fit, bern = bern, ...)
   regex <- factorRegex(fit)
   
   mdl <- makeJagsReady(mdl, 
-                       factorRef = factor_reference(model.frame(fit)),
+                       factorRef = factor_reference(stats::model.frame(fit)),
                        bern = bern) %>%
     dplyr::mutate(term_plain = gsub(pattern = ":", 
                                     replacement = "*", 
@@ -280,4 +281,4 @@ writeJagsFormula.xtabs <- function(fit, ...)
   return(pi)
 }
 
-utils::globalVariables(c("term_plain", "."))
+utils::globalVariables(c("term_plain", ".", "y.level"))

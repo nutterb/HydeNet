@@ -142,6 +142,8 @@ decisionOptions <- function(node, network)
 
 #' @rdname HydeUtilities 
 #' @param mdl Output from \code{broom::tidy()}
+#' @param factorRef A list of data frames mapping factors to levels
+#' @param bern bernoulli node names.
 
 makeJagsReady <- function(mdl, factorRef, bern)
 {
@@ -411,3 +413,5 @@ factor_reference <- function(data)
   
   Ref[!vapply(Ref, is.null, logical(1))]
 }
+
+utils::globalVariables("level")
