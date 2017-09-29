@@ -55,6 +55,7 @@ The manipulations are performed on the \code{nodeParams} element
   estimating them from the data.
 }
 \examples{
+\dontrun{
 #* NOTE: writeJagsModel isn't an exported function
 data(PE, package='HydeNet')
 Net <- HydeNetwork(~ wells + 
@@ -66,6 +67,7 @@ Net <- HydeNetwork(~ wells +
                      data = PE)
 HydeNet:::writeJagsModel(Net, 'pe')
 HydeNet:::writeJagsModel(Net, 'treat')
+}
 
 }
 \author{

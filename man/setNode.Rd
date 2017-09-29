@@ -21,8 +21,9 @@ fromFormula()
 
 \item{node}{A node within \code{network}.  This does not have to be quoted.}
 
-\item{nodeType}{a valid distribution function from JAGS.  See the data set
-in \code{data(jagsDists)} for a complete list.}
+\item{nodeType}{a valid distribution.  See the data set
+in \code{data(jagsDists)} for a complete list of available distributions.
+See "Choosing a Node Type"}
 
 \item{nodeFitter}{the fitting function, such as \code{lm} or \code{glm}.  This
 will probably only be needed when \code{fromData = TRUE}.}
@@ -32,9 +33,7 @@ node and its parents.  It must use as a term every parent of \code{node}. This f
 will be pushed through the unexported function \code{factorFormula}.  See
 "Coding Factor Levels" for more details.}
 
-\item{fitterArgs}{Additional arguments to be passed to \code{fitter}.  This does not 
-yet have any effect as I haven't yet decided out where to store this and 
-how to implement the fitting.}
+\item{fitterArgs}{Additional arguments to be passed to \code{fitter}.}
 
 \item{decision}{A value of either \code{"current"} or a logical value.
 If \code{"current"}, the current value of the setting is retained.  This allows 
@@ -63,7 +62,7 @@ from the data object in \code{network}.  Defaults to \code{TRUE} whenever
 
 \item{...}{parameters to be passed to the JAGS distribution function.  Each parameter
 in the distribution function must be named.  For 
-example, the parameters to pass to \code{dnorm} would be \code{mu='', tau=''}.
+example, the parameters to pass to \code{dnorm} would be \code{mean='', sd=''}.
 The required parameters can be looked up using the 
 \code{expectedParameters} function.  If parameters are to be estimated 
 from the data, the functions \code{fromData} and \code{fromFormula} may 
@@ -103,6 +102,9 @@ values are provided, \code{policyMatrix} and \code{compileDecisionModel}
 are likely to return errors when they are called.  Policy values may
 also be set with \code{setPolicyValues} after a network has been defined.}
 }
+\value{
+Returns the modified \code{HydeNetwork} object.
+}
 \description{
 The relationship between a node and its parents must be defined
   before the appropriate JAGS model statement can be constructed.  
@@ -126,6 +128,25 @@ The functions \code{fromFormula()} and \code{fromData()} help to control
   will cause the model to be fit and the JAGS code for the parameters to be
   stored in the \code{nodeParams} attribute.
 }
+\section{Choosing a Node Type}{
+
+Many of the distribution functions defined in JAGS have an equivalen 
+distribution function in R.  You may inspect the \code{jagsDists} data
+frame to see the function names in each language.  You may specify 
+the distribution function using the R name and it will be translated
+to the equivalent JAGS function.  
+
+You may still use the JAGS names, which allows you to specify a 
+distribution in JAGS that does not have an R equivalent listed. Note,
+however, that where R functions are supported, \code{HydeNet} anticipates
+the parameter names to be given following R conventions (See 
+the \code{RParameter} column of \code{jagsDists}.)
+
+Of particular interest are \code{dbern} and \code{dcat}, which are
+functions in JAGS that have no immediate equivalent in R. They provide
+Bernoulli and Multinomial distributions, respectively.
+}
+
 \section{Coding Factor Levels}{
 
 The \code{nodeFormula} argument will accept any valid R formula.  If desired, you 
@@ -178,7 +199,7 @@ Net <- HydeNetwork(~ wells +
 print(Net, d.dimer)
 
 #* Manually change the precision
-Net <- setNode(Net, d.dimer, nodeType='dnorm', mu=fromFormula(), tau=1/2.65, 
+Net <- setNode(Net, d.dimer, nodeType='dnorm', mean=fromFormula(), sd=sqrt(2.65), 
                   nodeFormula = d.dimer ~ pregnant * pe,
                   nodeFitter='lm')
 print(Net, d.dimer)

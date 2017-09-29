@@ -1,4 +1,4 @@
-context("print.HydePosterior")
+context("print.HydeSim")
 
 data(PE, package="HydeNet")
 Net <- HydeNetwork(~ wells +
@@ -10,9 +10,9 @@ Net <- HydeNetwork(~ wells +
                    data = PE)
 compiledNet <- compileJagsModel(Net, n.chains=5, data = list(pe = "Yes"))
 
-test_that("print.HydePosterior with observed values",
+test_that("print.HydeSim with observed values",
 {
-  expect_output(print(HydePosterior(compiledNet, 
+  expect_output(print(HydeSim(compiledNet, 
                                     variable.names = c("wells", "death"),
                                     n.iter = 100, bind = FALSE)))
 })

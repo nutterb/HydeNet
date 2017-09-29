@@ -317,7 +317,7 @@ compiledNet <- compileJagsModel(net, data = evidence,
                                 n.chains = 3,
                                 n.adapt = 5000)
 
-post <- HydePosterior(compiledNet,
+post <- HydeSim(compiledNet,
                       variable.names = trackedVars,
                       n.iter=10000)
 
@@ -345,7 +345,7 @@ policies <- data.frame(hit1 = c(0,1,1,1),
 
 (Note: we have included a convenience function called `policyMatrix()` when all combinations of decision node values are of interest. This function is a wrapper for `expand.grid()`; see `help(policyMatrix)` for details.)
 
-In the MEU analysis, the goal is to characterize the distribution of utility under the competing policies. This amounts to sampling posterior distributions of utility nodes under varying sets of values for the decision nodes. In `HydeNet`, this is done by 1) using the function `compileDecisionModel()` to create a list of `compiledHydeNetwork` objects (one object corresponding to each policy); 2) feeding that list to `HydePosterior()` to get a list of `coda.samples` objects; and finally 3) feeding the list of `coda.samples` objects to `bindPosterior()` to get a single posterior sample matrix for each policy:
+In the MEU analysis, the goal is to characterize the distribution of utility under the competing policies. This amounts to sampling posterior distributions of utility nodes under varying sets of values for the decision nodes. In `HydeNet`, this is done by 1) using the function `compileDecisionModel()` to create a list of `compiledHydeNetwork` objects (one object corresponding to each policy); 2) feeding that list to `HydeSim()` to get a list of `coda.samples` objects; and finally 3) feeding the list of `coda.samples` objects to `bindPosterior()` to get a single posterior sample matrix for each policy:
 
 ```{r, echo=FALSE}
 set.seed(39482820)
@@ -355,7 +355,7 @@ set.seed(39482820)
 compiledNets <- compileDecisionModel(net, policyMatrix = policies)
 
 samples <- lapply(compiledNets,
-                  HydePosterior,
+                  HydeSim,
                   variable.names = trackedVars,
                   n.iter=10000)
 

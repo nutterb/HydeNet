@@ -84,7 +84,7 @@ There are many options for manual specification of node distributions. Please re
 
 ### Network Visualization
 
-We have implemented a plot method for `HydeNetwork` objects, using the [`DiagrammeR`](http://cran.r-project.org/package=DiagrammeR) library by Richard Iannone et al. While not implemented in this simple example, there are different default node shapes and colors for random variable nodes, deterministic nodes, decision nodes and utility nodes. See our **"Building and Customizing HydeNet Plots"** vignette (`vignette("HydeNetPlots", package = "HydeNet")`)for details on customization.
+We have implemented a plot method for `HydeNetwork` objects, using the [`DiagrammeR`](https://CRAN.R-project.org/package=DiagrammeR) library by Richard Iannone et al. While not implemented in this simple example, there are different default node shapes and colors for random variable nodes, deterministic nodes, decision nodes and utility nodes. See our **"Building and Customizing HydeNet Plots"** vignette (`vignette("HydeNetPlots", package = "HydeNet")`)for details on customization.
 
 ```{r, fig.width = 5, eval=FALSE}
 plot(carNet)
@@ -184,7 +184,7 @@ autoNet <- HydeNetwork(~ wells
                        data = PE)
 autoNet <- setNode(autoNet, treat,
                    nodeFormula = treat ~ poly(d.dimer, 2) + angio,
-                   p = fromData())
+                   prob = fromData())
 ```
 ```{r, echo=FALSE}
 print(autoNet, treat)
@@ -206,7 +206,7 @@ autoNet <- HydeNetwork(~ wells
                        data = PE)
 autoNet <- setNode(autoNet, treat,
                    nodeFormula = treat ~ poly(d.dimer, 2) + angio,
-                   p = fromData())
+                   prob = fromData())
 print(autoNet, treat)
 ```
 

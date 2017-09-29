@@ -13,7 +13,7 @@ factorRegex(fit)
 A utility function to produce a regular expression that can
   separate factor names and factor levels in the \code{broom::tidy()$term}
   output.  At some point, this may have to become a method to accomodate
-  different model types, but I haven't run into that problem yet.
+  different model types.
 }
 \examples{
 data(PE, package = "HydeNet")

@@ -6,7 +6,7 @@
 #' 
 #' @title Hyde Network Utility Functions 
 #' @description The functions described below are unexported functions that 
-#'   are used internally by \code{HydeNet} to prepare modify network objects
+#'   are used internally by \code{HydeNet} to prepare and modify network objects
 #'   and prepare JAGS code.
 #'   
 #' @details 
@@ -25,7 +25,7 @@
 #'   
 #'   \code{matchLevelNumber}: Assigns the correct numeric value of a level to 
 #'   a factor variable in a model.  This is called from within 
-#'   \code{makeJagsRead}.
+#'   \code{makeJagsReady}.
 #'   
 #'   \code{matchVars}: Given a list of existing node names, the terms of a formula
 #'   are matched to the node names.  This allows functions to be used in 

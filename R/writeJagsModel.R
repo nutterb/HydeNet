@@ -26,6 +26,7 @@
 #' @seealso \code{\link{writeJagsFormula}}
 #' 
 #' @examples
+#' \dontrun{
 #' #* NOTE: writeJagsModel isn't an exported function
 #' data(PE, package='HydeNet')
 #' Net <- HydeNetwork(~ wells + 
@@ -37,6 +38,7 @@
 #'                      data = PE)
 #' HydeNet:::writeJagsModel(Net, 'pe')
 #' HydeNet:::writeJagsModel(Net, 'treat')
+#' }
 #' 
 
 

@@ -23,7 +23,7 @@ When working in R, it is often more convenient to work in
 It is assumed that factor variables will be used in logical
   comparisons of the format \code{[variable_name] == '[factor_level]'} and
   only this pattern is recognized in the text search.  Single or 
-  double quotes may be used around the level, and the spaces aroudn the
+  double quotes may be used around the level, and the spaces around the
   \code{==} are optional.  
   
   While there are certainly limitations to this function that we have

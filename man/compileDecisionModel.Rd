@@ -42,7 +42,7 @@ Nodes at which a decision can be made, such as the decision to
   decision options are extracted from the JAGS statement returned by 
   \code{writeJagsModel}.
   
-  The options for each decision nodes (if there are multiple nodes) are 
+  The options for each decision node (if there are multiple nodes) are 
   combined via \code{expand.grid} to make a table of all possible decisions.
   Each row of this table is passed as a list to the \code{data} argument 
   of \code{jags.model} (via \code{compileJagsModel}) and a list of JAGS

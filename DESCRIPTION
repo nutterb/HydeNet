@@ -37,6 +37,7 @@ Imports:
     utils
 Suggests:
     knitr,
+    RCurl,
     survival,
     testthat
 VignetteBuilder: knitr

@@ -8,7 +8,7 @@
 \alias{mergeCustomNodes}
 \alias{plot.HydeNetwork}
 \alias{plotHydeNetwork}
-\title{Plotting Utilities Probabilistic Graphical Network}
+\title{Plotting Utilities for Probabilistic Graphical Network}
 \source{
 \url{http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html}\cr
   See especially the section on Attributes
@@ -70,7 +70,6 @@ defaults node attribute settings for each variable type.}
 \item{restorePackageDefaults}{A logical value.  When TRUE, the original 
 package defaults are restored.}
 }
-
 \description{
 Generate and customize plots of a \code{HydeNetwork} 
   class network. \code{HydeNet} provides some initial defaults for standard 
@@ -81,30 +80,6 @@ Generate and customize plots of a \code{HydeNetwork}
   by invoking \code{HydePlotOptions}.  Node attributes are more fully 
   explained in the documentation for the \code{DiagrammeR} package.  
   Individual nodes may be define with \code{customNode}.
-
-GraphViz is an enormous set of resources for customizing and we 
-  cannot adequately describe them all here.  See 'Sources' for links 
-  to additional documentation from the \code{DiagrammeR} package and the 
-  GraphViz website.
-  
-  With its default settings, \code{HydeNet} makes use of five node 
-  attributes for plotting networks.  These are 
-  \itemize{
-    \item style: By default, set to 'filled', but may also take 'striped',
-      'wedged', or 'radial'.
-    \item fillcolor: The hexadecimal or X11 color name.  In styles 'striped',
-      'wedged', or 'radial', this may take multiple colors separated by a 
-      colon (:).
-    \item shape: the node shape.  May take the values 'oval', 'diamond',
-      'egg', 'ellipse', 'square', 'triangle', or 'rect'
-    \item fontcolor: The color of the node label.
-    \item color: The color of the node's border.
-   }
-   
-  \code{HydeNet} assumes the GraphViz defaults for edge nodes (arrows).
-  
-  See the Plotting Hyde Networks vignette (\code{vignette("HydeNetPlots")})
-  for a more thorough explanation of plotting networks.
 }
 \details{
 GraphViz is an enormous set of resources for customizing and we 

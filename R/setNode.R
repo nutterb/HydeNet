@@ -11,17 +11,16 @@
 #'   
 #' @param network A \code{HydeNetwork}.
 #' @param node A node within \code{network}.  This does not have to be quoted.
-#' @param nodeType a valid distribution function from JAGS.  See the data set
-#'   in \code{data(jagsDists)} for a complete list.
+#' @param nodeType a valid distribution.  See the data set
+#'   in \code{data(jagsDists)} for a complete list of available distributions.
+#'   See "Choosing a Node Type"
 #' @param nodeFitter the fitting function, such as \code{lm} or \code{glm}.  This
 #'   will probably only be needed when \code{fromData = TRUE}.
 #' @param nodeFormula A formula object specifying the relationship between a 
 #'   node and its parents.  It must use as a term every parent of \code{node}. This formula 
 #'   will be pushed through the unexported function \code{factorFormula}.  See
 #'   "Coding Factor Levels" for more details.
-#' @param fitterArgs Additional arguments to be passed to \code{fitter}.  This does not 
-#'   yet have any effect as I haven't yet decided out where to store this and 
-#'   how to implement the fitting.
+#' @param fitterArgs Additional arguments to be passed to \code{fitter}.  
 #' @param decision A value of either \code{"current"} or a logical value.  
 #'   If \code{"current"}, the current value of the setting is retained.  This allows 
 #'   decision nodes set by \code{setDecisionNode} to retain the classification as a 
@@ -46,7 +45,7 @@
 #'   \code{network} has a data object.
 #' @param ... parameters to be passed to the JAGS distribution function.  Each parameter
 #'   in the distribution function must be named.  For 
-#'   example, the parameters to pass to \code{dnorm} would be \code{mu='', tau=''}.
+#'   example, the parameters to pass to \code{dnorm} would be \code{mean='', sd=''}.
 #'   The required parameters can be looked up using the 
 #'   \code{expectedParameters} function.  If parameters are to be estimated 
 #'   from the data, the functions \code{fromData} and \code{fromFormula} may 
@@ -96,6 +95,26 @@
 #'   (especially if you are working interactively).  Using \code{fitModel=TRUE} 
 #'   will cause the model to be fit and the JAGS code for the parameters to be
 #'   stored in the \code{nodeParams} attribute.
+#'   
+#' @return 
+#' Returns the modified \code{HydeNetwork} object.
+#'   
+#' @section Choosing a Node Type:
+#' Many of the distribution functions defined in JAGS have an equivalen 
+#' distribution function in R.  You may inspect the \code{jagsDists} data
+#' frame to see the function names in each language.  You may specify 
+#' the distribution function using the R name and it will be translated
+#' to the equivalent JAGS function.  
+#' 
+#' You may still use the JAGS names, which allows you to specify a 
+#' distribution in JAGS that does not have an R equivalent listed. Note,
+#' however, that where R functions are supported, \code{HydeNet} anticipates
+#' the parameter names to be given following R conventions (See 
+#' the \code{RParameter} column of \code{jagsDists}.)
+#' 
+#' Of particular interest are \code{dbern} and \code{dcat}, which are
+#' functions in JAGS that have no immediate equivalent in R. They provide
+#' Bernoulli and Multinomial distributions, respectively.
 #'   
 #' @section Coding Factor Levels:
 #' The \code{nodeFormula} argument will accept any valid R formula.  If desired, you 
@@ -148,7 +167,7 @@
 #' print(Net, d.dimer)
 #' 
 #' #* Manually change the precision
-#' Net <- setNode(Net, d.dimer, nodeType='dnorm', mu=fromFormula(), tau=1/2.65, 
+#' Net <- setNode(Net, d.dimer, nodeType='dnorm', mean=fromFormula(), sd=sqrt(2.65), 
 #'                   nodeFormula = d.dimer ~ pregnant * pe,
 #'                   nodeFitter='lm')
 #' print(Net, d.dimer)
@@ -215,11 +234,26 @@ setNode <- function(network, node, nodeType,
   exp_param <- eval(substitute(expectedParameters(network = network, 
                                                   node = node, 
                                                   returnVector = TRUE)))
+
   params <- list(...)[exp_param]
+  
+  # JAGS dnorm expects tau = 1/variance.  
+  # HydeNet accepts sd, so we need to transform this.
+  if (nodeType == "dnorm")
+  {
+    if ("sd" %in% names(params)) 
+      if (is.numeric(params[["sd"]]))
+        params[["sd"]] <- 1 / params[["sd"]]^2
+  }
   
   checkmate::assertSubset(x = exp_param,
                           choices = names(params),
                           add = coll)
+  orig_names <- names(params)
+  
+  names(params) <- 
+    jagsDists[["Parameters"]][jagsDists$FnName == nodeType & 
+                                jagsDists$RParameter %in% names(params)]
   
   if (validate){
     valid <- validateParameters(params, network[["nodeType"]][[node.t]]) 
@@ -234,7 +268,7 @@ setNode <- function(network, node, nodeType,
     if (!all(valid))
     {
       not_valid <- which(!valid)
-      msg <- paste0("Please define ", names(params)[not_valid], " such that ", names(valid)[not_valid], 
+      msg <- paste0("Please define ", orig_names[not_valid], " such that ", names(valid)[not_valid], 
                     " (or use validate=FALSE).")
       msg <- paste(msg, collapse="\n")
       coll$push(msg)
@@ -254,7 +288,6 @@ setNode <- function(network, node, nodeType,
                             choices = "determ",
                             add = coll)
     
-
     if (any(sapply(X = network$parents, 
                    FUN = function(p, t) t %in% p, node.t)))
     coll$push("Utility nodes may not have children.")
@@ -285,7 +318,7 @@ setNode <- function(network, node, nodeType,
   {
     network[["nodeData"]][[node.t]] <- nodeData
   }
- 
+
   if (!is.null(factorLevels))
   {
     nodeFitter <- 

@@ -29,19 +29,19 @@
 #'   enforced.  Thus, it is possible to include numeric values in a decision 
 #'   matrix.
 #'   
-#'   Policy matrices can be passed to \code{HydePosterior} to run posterior 
+#'   Policy matrices can be passed to \code{HydeSim} to run posterior 
 #'   distributions on each row of the policy matrix.  There is nothing 
 #'   particularly special about the policy matrices returned by 
 #'   \code{policyMatrix}; they are simply data frame that require names drawn
 #'   from the nodes in the network.  Any data frame can be passed to 
-#'   \code{HydePosterior} and a check is done there to confirm all of the 
+#'   \code{HydeSim} and a check is done there to confirm all of the 
 #'   column names match a node in the network.
 #'   
 #'   Whenever a node is identified as a deterministic node, its policy values
 #'   are forced to \code{NULL}, regardless of what the user has specified.
 #'   
 #' @return Returns a data frame built by \code{expand.grid} and intended to be
-#'   used with \code{HydePosterior}.
+#'   used with \code{HydeSim}.
 #'   
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
