@@ -4,8 +4,7 @@
 #' @title Produce Regular Expressions for Extracting Factor Names and Levels
 #' @description A utility function to produce a regular expression that can
 #'   separate factor names and factor levels in the \code{broom::tidy()$term}
-#'   output.  At some point, this may have to become a method to accomodate
-#'   different model types.
+#'   output.
 #'   
 #' @param fit a model object
 #' 

@@ -20,8 +20,7 @@
 #' \code{returnVector} will generally be set to \code{FALSE} for most uses, 
 #' but can be set to \code{TRUE} for use in error checking.  For example, 
 #' in \code{setNode}, if not all of the parents have been given a coefficient 
-#' (or if too few coefficients have been given), the vector of names is usually
-#' more useful for giving informative error messages.
+#' (or if too few coefficients have been given), the vector of names is supplied.
 #' 
 #' @author Jarrod Dalton and Benjamin Nutter
 #' @examples

@@ -33,10 +33,6 @@
 #'   convenience in displaying the network), and \code{factorRef} (giving the
 #'   mappings of factor levels to factor variables).  
 #'   
-#'   The only rationale for giving this object its own class was because it 
-#'   produces an enormous amount of material to be printed.  A distinct 
-#'   \code{print} method has been written for this object.
-#'   
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
 #' @examples

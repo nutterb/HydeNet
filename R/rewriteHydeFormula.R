@@ -8,9 +8,7 @@
 #' @title Rewrite HydeNetwork Graph Model Formula
 #' @description This is a convenience function used to assist in the updating 
 #'   of \code{HydeNetwork} network objects.  It makes it possible to add and 
-#'   subtract individual parent relationships without deleting an entire node.   
-#'   It's still a work in progress; please report bugs and errors to the 
-#'   package maintainer.
+#'   subtract individual parent relationships without deleting an entire node. 
 #'   
 #' @param old_form The current formula in a \code{HydeNetwork} object.
 #' @param new_form The formula specifications to be added
