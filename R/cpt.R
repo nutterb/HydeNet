@@ -136,7 +136,7 @@ cpt.list <- function(x, data, wt, ...)
 
 #******** UNEXPORTED FUNCTION
 cpt_workhorse <- function(variables, dependentVar, independentVars,
-                          data, wt, ...)
+                          data, wt, na.rm=FALSE, ...)
 {
   wt_text <- 
     if (missing(wt))
@@ -162,14 +162,24 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
 
   checkmate::assertDataFrame(data)
   
-  n <- nrow(data)
-  
   checkmate::assertSubset(variables, 
                           choices = names(data))
   
   lapply(data[, variables],
          checkmate::assertFactor,
          add = coll)
+  
+  vars  <- c(dependentVar, independentVars)  
+  
+  #check for NAs, remove if the user wants
+  completeData <- data %>% dplyr::filter(complete.cases(.))
+  if((nrow(data) != nrow(completeData)) * !na.rm){
+    coll$push("Missing values in the supplied variable(s). See help('cpt')")
+  }
+  checkmate::reportAssertions(coll)
+  
+  data <- completeData
+  n <- nrow(data)
 
   if(missing(wt)) 
   {
@@ -213,7 +223,6 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   
   checkmate::reportAssertions(coll)
   
-  vars  <- c(dependentVar, independentVars)  
   ..vars <- lapply(X = vars, 
                    FUN = as.symbol)
   ..independentVars <- lapply(X = independentVars, 
@@ -221,6 +230,7 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   
   data     <- dplyr::bind_cols(dplyr::tbl_df(data[,vars]),
                                dplyr::tbl_df(data.frame(wt = wt)))
+  
   
   joint <- 
     data %>% 
