@@ -172,7 +172,7 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   vars  <- c(dependentVar, independentVars)  
   
   #check for NAs, remove if the user wants
-  completeData <- data %>% dplyr::filter(complete.cases(.))
+  completeData <- data %>% dplyr::filter(stats::complete.cases(.))
   if((nrow(data) != nrow(completeData)) * !na.rm){
     coll$push("Missing values in the supplied variable(s). See help('cpt')")
   }

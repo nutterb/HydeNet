@@ -38,11 +38,7 @@ A list of class \code{HydeSim} with elements \code{codas}
   (the MCMC matrices from \code{coda.samples}), \code{observed} (the values
   of the variables that were observed), \code{dag} (the dag object for 
   convenience in displaying the network), and \code{factorRef} (giving the
-  mappings of factor levels to factor variables).  
-  
-  The only rationale for giving this object its own class was because it 
-  produces an enormous amount of material to be printed.  A distinct 
-  \code{print} method has been written for this object.
+  mappings of factor levels to factor variables).
 }
 \description{
 The simulated distributions of the decision network can be 

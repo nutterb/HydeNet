@@ -155,7 +155,7 @@ plot(BlackJack,
 `HydeNet` is a tool to assist in generating and evaluating hybrid decision networks.  Displaying the network is an important aspect of communicating the relationships established by your network.  The `HydeNet` plotting tools provide the basic functionality needed to express both generic and customized plots suitable for sharing and evaluating network models.
 
 ```{r, include = FALSE}
-if (!RCurl::url.exists("http://www.graphviz.org/About.php"))
+if (!RCurl::url.exists("http://www.graphviz.org/about"))
 {
   stop("Graphviz link does not exist. Find a new link")
 }

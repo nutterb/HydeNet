@@ -61,8 +61,7 @@
 #'   \url{http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html}\cr
 #'   See especially the section on Attributes
 #'   
-#'   \url{http://graphviz.org/}\cr
-#'   \url{http://graphviz.org/content/attrs}
+#'   \url{http://graphviz.org/}
 #' 
 #' @examples
 #' \dontrun{
