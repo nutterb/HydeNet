@@ -120,7 +120,7 @@ HydeSim <- function(cHN, variable.names, n.iter, thin=1, ...,
   class(HydePost) <- "HydeSim"
   if (bind)
   {
-    bindPosterior(HydePost)
+    bindSim(HydePost)
   }
   else 
   {
