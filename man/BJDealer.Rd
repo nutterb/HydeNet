@@ -26,4 +26,3 @@ cards; only one of the dealer's cards is shown, and this is called
 the "upcard")
 }
 \keyword{datasets}
-

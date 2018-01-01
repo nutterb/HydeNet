@@ -29,4 +29,3 @@ vectorProbs(c(1, 2, 3), "wells")
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

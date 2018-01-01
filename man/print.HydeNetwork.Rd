@@ -43,4 +43,3 @@ print(Net, d.dimer)
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

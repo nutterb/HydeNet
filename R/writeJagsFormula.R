@@ -83,7 +83,7 @@ writeJagsFormula.glm <- function(fit, nodes, bern = bern, ...)
   mdl <- makeJagsReady(mdl, 
                        factorRef = factor_reference(stats::model.frame(fit)),
                        bern = bern) %>%
-    mutate(term_plain = gsub(pattern = ":", 
+    dplyr::mutate(term_plain = gsub(pattern = ":", 
                              replacement = "*", 
                              x = term_plain))
   
@@ -131,7 +131,7 @@ writeJagsFormula.lm <- function(fit, nodes, bern, ...)
   mdl <- makeJagsReady(mdl, 
                        factorRef = factor_reference(stats::model.frame(fit)),
                        bern = bern) %>%
-    mutate(term_plain = gsub(pattern = ":", 
+    dplyr::mutate(term_plain = gsub(pattern = ":", 
                              replacement = "*", 
                              x = term_plain))
   

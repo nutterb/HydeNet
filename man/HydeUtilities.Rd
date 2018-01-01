@@ -2,18 +2,18 @@
 % Please edit documentation in R/HydeUtilities.R
 \name{HydeUtilities}
 \alias{HydeUtilities}
-\alias{dataframeFactors}
+\alias{termName}
 \alias{decisionOptions}
-\alias{factor_reference}
-\alias{makeFactorRef}
 \alias{makeJagsReady}
 \alias{matchLevelNumber}
 \alias{matchVars}
 \alias{nodeFromFunction}
 \alias{policyMatrixValues}
 \alias{polyToPow}
-\alias{termName}
 \alias{validateParameters}
+\alias{makeFactorRef}
+\alias{dataframeFactors}
+\alias{factor_reference}
 \title{Hyde Network Utility Functions}
 \usage{
 termName(term, reg)
@@ -135,4 +135,3 @@ The functions described below are unexported functions that
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

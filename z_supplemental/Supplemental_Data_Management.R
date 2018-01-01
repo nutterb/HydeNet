@@ -10,14 +10,14 @@ write.csv(PE, "C:/Users/nutterb/Documents/GitHub/HydeNet/z_supplemental/PE.csv",
           na="", row.names=FALSE)
 
 #* Read in edited data files
-jagsDists <- read.csv("C:/Users/Nutter/Documents/GitHub/HydeNet/z_supplemental/jagsDists.csv",
+jagsDists <- read.csv("/home/benjamin/GitHub/HydeNet/z_supplemental/jagsDists.csv",
          stringsAsFactors=FALSE)
-jagsFunctions <- read.csv("C:/Users/Nutter/Documents/GitHub/HydeNet/z_supplemental/jagsFunctions.csv",
+jagsFunctions <- read.csv("/home/benjamin/GitHub/HydeNet/z_supplemental/jagsFunctions.csv",
           stringsAsFactors=FALSE)
-PE <- read.csv("C:/Users/Nutter/Documents/GitHub/HydeNet/z_supplemental/PE.csv",
+PE <- read.csv("/home/benjamin/GitHub/HydeNet/z_supplemental/PE.csv",
           stringsAsFactors=FALSE)
 
 #* Save the data files as package resources
-save(jagsDists, file="C:/Users/Nutter/Documents/GitHub/HydeNet/data/jagsDists.Rdata")
-save(jagsFunctions, file="C:/Users/Nutter/Documents/GitHub/HydeNet/data/jagsFunctions.Rdata")
-save(jagsDists, jagsFunctions, file="C:/Users/Nutter/Documents/GitHub/HydeNet/R/sysdata.Rda")
+save(jagsDists, file="/home/benjamin/GitHub/HydeNet/data/jagsDists.RData")
+save(jagsFunctions, file="/home/benjamin/GitHub/HydeNet/data/jagsFunctions.RData")
+save(jagsDists, jagsFunctions, file="/home/benjamin/GitHub/HydeNet/R/sysdata.rda")

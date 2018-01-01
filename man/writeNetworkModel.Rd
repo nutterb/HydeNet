@@ -36,10 +36,9 @@ writeNetworkModel(Net)
 writeNetworkModel(Net, pretty=TRUE)
 
 }
-\author{
-Jarrod Dalton and Benjamin Nutter
-}
 \seealso{
 \code{\link{writeJagsModel}}, \code{\link{writeJagsFormula}}
 }
-
+\author{
+Jarrod Dalton and Benjamin Nutter
+}

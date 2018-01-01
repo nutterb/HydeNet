@@ -12,4 +12,3 @@ SE.cpt
 This is a conditional probability table used in the emesis example of the JSS article.
 }
 \keyword{datasets}
-

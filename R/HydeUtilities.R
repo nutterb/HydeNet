@@ -1,6 +1,4 @@
 #' @name HydeUtilities
-#' @importFrom dplyr group_by_
-#' @importFrom dplyr mutate
 #' @importFrom magrittr %>%
 #' @export %>%
 #' 
@@ -89,8 +87,6 @@ termName <- function(term, reg)
 }
 
 #' @rdname HydeUtilities
-#' @importFrom stringr perl
-#' @importFrom stringr str_extract
 #' 
 #' @param node Character string indicating a node in a network
 #' @param network A Hyde Network Object

@@ -167,4 +167,3 @@ BlackJack <- setUtilityNodes(BlackJack, payoff)
 
 }
 \keyword{datasets}
-

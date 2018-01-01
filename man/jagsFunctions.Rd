@@ -20,4 +20,3 @@ jagsFunctions
 A dataset listing the JAGS functions and their R equivalents.
 }
 \keyword{datasets}
-

@@ -234,9 +234,15 @@ setNode <- function(network, node, nodeType,
   exp_param <- eval(substitute(expectedParameters(network = network, 
                                                   node = node, 
                                                   returnVector = TRUE)))
-
-  params <- list(...)[exp_param]
   
+  params <- list(...)
+  
+  names(params)[!exp_param %in% names(params)] <- 
+    exp_param[!exp_param %in% names(params)]
+    
+  
+  params <- params[exp_param]
+
   # JAGS dnorm expects tau = 1/variance.  
   # HydeNet accepts sd, so we need to transform this.
   if (nodeType == "dnorm")

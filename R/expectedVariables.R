@@ -69,6 +69,8 @@ expectedParameters <- function(network, node, returnVector=FALSE)
   
   params <- jagsDists[["RParameter"]][jagsDists[["FnName"]] == inputs]
   
+  names(params) <- jagsDists[["Parameters"]][jagsDists[["FnName"]] == inputs]
+  
   if (returnVector)
   {
     return(params)

@@ -116,4 +116,3 @@ print(bagNet)
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

@@ -23,4 +23,3 @@ HydeNet:::factorRegex(g6)
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

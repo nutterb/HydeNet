@@ -50,4 +50,3 @@ Posterior_decision <- HydeSim(Decision,
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

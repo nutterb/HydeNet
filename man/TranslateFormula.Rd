@@ -26,10 +26,9 @@ Only a limited subset of R functions are recognized here, but no
   \code{jagsFunctions} data set (use \code{data(jagsFunctions)} to 
   review).
 }
-\author{
-Jarrod Dalton and Benjamin Nutter
-}
 \references{
 \url{http://people.math.aau.dk/~kkb/Undervisning/Bayes14/sorenh/docs/jags_user_manual.pdf}
 }
-
+\author{
+Jarrod Dalton and Benjamin Nutter
+}

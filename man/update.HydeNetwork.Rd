@@ -41,4 +41,3 @@ plot(Net)
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

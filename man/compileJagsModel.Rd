@@ -59,10 +59,9 @@ s <- coda.samples(compiledNet$jags,
                   n.iter=1000)
                 
 }
-\author{
-Benjamin Nutter
-}
 \seealso{
 \code{jags.model}
 }
-
+\author{
+Benjamin Nutter
+}

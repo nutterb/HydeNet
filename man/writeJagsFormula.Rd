@@ -62,10 +62,9 @@ writeJagsFormula(fit, nodes=c("d.dimer", "pregnant", "pe"))
 fit.glm <- glm(death ~ pe + treat, data=PE, family="binomial")
 writeJagsFormula(fit.glm, nodes=c("death", "pe", "treat"))
 }
-\author{
-Jarrod Dalton and Benjamin Nutter
-}
 \seealso{
 \code{\link{writeJagsModel}}, \code{\link{writeNetworkModel}}
 }
-
+\author{
+Jarrod Dalton and Benjamin Nutter
+}

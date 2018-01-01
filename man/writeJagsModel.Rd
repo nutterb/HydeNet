@@ -2,9 +2,9 @@
 % Please edit documentation in R/writeJagsModel.R
 \name{writeJagsModel}
 \alias{writeJagsModel}
+\alias{writeJagsModel_default}
 \alias{writeJagsModel_dbern}
 \alias{writeJagsModel_dcat}
-\alias{writeJagsModel_default}
 \alias{writeJagsModel_determ}
 \alias{writeJagsModel_dnorm}
 \alias{writeJagsModel_dnorm_default}
@@ -70,10 +70,9 @@ HydeNet:::writeJagsModel(Net, 'treat')
 }
 
 }
-\author{
-Jarrod Dalton and Benjamin Nutter
-}
 \seealso{
 \code{\link{writeJagsFormula}}
 }
-
+\author{
+Jarrod Dalton and Benjamin Nutter
+}

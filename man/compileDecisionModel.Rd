@@ -78,10 +78,9 @@ custom_policy <- policyMatrix(Net,
 decision3 <- compileDecisionModel(Net, custom_policy) 
 
 }
-\author{
-Jarrod Dalton and Benjamin Nutter
-}
 \seealso{
 \code{\link{policyMatrix}} \code{\link{compileJagsModel}}
 }
-
+\author{
+Jarrod Dalton and Benjamin Nutter
+}

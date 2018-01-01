@@ -22,8 +22,8 @@ Normal,dnorm,dnorm,,,mu,mean,,is.numeric(mu),TRUE
 Normal,dnorm,dnorm,,,tau,sd,>= 0,tau >= 0,TRUE
 Pareto,dpar,,c,,alpha,,> 0,alpha > 0,FALSE
 Pareto,dpar,,c,,alpha,,> c,alpha > 0,FALSE
-Student t,dt,dt,,,mu,,,is.numeric(mu),FALSE
-Student t,dt,dt,,,tau,,> 0,tau > 0,FALSE
+Student t,dt,dt,,,mu,mean,,is.numeric(mu),FALSE
+Student t,dt,dt,,,tau,sd,> 0,tau > 0,FALSE
 Student t,dt,dt,,,k,df,> 0,k > 0,TRUE
 Uniform,dunif,dunif,a,b,a,min,< b,a < b,TRUE
 Uniform,dunif,dunif,a,b,b,max,> a,b > a,TRUE

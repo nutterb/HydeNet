@@ -43,4 +43,3 @@ factorFormula(form = payoff ~ (death == 'No') + (pe == 'Yes'),
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

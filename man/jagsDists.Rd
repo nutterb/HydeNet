@@ -29,4 +29,3 @@ jagsDists
 A dataset listing the JAGS probability distributions and their parameters
 }
 \keyword{datasets}
-
