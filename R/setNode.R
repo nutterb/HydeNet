@@ -137,7 +137,7 @@
 #' The validation of parameters is performed by comparing the values provided with 
 #' the limits defined in the \code{jagsDists$paramLogic} variable. (look at 
 #' \code{data(jagsDists, data='HydeNet')}.  For most node types, validation will 
-#' be peformed for numeric variables.  For deterministic variables, the validation
+#' be performed for numeric variables.  For deterministic variables, the validation
 #' will only check that the parameter definition is a formula.  
 #' 
 #' It is possible to pass character strings as definitions, but when this is done, 

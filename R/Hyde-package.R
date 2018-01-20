@@ -7,7 +7,7 @@
 #' probability distributions, where each node represents a random variable and 
 #' each edge represents conditionality. The full joint distribution is 
 #' therefore factorized as a product of conditional densities, where each node 
-#' is assumed to be independent of its non-desendents given information on its 
+#' is assumed to be independent of its non-descendants given information on its 
 #' parent nodes. Since exact, closed-form algorithms are computationally 
 #' burdensome for inference within hybrid networks that contain a combination 
 #' of continuous and discrete nodes, particle-based approximation techniques 

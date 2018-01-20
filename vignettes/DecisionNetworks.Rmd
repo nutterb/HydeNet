@@ -281,7 +281,7 @@ net <- setNodeModels(net, glm.hit1, glm.hit2, glm.hit3)
 
 Alternatively, decision nodes can be deterministic in nature. In this case, we interpret the function which sets the value of these nodes depending on the value(s) of its parent node(s) as a deterministic strategy that is chosen by the actor. Within the blackjack network, we might envision such a strategy by the following rule, which would be applicable to all three hit decisions in the network: choose 'hit' when the current point total is less than 15.
 
-**Utility nodes** are restricted to be deterministic nodes with no descendents. In the blackjack example, for instance, we would assign the payoff utility node as follows:
+**Utility nodes** are restricted to be deterministic nodes with no descendants. In the blackjack example, for instance, we would assign the payoff utility node as follows:
 
 ```{r}
 net <- setNode(net, payoff, "determ", define=fromFormula(),

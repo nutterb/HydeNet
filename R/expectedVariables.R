@@ -87,3 +87,29 @@ expectedParameters <- function(network, node, returnVector=FALSE)
     )
   }
 }
+
+
+expectedParameters_ <- function(network, node, returnVector=FALSE)
+{
+  inputs <- network[["nodeType"]][[node]]
+  
+  params <- jagsDists[["RParameter"]][jagsDists[["FnName"]] == inputs]
+  
+  names(params) <- jagsDists[["Parameters"]][jagsDists[["FnName"]] == inputs]
+  
+  if (returnVector)
+  {
+    return(params)
+  }
+  else 
+  {
+    cat(
+      paste(
+        paste(
+          paste0(params, "= "),
+          collapse=", "
+        )
+      )
+    )
+  }
+}

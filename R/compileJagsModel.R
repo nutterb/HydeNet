@@ -61,14 +61,15 @@ compileJagsModel <- function(network, data=NULL, ...)
 
   cpt_arrays <- makeCptArrays(network) #* The utilty function is in the 
                                        #* file for compileDecisionModel
- 
+
   jags <- 
     rjags::jags.model(
       file = textConnection(writeNetworkModel(network)), 
       data = 
         if (is.null(data) & length(cpt_arrays) == 0) 
         {
-          sys.frame(sys.parent()) 
+          sys.frame(sys.parent())
+          # .GlobalEnv
         }
         else 
         {

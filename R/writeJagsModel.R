@@ -51,15 +51,12 @@ writeJagsModel <- function(network, node)
   node_params <- network[["nodeParams"]][[node_str]]
   
   params <- 
-    eval(
-      substitute(
-        expectedParameters(network = network, 
-                           node = node, 
-                           returnVector = TRUE
-        )
-      )
-    )
-  
+    expectedParameters_(network = network, 
+                        node = node, 
+                        returnVector = TRUE)
+    
+  names(node_params) <- names(params)
+
   switch(
     network[["nodeType"]][[node_str]],
     "dbern" =   writeJagsModel_dbern(network = network,
