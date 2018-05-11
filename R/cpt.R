@@ -165,7 +165,7 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   checkmate::assertSubset(variables, 
                           choices = names(data))
   
-  lapply(data[, variables],
+  lapply(data[variables],
          checkmate::assertFactor,
          add = coll)
   
@@ -252,7 +252,7 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   
   cpt[is.na(cpt)] <- 0
 
-  model <- data[, c(names(dimnames(cpt)), "wt")]
+  model <- data[c(names(dimnames(cpt)), "wt")]
   
   if ("wt" %in% names(model) && !is.null(wt_text)) 
   {

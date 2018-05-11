@@ -169,7 +169,7 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
         "      as the complement of the inputted probabilities Pr(", dependentVar,
         " != ",factorLevels[[dependentVar]][1]," | ",
         paste(independentVars,collapse=", "), ").\n", hbar,sep="")
-    data <- data[data[,dependentVar] %in% levels(data[,dependentVar])[-1],]
+    data <- data[data[dependentVar] %in% levels(data[dependentVar])[-1],]
     cat("Enter the following conditional probabilities:\n")
   } 
   else 
@@ -180,7 +180,7 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
   cat("Use '<q>' to halt execution.\n",
       "To go back one step and re-enter, enter '<b>'.\n", hbar, sep="")
   
-  formattedDepVarLvls <- format(as.character(data[,dependentVar]),
+  formattedDepVarLvls <- format(as.character(data[dependentVar]),
                                 width = facValWidths[dependentVar])
   
   noNegativeProbs <- FALSE
@@ -251,7 +251,7 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
       complementProbs <- plyr::ddply(data, 
                                      independentVars,
                                      function(data) c("wt" = 1-sum(data[["wt"]])))
-      complementProbs[,dependentVar] <- levels(data[, dependentVar])[1]
+      complementProbs[,dependentVar] <- levels(data[dependentVar])[1]
       data <- rbind(data, complementProbs)
       if(min(data$wt)>=0)
       {

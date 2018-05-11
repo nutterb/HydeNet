@@ -69,7 +69,8 @@ writeJagsFormula.glm <- function(fit, nodes, bern = bern, ...)
 {
   if (fit[["family"]][["family"]] == "gaussian" & fit[["family"]][["link"]] == "identity")
   {
-    return(writeJagsFormula.lm(fit))
+    return(writeJagsFormula.lm(fit, 
+                               descriptors = c("term", "term_plain", "level")))
   }
   
   mdl <- suppressWarnings(

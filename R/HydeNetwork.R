@@ -200,7 +200,7 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...)
                                       FUN = is.factor, 
                                       FUN.VALUE = logical(1))]
     factorLevels[factor_vars] <- 
-      lapply(X = data[, factor_vars, drop = FALSE],
+      lapply(X = data[factor_vars],
              FUN = levels)
   }
   
@@ -354,7 +354,7 @@ HydeNetwork_nodeFormula <- function(x, parents, data, fromData)
 {
   if (is.null(parents[[x]]))
   {
-    if (fromData[[names(parents)[x]]] & !is.numeric(data[, names(parents)[x]]))
+    if (fromData[[names(parents)[x]]] & !is.numeric(data[[names(parents)[x]]]))
     {
       f <- paste("~ ", names(parents)[x])
     }
@@ -381,24 +381,24 @@ HydeNetwork_nodeFitter <- function(node_name, data, parents)
   {
     return(NULL)
   }
-  else if (is.numeric(data[, node_name])) 
+  else if (is.numeric(data[[node_name]])) 
   {
     return("lm")
   }
-  else if (is.factor(data[, node_name]) & is.null(parents[[node_name]]))
+  else if (is.factor(data[[node_name]]) & is.null(parents[[node_name]]))
   {
     return("xtabs")
   }
-  else if (is.factor(data[, node_name]) & 
-           all(vapply(parents[[node_name]], function(p) is.factor(data[, p]), logical(1))))
+  else if (is.factor(data[[node_name]]) & 
+           all(vapply(parents[[node_name]], function(p) is.factor(data[[p]]), logical(1))))
   {
     return("cpt")
   }
-  else if (is.factor(data[, node_name]) & nlevels(data[, node_name]) == 2)
+  else if (is.factor(data[[node_name]]) & nlevels(data[[node_name]]) == 2)
   {
     return("glm")
   }
-  else if (is.factor(data[, node_name]) & nlevels(data[, node_name]) > 2)
+  else if (is.factor(data[[node_name]]) & nlevels(data[[node_name]]) > 2)
   {
     return("multinom")
   }
@@ -417,10 +417,10 @@ HydeNetwork_nodeType <- function(node_name, data, parents, nodeFitter)
   if (node_name %in% names(data))
   {
     if ((is.null(parents[[node_name]]) && 
-         !is.numeric(data[, node_name])) || 
+         !is.numeric(data[[node_name]])) || 
         (!is.null(parents[[node_name]]) && 
-         !is.numeric(data[, node_name]) && 
-         nlevels(data[, node_name]) > 2))
+         !is.numeric(data[[node_name]]) && 
+         nlevels(data[[node_name]]) > 2))
     {
       return('dcat')
     }
@@ -429,10 +429,10 @@ HydeNetwork_nodeType <- function(node_name, data, parents, nodeFitter)
       return('dcat')
     }
     else if ((is.null(parents[[node_name]]) && 
-              !is.numeric(data[, node_name])) || 
+              !is.numeric(data[[node_name]])) || 
              (!is.null(parents[[node_name]]) && 
-              !is.numeric(data[, node_name]) && 
-              nlevels(data[, node_name]) == 2))
+              !is.numeric(data[[node_name]]) && 
+              nlevels(data[[node_name]]) == 2))
     {
       return('dbern')
     }
