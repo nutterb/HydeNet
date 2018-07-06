@@ -19,4 +19,3 @@ Summaries of \code{HydeNetwork}, compiled network, and
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

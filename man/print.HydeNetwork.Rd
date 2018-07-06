@@ -34,7 +34,7 @@ print(Net)
 print(Net, d.dimer) 
                     
 Net <- setNode(Net, d.dimer, 
-                  nodeType='dnorm', mu=fromData(), tau=fromData(), 
+                  nodeType='dnorm', mean=fromData(), sd=fromData(), 
                   nodeFormula = d.dimer ~ pregnant + pe,
                   nodeFitter='lm')
 print(Net, d.dimer)
@@ -43,4 +43,3 @@ print(Net, d.dimer)
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

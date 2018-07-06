@@ -10,22 +10,22 @@ Net <- HydeNetwork(~ wells +
 
 test_that("decision argument warning",
 {
-  expect_warning(setNode(Net, treat, nodeType = "dbern", decision = "yes", p = .5))
+  expect_warning(setNode(Net, treat, nodeType = "dbern", decision = "yes", prob = .5))
 })
 
 test_that("utility error: utilties must be deterministic and not have children",
 {
-  expect_error(setNode(Net, treat, nodeType = "dbern", utility = TRUE, p =.5))
+  expect_error(setNode(Net, treat, nodeType = "dbern", utility = TRUE, prob =.5))
 })  
 
 test_that("validation error",
 {
-  expect_error(setNode(Net, treat, nodeType = "dbern", p = 1.2))
+  expect_error(setNode(Net, treat, nodeType = "dbern", prob = 1.2))
 })
 
 test_that("fit the model for dbern",
 {
-  expect_silent(setNode(Net, treat, nodeType = "dbern", p = fromData(),
+  expect_silent(setNode(Net, treat, nodeType = "dbern", prob = fromData(),
                  fitModel = TRUE))
 })
 
@@ -38,7 +38,7 @@ test_that("fit the model for dcat",
 test_that("fit the model for dnorm",
 {
   expect_silent(setNode(Net, d.dimer, nodeType = "dnorm",
-                      mu = fromData(), tau = fromData(),
+                      mean = fromData(), sd = fromData(),
                       fitModel = TRUE))
 })
 

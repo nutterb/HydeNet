@@ -20,8 +20,7 @@
 #' \code{returnVector} will generally be set to \code{FALSE} for most uses, 
 #' but can be set to \code{TRUE} for use in error checking.  For example, 
 #' in \code{setNode}, if not all of the parents have been given a coefficient 
-#' (or if too few coefficients have been given), the vector of names is usually
-#' more useful for giving informative error messages.
+#' (or if too few coefficients have been given), the vector of names is supplied.
 #' 
 #' @author Jarrod Dalton and Benjamin Nutter
 #' @examples
@@ -68,7 +67,35 @@ expectedParameters <- function(network, node, returnVector=FALSE)
   node <- as.character(substitute(node))
   inputs <- network[["nodeType"]][[node]]
   
-  params <- jagsDists[["Parameters"]][jagsDists[["FnName"]] == inputs]
+  params <- jagsDists[["RParameter"]][jagsDists[["FnName"]] == inputs]
+  
+  names(params) <- jagsDists[["Parameters"]][jagsDists[["FnName"]] == inputs]
+  
+  if (returnVector)
+  {
+    return(params)
+  }
+  else 
+  {
+    cat(
+      paste(
+        paste(
+          paste0(params, "= "),
+          collapse=", "
+        )
+      )
+    )
+  }
+}
+
+
+expectedParameters_ <- function(network, node, returnVector=FALSE)
+{
+  inputs <- network[["nodeType"]][[node]]
+  
+  params <- jagsDists[["RParameter"]][jagsDists[["FnName"]] == inputs]
+  
+  names(params) <- jagsDists[["Parameters"]][jagsDists[["FnName"]] == inputs]
   
   if (returnVector)
   {

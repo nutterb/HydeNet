@@ -1,8 +1,8 @@
-#' @name HydePosterior
-#' @export HydePosterior
+#' @name HydeSim
+#' @export HydeSim
 #' 
-#' @title Posterior Distributions of a Decision Network
-#' @description The posterior distributions of the decision network can be 
+#' @title Simulated Distributions of a Decision Network
+#' @description The simulated distributions of the decision network can be 
 #'   evaluated to determine the probabilistic outcomes based on the decision
 #'   inputs in the model as well as subject specific factors.
 #'   
@@ -18,7 +18,7 @@
 #'   forced into \code{variable.names} if not already provided.  This is 
 #'   recommended, especially if you will be binding multiple JAGS runs 
 #'   together.
-#' @param bind Logical. If \code{TRUE}, posterior distributions will be bound into 
+#' @param bind Logical. If \code{TRUE}, simulated distributions will be bound into 
 #'   a single data frame.  If \code{FALSE}, the standard output from \code{rjags}
 #'   is returned.
 #'   
@@ -27,15 +27,11 @@
 #'   the rows of the policy/decision matrix given in the \code{data} argument 
 #'   of \code{compileJagsNetwork}.
 #'   
-#' @return A list of class \code{HydePosterior} with elements \code{codas} 
+#' @return A list of class \code{HydeSim} with elements \code{codas} 
 #'   (the MCMC matrices from \code{coda.samples}), \code{observed} (the values
 #'   of the variables that were observed), \code{dag} (the dag object for 
 #'   convenience in displaying the network), and \code{factorRef} (giving the
 #'   mappings of factor levels to factor variables).  
-#'   
-#'   The only rationale for giving this object its own class was because it 
-#'   produces an enormous amount of material to be printed.  A distinct 
-#'   \code{print} method has been written for this object.
 #'   
 #' @author Jarrod Dalton and Benjamin Nutter
 #' 
@@ -53,20 +49,20 @@
 #' compiledNet <- compileJagsModel(Net, n.chains=5)
 #' 
 #' #* Generate the posterior distribution
-#' Posterior <- HydePosterior(compiledNet, 
+#' Posterior <- HydeSim(compiledNet, 
 #'                            variable.names = c("d.dimer", "death"), 
 #'                            n.iter = 1000)
 #' 
 #' #* Posterior Distributions for a Decision Model
 #' Net <- setDecisionNodes(Net, angio, treat)
 #' decisionNet <- compileDecisionModel(Net, n.chains=5)
-#' decisionsPost <- HydePosterior(decisionNet, 
+#' decisionsPost <- HydeSim(decisionNet, 
 #'                                variable.names = c("d.dimer", "death"),
 #'                                n.iter = 1000)
 #' 
 #' 
 
-HydePosterior <- function(cHN, variable.names, n.iter, thin=1, ...,
+HydeSim <- function(cHN, variable.names, n.iter, thin=1, ...,
                           monitor_observed=TRUE, bind=TRUE)
 {
   if (monitor_observed)
@@ -121,14 +117,23 @@ HydePosterior <- function(cHN, variable.names, n.iter, thin=1, ...,
   
   
   
-  class(HydePost) <- "HydePosterior"
+  class(HydePost) <- "HydeSim"
   if (bind)
   {
-    bindPosterior(HydePost)
+    bindSim(HydePost)
   }
   else 
   {
     HydePost
   }
   
+}
+
+#' @rdname HydeSim
+#' @export
+
+HydePosterior <- function(...)
+{
+  message("`HydePoseterior` has been deprecated and replaced by `HydeSim`")
+  HydeSim(...)
 }

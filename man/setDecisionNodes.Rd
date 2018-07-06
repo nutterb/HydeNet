@@ -27,4 +27,3 @@ Depending on how your Hyde Network was built, you may not have
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

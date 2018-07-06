@@ -14,8 +14,7 @@ rewriteHydeFormula(old_form, new_form)
 \description{
 This is a convenience function used to assist in the updating 
   of \code{HydeNetwork} network objects.  It makes it possible to add and 
-  subtract individual parent relationships without deleting an entire node.   
-  It's still a work in progress.
+  subtract individual parent relationships without deleting an entire node.
 }
 \details{
 To allow changes to be made on the node-parent level, the formulae
@@ -36,4 +35,3 @@ To allow changes to be made on the node-parent level, the formulae
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

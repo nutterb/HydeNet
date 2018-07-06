@@ -1,15 +1,13 @@
-This update fixes errors introduced with `DiagrammeR` 0.9.0
+This update provides fixes to design features that failed to meet the specification design. It permits the user to define distribution parameters using either the R distribution function argument, or the JAGS distribution function argument.
 
 ## Test environments
-* win-builder (release)
-* local windows install R 3.3.2
-* local windows install R-devel 2017-01-05 r71919
+* win-builder (devel 2017-09-12 r73242)
+* Local Linux install R 3.4.3 (Ubuntu 16.05.3 LTS)
+* Travis CI Linux install R 3.4.2 (Ubuntu 14.04.5 LTS)
 
 ## R CMD check results
 
-A NOTE was returned by win-builder (release and devel) regarding 
-potential spelling errors; all words in the DESCRIPTION file are 
-correctly spelled.
+There were no findings from the CHECK results
 
 ## Downstream dependencies
 There are no downstream dependencies for this package

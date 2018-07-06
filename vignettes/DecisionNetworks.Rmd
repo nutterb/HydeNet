@@ -281,7 +281,7 @@ net <- setNodeModels(net, glm.hit1, glm.hit2, glm.hit3)
 
 Alternatively, decision nodes can be deterministic in nature. In this case, we interpret the function which sets the value of these nodes depending on the value(s) of its parent node(s) as a deterministic strategy that is chosen by the actor. Within the blackjack network, we might envision such a strategy by the following rule, which would be applicable to all three hit decisions in the network: choose 'hit' when the current point total is less than 15.
 
-**Utility nodes** are restricted to be deterministic nodes with no descendents. In the blackjack example, for instance, we would assign the payoff utility node as follows:
+**Utility nodes** are restricted to be deterministic nodes with no descendants. In the blackjack example, for instance, we would assign the payoff utility node as follows:
 
 ```{r}
 net <- setNode(net, payoff, "determ", define=fromFormula(),
@@ -317,7 +317,7 @@ compiledNet <- compileJagsModel(net, data = evidence,
                                 n.chains = 3,
                                 n.adapt = 5000)
 
-post <- HydePosterior(compiledNet,
+post <- HydeSim(compiledNet,
                       variable.names = trackedVars,
                       n.iter=10000)
 
@@ -345,7 +345,7 @@ policies <- data.frame(hit1 = c(0,1,1,1),
 
 (Note: we have included a convenience function called `policyMatrix()` when all combinations of decision node values are of interest. This function is a wrapper for `expand.grid()`; see `help(policyMatrix)` for details.)
 
-In the MEU analysis, the goal is to characterize the distribution of utility under the competing policies. This amounts to sampling posterior distributions of utility nodes under varying sets of values for the decision nodes. In `HydeNet`, this is done by 1) using the function `compileDecisionModel()` to create a list of `compiledHydeNetwork` objects (one object corresponding to each policy); 2) feeding that list to `HydePosterior()` to get a list of `coda.samples` objects; and finally 3) feeding the list of `coda.samples` objects to `bindPosterior()` to get a single posterior sample matrix for each policy:
+In the MEU analysis, the goal is to characterize the distribution of utility under the competing policies. This amounts to sampling posterior distributions of utility nodes under varying sets of values for the decision nodes. In `HydeNet`, this is done by 1) using the function `compileDecisionModel()` to create a list of `compiledHydeNetwork` objects (one object corresponding to each policy); 2) feeding that list to `HydeSim()` to get a list of `coda.samples` objects; and finally 3) feeding the list of `coda.samples` objects to `bindPosterior()` to get a single posterior sample matrix for each policy:
 
 ```{r, echo=FALSE}
 set.seed(39482820)
@@ -355,7 +355,7 @@ set.seed(39482820)
 compiledNets <- compileDecisionModel(net, policyMatrix = policies)
 
 samples <- lapply(compiledNets,
-                  HydePosterior,
+                  HydeSim,
                   variable.names = trackedVars,
                   n.iter=10000)
 

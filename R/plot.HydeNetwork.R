@@ -4,7 +4,7 @@
 #' @method plot HydeNetwork
 #' 
 #' 
-#' @title Plotting Utilities Probabilistic Graphical Network
+#' @title Plotting Utilities for Probabilistic Graphical Network
 #' @description Generate and customize plots of a \code{HydeNetwork} 
 #'   class network. \code{HydeNet} provides some initial defaults for standard 
 #'   variable nodes, deterministic nodes, decision nodes, and utility nodes.
@@ -61,8 +61,7 @@
 #'   \url{http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html}\cr
 #'   See especially the section on Attributes
 #'   
-#'   \url{http://graphviz.org/}\cr
-#'   \url{http://graphviz.org/content/attrs}
+#'   \url{http://graphviz.org/}
 #' 
 #' @examples
 #' \dontrun{

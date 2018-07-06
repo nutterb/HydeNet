@@ -14,4 +14,3 @@ mergeDefaultPlotOpts(network, node_df)
 \description{
 rdname plot.HydeNetwork
 }
-

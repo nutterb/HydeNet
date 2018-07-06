@@ -45,4 +45,3 @@ writeNetworkModel(Net, pretty=TRUE)
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

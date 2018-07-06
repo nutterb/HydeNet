@@ -24,4 +24,3 @@ PE
 These are simulated data on 10,000 cases with suspected pulmonary embolism at a hospital.
 }
 \keyword{datasets}
-

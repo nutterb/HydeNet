@@ -31,4 +31,3 @@ BlackJackTrain
 These are simulated data on 1,000 Black Jack hands.
 }
 \keyword{datasets}
-

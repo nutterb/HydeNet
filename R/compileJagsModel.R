@@ -38,9 +38,9 @@
 #' compiledNet <- compileJagsModel(Net, n.chains=5)
 #' 
 #' #* Generate the posterior distribution
-#' Posterior <- HydePosterior(compiledNet, 
-#'                            variable.names = c("d.dimer", "death"), 
-#'                            n.iter = 1000)
+#' Posterior <- HydeSim(compiledNet, 
+#'                      variable.names = c("d.dimer", "death"), 
+#'                      n.iter = 1000)
 #' Posterior
 #' 
 #' #* For a single model (ie, not a decision model), the user may choose to 
@@ -61,14 +61,15 @@ compileJagsModel <- function(network, data=NULL, ...)
 
   cpt_arrays <- makeCptArrays(network) #* The utilty function is in the 
                                        #* file for compileDecisionModel
- 
+
   jags <- 
     rjags::jags.model(
       file = textConnection(writeNetworkModel(network)), 
       data = 
         if (is.null(data) & length(cpt_arrays) == 0) 
         {
-          sys.frame(sys.parent()) 
+          sys.frame(sys.parent())
+          # .GlobalEnv
         }
         else 
         {

@@ -1,7 +1,7 @@
 Package: HydeNet
 Type: Package
 Title: Hybrid Bayesian Networks Using R and JAGS
-Version: 0.10.5
+Version: 0.10.8-01
 Author: Jarrod E. Dalton <daltonj@ccf.org> and Benjamin Nutter
     <benjamin.nutter@gmail.com>
 Maintainer: Benjamin Nutter <benjamin.nutter@gmail.com>
@@ -37,6 +37,7 @@ Imports:
     utils
 Suggests:
     knitr,
+    RCurl,
     survival,
     testthat
 VignetteBuilder: knitr
@@ -45,4 +46,4 @@ LazyLoad: yes
 LazyData: true
 URL: https://github.com/nutterb/HydeNet,
 BugReports: https://github.com/nutterb/HydeNet/issues
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

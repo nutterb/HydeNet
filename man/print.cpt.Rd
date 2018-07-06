@@ -17,4 +17,3 @@ Just a wrapper to strip the attributes off, change the class, and print the arra
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

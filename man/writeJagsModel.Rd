@@ -2,9 +2,9 @@
 % Please edit documentation in R/writeJagsModel.R
 \name{writeJagsModel}
 \alias{writeJagsModel}
+\alias{writeJagsModel_default}
 \alias{writeJagsModel_dbern}
 \alias{writeJagsModel_dcat}
-\alias{writeJagsModel_default}
 \alias{writeJagsModel_determ}
 \alias{writeJagsModel_dnorm}
 \alias{writeJagsModel_dnorm_default}
@@ -55,6 +55,7 @@ The manipulations are performed on the \code{nodeParams} element
   estimating them from the data.
 }
 \examples{
+\dontrun{
 #* NOTE: writeJagsModel isn't an exported function
 data(PE, package='HydeNet')
 Net <- HydeNetwork(~ wells + 
@@ -66,12 +67,12 @@ Net <- HydeNetwork(~ wells +
                      data = PE)
 HydeNet:::writeJagsModel(Net, 'pe')
 HydeNet:::writeJagsModel(Net, 'treat')
-
 }
-\author{
-Jarrod Dalton and Benjamin Nutter
+
 }
 \seealso{
 \code{\link{writeJagsFormula}}
 }
-
+\author{
+Jarrod Dalton and Benjamin Nutter
+}

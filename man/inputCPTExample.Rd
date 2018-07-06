@@ -17,4 +17,3 @@ illustrated in the article being submitted to JSS.  It is saved as an object
 named \code{h} in the article.
 }
 \keyword{datasets}
-

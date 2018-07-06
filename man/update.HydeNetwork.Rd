@@ -20,11 +20,8 @@ Add or remove nodes or add parents within a \code{HydeNetwork}
 }
 \details{
 Adding or removing nodes is fairly straightforward if you are 
-  removing a complete node (along with its parents).  If you just wish to 
-  remove a parent, this doesn't work well yet.  I will have to work out 
-  a solution to remove parent relationships individually.  I had hoped
-  there would be an \code{update.dag} method, but no luck.  This will continue
-  to be developed in the future, but the arguments will remain the same.
+  removing a complete node (along with its parents).  Removing a parent
+  will generate a warning that the child nodes may need to be redefined.
 }
 \examples{
 data(PE, package="HydeNet")
@@ -44,4 +41,3 @@ plot(Net)
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

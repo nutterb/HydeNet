@@ -28,4 +28,3 @@ By default, \code{HydeNet} uses factor levels for policy
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

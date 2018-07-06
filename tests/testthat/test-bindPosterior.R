@@ -1,4 +1,4 @@
-context("bindPosterior")
+context("bindSim")
 
 data(PE, package="HydeNet")
 Net <- HydeNetwork(~ wells +
@@ -10,11 +10,11 @@ Net <- HydeNetwork(~ wells +
                    data = PE) %>%
   setDecisionNodes(treat, angio)
 Post <- compileDecisionModel(Net) %>%
-  HydePosterior(variable.names = c("wells", "treat", "death"),
+  HydeSim(variable.names = c("wells", "treat", "death"),
                 n.iter = 100,
                 bind = FALSE) 
 
-test_that("bindPosterior from Decision Model",
+test_that("bindSim from Decision Model",
 {
-  expect_silent(bindPosterior(Post))
+  expect_silent(bindSim(Post))
 })

@@ -23,13 +23,8 @@ When working in R, it is often more convenient to work in
 It is assumed that factor variables will be used in logical
   comparisons of the format \code{[variable_name] == '[factor_level]'} and
   only this pattern is recognized in the text search.  Single or 
-  double quotes may be used around the level, and the spaces aroudn the
-  \code{==} are optional.  
-  
-  While there are certainly limitations to this function that we have
-  not yet found, we believe it covers the majority of cases in which
-  it is useful. More complex cases that can't be handled by 
-  \code{factorFormula} may require writing native JAGS code.
+  double quotes may be used around the level, and the spaces around the
+  \code{==} are optional.
 }
 \examples{
 \dontrun{
@@ -48,4 +43,3 @@ factorFormula(form = payoff ~ (death == 'No') + (pe == 'Yes'),
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

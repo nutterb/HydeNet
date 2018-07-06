@@ -26,6 +26,7 @@
 #' @seealso \code{\link{writeJagsFormula}}
 #' 
 #' @examples
+#' \dontrun{
 #' #* NOTE: writeJagsModel isn't an exported function
 #' data(PE, package='HydeNet')
 #' Net <- HydeNetwork(~ wells + 
@@ -37,6 +38,7 @@
 #'                      data = PE)
 #' HydeNet:::writeJagsModel(Net, 'pe')
 #' HydeNet:::writeJagsModel(Net, 'treat')
+#' }
 #' 
 
 
@@ -49,15 +51,12 @@ writeJagsModel <- function(network, node)
   node_params <- network[["nodeParams"]][[node_str]]
   
   params <- 
-    eval(
-      substitute(
-        expectedParameters(network = network, 
-                           node = node, 
-                           returnVector = TRUE
-        )
-      )
-    )
-  
+    expectedParameters_(network = network, 
+                        node = node, 
+                        returnVector = TRUE)
+    
+  names(node_params) <- names(params)
+
   switch(
     network[["nodeType"]][[node_str]],
     "dbern" =   writeJagsModel_dbern(network = network,

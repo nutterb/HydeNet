@@ -1,11 +1,11 @@
-#' @name print.HydePosterior
+#' @name print.HydeSim
 #' @export 
-#' @method print HydePosterior
+#' @method print HydeSim
 #' 
-#' @title Print a Hyde Posterior Distribution Object
-#' @description Prints a brief description of a HydePosterior object.
+#' @title Print a Hyde Simulated Distribution Object
+#' @description Prints a brief description of a HydeSim object.
 #' 
-#' @param x a \code{HydePosterior} object
+#' @param x a \code{HydeSim} object
 #' @param ... additional arguments to be passed to print methods.  Currently 
 #'   none in use.
 #'   
@@ -30,19 +30,19 @@
 #' 
 #' #* Generate the posterior distribution for the model (but not the 
 #' #* decision model)
-#' Posterior <- HydePosterior(compiledNet, 
+#' Posterior <- HydeSim(compiledNet, 
 #'                            variable.names = c("d.dimer", "death"), 
 #'                            n.iter = 1000)
 #' Posterior
 #' 
 #' #* Generate the posterior for the decision model
 #' Decision <- compileDecisionModel(Net, n.chains=5)
-#' Posterior_decision <- HydePosterior(Decision, 
+#' Posterior_decision <- HydeSim(Decision, 
 #'                                     variable.names = c("d.dimer", "death"), 
 #'                                     n.iter = 1000)
 #' 
 
-print.HydePosterior <- function(x, ...){
+print.HydeSim <- function(x, ...){
   n_distributions <- 
     if (class(x$codas) == "mcmc.list")
     {

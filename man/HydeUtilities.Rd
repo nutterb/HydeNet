@@ -2,18 +2,18 @@
 % Please edit documentation in R/HydeUtilities.R
 \name{HydeUtilities}
 \alias{HydeUtilities}
-\alias{dataframeFactors}
+\alias{termName}
 \alias{decisionOptions}
-\alias{factor_reference}
-\alias{makeFactorRef}
 \alias{makeJagsReady}
 \alias{matchLevelNumber}
 \alias{matchVars}
 \alias{nodeFromFunction}
 \alias{policyMatrixValues}
 \alias{polyToPow}
-\alias{termName}
 \alias{validateParameters}
+\alias{makeFactorRef}
+\alias{dataframeFactors}
+\alias{factor_reference}
 \title{Hyde Network Utility Functions}
 \usage{
 termName(term, reg)
@@ -84,7 +84,7 @@ a reference table (another data frame) is returned.}
 }
 \description{
 The functions described below are unexported functions that 
-  are used internally by \code{HydeNet} to prepare modify network objects
+  are used internally by \code{HydeNet} to prepare and modify network objects
   and prepare JAGS code.
 }
 \details{
@@ -103,7 +103,7 @@ The functions described below are unexported functions that
   
   \code{matchLevelNumber}: Assigns the correct numeric value of a level to 
   a factor variable in a model.  This is called from within 
-  \code{makeJagsRead}.
+  \code{makeJagsReady}.
   
   \code{matchVars}: Given a list of existing node names, the terms of a formula
   are matched to the node names.  This allows functions to be used in 
@@ -135,4 +135,3 @@ The functions described below are unexported functions that
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

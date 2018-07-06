@@ -154,7 +154,19 @@ plot(BlackJack,
 ## Conclusion
 `HydeNet` is a tool to assist in generating and evaluating hybrid decision networks.  Displaying the network is an important aspect of communicating the relationships established by your network.  The `HydeNet` plotting tools provide the basic functionality needed to express both generic and customized plots suitable for sharing and evaluating network models.
 
+```{r, include = FALSE}
+if (!RCurl::url.exists("http://www.graphviz.org/about"))
+{
+  stop("Graphviz link does not exist. Find a new link")
+}
+
+if (!RCurl::url.exists("http://www.bicyclecards.com/how-to-play/blackjack/"))
+{
+  stop("Blackjack rules URL does not exist.  Find a new link")
+}
+```
+
 
 ## References
 [1] Graphviz, "About Graphviz," Retrieved from [http://www.graphviz.org/About.php](http://www.graphviz.org/About.php).  
-[2] Bicycle Cards, "Blackjack," Retrieved from [http://www.bicyclecards.com/card-games/rule/blackjack](http://www.bicyclecards.com/card-games/rule/blackjack].
+[2] Bicycle Cards, "Blackjack," Retrieved from [http://www.bicyclecards.com/how-to-play/blackjack/](http://www.bicyclecards.com/how-to-play/blackjack/].

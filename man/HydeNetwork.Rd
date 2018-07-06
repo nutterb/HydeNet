@@ -37,7 +37,7 @@ list with the following components:
       to fitter functions.
   \item \code{nodeParams} A named list.  Each element is a vector of parameters 
       that will be expected by JAGS.
-  \item \code{fromData} A named list with the logical value of wheather parameters
+  \item \code{fromData} A named list with the logical value of whether parameters
       should be estimated from the data.
   \item \code{nodeData} A named list with the data for each node.  If a node's 
       entry in \code{fromData} is \code{TRUE} and \code{nodeData} is \code{NULL},
@@ -116,4 +116,3 @@ print(bagNet)
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-

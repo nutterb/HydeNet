@@ -1,4 +1,4 @@
-context("HydePosterior")
+context("HydeSim")
 
 data(PE, package="HydeNet")
 Net <- HydeNetwork(~ wells +
@@ -10,52 +10,52 @@ Net <- HydeNetwork(~ wells +
                    data = PE)
 compiledNet <- compileJagsModel(Net, n.chains=5)
 
-test_that("Unbound HydePosterior returns object of class HydePosterior",
+test_that("Unbound HydeSim returns object of class HydeSim",
 {
-  Posterior <- HydePosterior(compiledNet,
+  Posterior <- HydeSim(compiledNet,
                              variable.names = c("d.dimer", "death"),
                              n.iter = 1000, 
                              bind = FALSE)  
   expect_equal(class(Posterior),
-               "HydePosterior")
+               "HydeSim")
 })
 
-test_that("Bound HydePosterior returns object of class data.frame",
+test_that("Bound HydeSim returns object of class data.frame",
 {
-  Posterior <- HydePosterior(compiledNet,
+  Posterior <- HydeSim(compiledNet,
                              variable.names = c("d.dimer", "death"),
                              n.iter = 1000)  
   expect_equal(class(Posterior),
                "data.frame")
 })
 
-test_that("Unbound HydePosterior print method",
+test_that("Unbound HydeSim print method",
 {
-  Posterior <- HydePosterior(compiledNet,
+  Posterior <- HydeSim(compiledNet,
                              variable.names = c("d.dimer", "death"),
                              n.iter = 1000, 
                              bind = FALSE)  
   expect_output(print(Posterior))
 })
 
-test_that("bindPosterior returns relabeled data",
+test_that("bindSim returns relabeled data",
 {
-  Posterior <- HydePosterior(compiledNet,
+  Posterior <- HydeSim(compiledNet,
                              variable.names = c("d.dimer", "death"),
                              n.iter = 1000, 
                              bind = FALSE) 
-  Bound <- bindPosterior(Posterior)
+  Bound <- bindSim(Posterior)
   expect_equal(class(Bound$death),
                "factor")
 })
 
-test_that("bindPosterior returns relabeled data",
+test_that("bindSim returns relabeled data",
 {
-  Posterior <- HydePosterior(compiledNet,
+  Posterior <- HydeSim(compiledNet,
                              variable.names = c("d.dimer", "death"),
                              n.iter = 1000, 
                              bind = FALSE) 
-  Bound <- bindPosterior(Posterior, relabel_factor = FALSE)
+  Bound <- bindSim(Posterior, relabel_factor = FALSE)
   expect_equal(class(Bound$death),
                "numeric")
 })

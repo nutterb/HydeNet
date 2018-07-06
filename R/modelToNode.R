@@ -15,9 +15,7 @@
 #' 
 #' @description For models built with \code{xtabs}, although a data frame may be
 #'   passed when building the model, it is not stored in the object.  Thus,
-#'   the data used to construct the models are not carried with the node.  However,
-#'   the JAGS code is built appropriate from the object and this should be of
-#'   little concern.
+#'   the data used to construct the models are not carried with the node.
 
 modelToNode <- function(model, nodes, ...)
 {

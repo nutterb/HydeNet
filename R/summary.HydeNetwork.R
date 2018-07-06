@@ -48,26 +48,26 @@ summary.HydeNetwork <- function(object, ...)
 decision_node_summary <- function(object, nodes)
 {
   name_summary <- summarise_node_name(nodes)
-  parent_summary <- summarise_parents(object, nodes, max(nchar(name_summary)))
-  policy_summary <- summarise_policy(object, nodes, 
-                                     max(nchar(name_summary)), 
-                                     max(nchar(parent_summary)))
-  
+  ns_charwid <- ifelse(length(name_summary)>0, max(nchar(name_summary)), 0)
+  parent_summary <- summarise_parents(object, nodes, ns_charwid)
+  ps_charwid <- ifelse(length(parent_summary)>0, max(nchar(parent_summary)), 0)
+  policy_summary <- summarise_policy(object, nodes, ns_charwid, ps_charwid)
   paste0(name_summary, parent_summary, policy_summary, collapse = "\n")
 }
 
 utility_node_summary <- function(object, nodes)
 {
   name_summary <- summarise_node_name(nodes)
-  parent_summary <- summarise_parents(object, nodes, max(nchar(name_summary)), end_sep = "")
-  
+  ns_charwid <- ifelse(length(name_summary)>0, max(nchar(name_summary)), 0)
+  parent_summary <- summarise_parents(object, nodes, ns_charwid, end_sep = "")
   paste0(name_summary, parent_summary, collapse = "\n")
 }
 
 random_node_summary <- function(object, nodes)
 {
   name_summary <- summarise_node_name(nodes)
-  parent_summary <- summarise_parents(object, nodes, max(nchar(name_summary)))
+  ns_charwid <- ifelse(length(name_summary)>0, max(nchar(name_summary)), 0)
+  parent_summary <- summarise_parents(object, nodes, ns_charwid, end_sep = "")
   type_summary <- summarise_type(object, nodes)
   
   paste0(name_summary, parent_summary, type_summary, collapse = "\n")
@@ -76,9 +76,8 @@ random_node_summary <- function(object, nodes)
 
 summarise_node_name <- function(nodes, max.width = 20)
 {
-  max.width <- min(c(max.width, 
-                     max(nchar(nodes)) + 3))
-  
+  if(length(nodes)>0) max.width <- min(c(max.width, max(nchar(nodes))+3))
+
   ifelse(test = nchar(nodes) > (max.width - 2),
          yes = paste0(substr(nodes, 1, 14), "...  |  "),
          no = paste0(stringr::str_pad(string = nodes, 
@@ -104,11 +103,12 @@ summarise_parents <- function(object, nodes, name_width, end_sep = "  |  ")
                   yes = "1 parent",
                   no = paste0(nparents, " parents  ")),
            parents)
+  parents <- 
+    stringr::str_pad(string = parents, 
+                     width = ifelse(length(parents)>0, max(nchar(parents)), 0)+1, 
+                     side = "right")
   
-  paste0(stringr::str_pad(string = parents, 
-                          width = max(nchar(parents)), 
-                          side = "right"), 
-         end_sep)
+  if(length(parents)>0) paste0(parents, end_sep) else ""
 }
 
 summarise_policy <- function(object, nodes, name_width, parent_width)

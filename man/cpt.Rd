@@ -116,4 +116,3 @@ inputCPT(wetGrass ~ rain + morning,
 \author{
 Jarrod Dalton and Benjamin Nutter
 }
-
