@@ -19,7 +19,7 @@
 #'   review).
 #'   
 #' @author Jarrod Dalton and Benjamin Nutter
-#' @references \url{http://people.math.aau.dk/~kkb/Undervisning/Bayes14/sorenh/docs/jags_user_manual.pdf}
+#' @references \url{http://people.stat.sc.edu/hansont/stat740/jags_user_manual.pdf}
 
 rToJags <- function(f)
 {

@@ -1,8 +1,5 @@
 #' @name HydeNetwork
 #' @export HydeNetwork
-#' @importFrom graph nodes
-#' @importFrom gRbase dag
-#' @importFrom gRbase graphNEL2adjMAT
 #' @importFrom stats as.formula
 #' 
 #' @title Define a Probablistic Graphical Network
@@ -10,10 +7,10 @@
 #'   define a probabilistic
 #'   graphical network to serve as the basis of building a model.  
 #'   
-#' @param nodes Either a formula that defines the network as passed to 
-#'   \code{gRbase::dag} or a list of model objects.
+#' @param nodes Either a formula that defines the network or a list of 
+#'   model objects.
 #' @param data A data frame with the data for estimating node parameters.
-#' @param ... additional arguments to \code{gRbase::dag}.
+#' @param ... additional arguments to other methods.  Not currently used.
 #' 
 #' @details The DAG becomes only one element of the object returned by 
 #'   \code{HydeNetwork}. The dag object is used to extract the node names
@@ -62,11 +59,11 @@
 #'       a decision node or not.
 #'   \item \code{nodeUtility} A named list of logical flags for whether the node is
 #'       a utility node or not.
-#'   \item \code{dag} The dag object returned by \code{gRbase}.  Most of the plotting
+#'   \item \code{dag} The adjacency matrix defining the network.  Most of the plotting
 #'       utilities will be based on this element.
 #'   \item \code{data} A common data frame for nodes that do not have their own unique
 #'       data source.
-#'   \item \code{network_formula} The original formula passed to \code{gRbase::dag}
+#'   \item \code{network_formula} The original formula passed 
 #'       to construct the model.
 #'  }
 #'  
@@ -115,14 +112,14 @@ HydeNetwork <- function(nodes, ...)
 
 HydeNetwork.formula <- function(nodes, data=NULL, ...)
 {
-  #* Build the DAG object
-  network <- gRbase::dag(nodes) 
+  #* Build the DAG object 
+  network <- formula_to_adjacency_matrix(nodes)
   
   #* Node names
-  node_names <- graph::nodes(network)
+  node_names <- colnames(network)
   
   #* Parents
-  parents <- HydeNetwork_parents(network)
+  parents <- HydeNetwork_parents(nodes)
   names(parents) <- node_names
   
   #* fromData
@@ -306,9 +303,56 @@ HydeNetwork.list <- function(nodes, ...)
 }
 
 #** Utility Functions ***************************
+formula_to_adjacency_matrix <- function(nodes){
+  fm_char <- paste0(deparse(nodes), collapse = " ")
+  fm_char <- gsub(" ", "", fm_char)
+  fm_char <- sub("~", "", fm_char, fixed = TRUE)
+  
+  fm_char <- unlist(strsplit(fm_char, "[+]"))
+  
+  distinct_nodes <- 
+    unlist(strsplit(fm_char, "([|]|[*]|[-])"))
+  distinct_nodes <- sub("^ +", "", distinct_nodes)
+  distinct_nodes <- sub(" +$", "", distinct_nodes)
+  distinct_nodes <- unique(distinct_nodes)
+  
+  adj_mat <- matrix(0, 
+                    nrow = length(distinct_nodes),
+                    ncol = length(distinct_nodes),
+                    dimnames = list(distinct_nodes,
+                                    distinct_nodes))
+  
+  fm_char <- strsplit(fm_char, "[|]")
+  
+  root_node <- vapply(X = fm_char,
+                      FUN = `[`, 
+                      FUN.VALUE = character(1), 
+                      1)
+  root_node <- gsub("(^ +| +$)", "", root_node)
+  
+  root_parent <- vapply(X = fm_char,
+                        FUN = `[`,
+                        FUN.VALUE = character(1),
+                        2)
+  root_parent <- gsub(" ", "", root_parent)
+  root_parent <- strsplit(root_parent, "[*]")
+  
+  names(root_parent) <- root_node
+  
+  for (i in seq_along(root_parent)){
+    if (!all(is.na(root_parent[[i]]))){
+      adj_mat[root_parent[[i]],
+              names(root_parent)[i]] <- 1
+    }
+  }
+  
+  adj_mat
+}
+
+
 HydeNetwork_parents <- function(network)
 {
-  adjMat <- gRbase::graphNEL2adjMAT(network)  
+  adjMat <- formula_to_adjacency_matrix(network)  
   parents <- 
     lapply(X = 1:ncol(adjMat), 
            FUN = 

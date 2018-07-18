@@ -13,10 +13,10 @@ HydeNetwork(nodes, ...)
 \method{HydeNetwork}{list}(nodes, ...)
 }
 \arguments{
-\item{nodes}{Either a formula that defines the network as passed to 
-\code{gRbase::dag} or a list of model objects.}
+\item{nodes}{Either a formula that defines the network or a list of 
+model objects.}
 
-\item{...}{additional arguments to \code{gRbase::dag}.}
+\item{...}{additional arguments to other methods.  Not currently used.}
 
 \item{data}{A data frame with the data for estimating node parameters.}
 }
@@ -55,11 +55,11 @@ list with the following components:
       a decision node or not.
   \item \code{nodeUtility} A named list of logical flags for whether the node is
       a utility node or not.
-  \item \code{dag} The dag object returned by \code{gRbase}.  Most of the plotting
+  \item \code{dag} The adjacency matrix defining the network.  Most of the plotting
       utilities will be based on this element.
   \item \code{data} A common data frame for nodes that do not have their own unique
       data source.
-  \item \code{network_formula} The original formula passed to \code{gRbase::dag}
+  \item \code{network_formula} The original formula passed 
       to construct the model.
  }
  
