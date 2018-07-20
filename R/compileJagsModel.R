@@ -62,9 +62,10 @@ compileJagsModel <- function(network, data=NULL, ...)
   cpt_arrays <- makeCptArrays(network) #* The utilty function is in the 
                                        #* file for compileDecisionModel
 
+  con <- textConnection(writeNetworkModel(network))
   jags <- 
     rjags::jags.model(
-      file = textConnection(writeNetworkModel(network)), 
+      file = con, 
       data = 
         if (is.null(data) & length(cpt_arrays) == 0) 
         {
@@ -77,6 +78,8 @@ compileJagsModel <- function(network, data=NULL, ...)
         },
       ...
     )
+  
+  close(con)
   
   #* cHN for compiled Hyde Network
   cHN <- list(jags=jags, 

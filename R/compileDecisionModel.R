@@ -70,7 +70,10 @@
 #'                               angio = c("Negative", "Positive"))
 #' decision3 <- compileDecisionModel(Net, custom_policy) 
 #' 
-compileDecisionModel <- function(network, policyMatrix = NULL, ..., data = NULL)
+compileDecisionModel <- function(network, 
+                                 policyMatrix = NULL, 
+                                 ..., 
+                                 data = NULL)
 {
   coll <- checkmate::makeAssertCollection()
 

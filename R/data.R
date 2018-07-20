@@ -224,7 +224,7 @@
 #'   \item{Rsupport}{Logical value, indicating if an R equivalent is 
 #'     supported by \code{HydeNet}}
 #' }
-#' @source \url{http://people.math.aau.dk/~kkb/Undervisning/Bayes14/sorenh/docs/jags_user_manual.pdf}
+#' @source \url{http://people.stat.sc.edu/hansont/stat740/jags_user_manual.pdf}
 "jagsDists"
 
 #' JAGS Functions Compatible with R.
@@ -237,7 +237,7 @@
 #'   \item{r_function}{R function Name}
 #'   \item{r_package}{R package where the function is found.}
 #' }
-#' @source \url{http://people.math.aau.dk/~kkb/Undervisning/Bayes14/sorenh/docs/jags_user_manual.pdf}
+#' @source \url{http://people.stat.sc.edu/hansont/stat740/jags_user_manual.pdf}
 "jagsFunctions"
 
 #' Pulmonary Embolism Dataset

@@ -27,7 +27,7 @@ Only a limited subset of R functions are recognized here, but no
   review).
 }
 \references{
-\url{http://people.math.aau.dk/~kkb/Undervisning/Bayes14/sorenh/docs/jags_user_manual.pdf}
+\url{http://people.stat.sc.edu/hansont/stat740/jags_user_manual.pdf}
 }
 \author{
 Jarrod Dalton and Benjamin Nutter

@@ -11,7 +11,7 @@
   \item{r_package}{R package where the function is found.}
 }}
 \source{
-\url{http://people.math.aau.dk/~kkb/Undervisning/Bayes14/sorenh/docs/jags_user_manual.pdf}
+\url{http://people.stat.sc.edu/hansont/stat740/jags_user_manual.pdf}
 }
 \usage{
 jagsFunctions
