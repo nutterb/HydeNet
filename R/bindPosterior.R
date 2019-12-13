@@ -97,7 +97,7 @@ bind_chains_mcmclist <- function(mcmc, hydeSim)
   as.data.frame(hydeSim$codas[[mcmc]]) %>%
     dplyr::mutate_(
       chain_index = ~mcmc,
-      obs_index = ~1:n()
+      obs_index = seq_along(mcmc)
     )
 }
 
@@ -109,7 +109,7 @@ bind_chains_list <- function(mcmc)
            as.data.frame(mcmc[[chain]]) %>%
              dplyr::mutate_(
                chain_index = ~chain,
-               obs_index = ~1:n()
+               obs_index = seq_along(chain)
              )
          }
   ) %>%

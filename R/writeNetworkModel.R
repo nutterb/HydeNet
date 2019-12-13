@@ -37,7 +37,7 @@ writeNetworkModel <- function(network, pretty=FALSE)
 {
   model <- lapply(network[["nodes"]], function(x) writeJagsModel(network, x))
   model <- paste("  ", unlist(model), collapse="\n")
-  model <- paste("model{", model, "}", sep="\n")
+  model <- paste("model{", model, "}\n", sep="\n")
   
   if (pretty) cat(model) else return(model)
 }

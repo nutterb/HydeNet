@@ -16,8 +16,8 @@
   \url{http://graphviz.org/}
 }
 \usage{
-\method{plot}{HydeNetwork}(x, customNodes = NULL, customEdges = NULL, ...,
-  removeDeterm = FALSE, useHydeDefaults = TRUE)
+\method{plot}{HydeNetwork}(x, customNodes = NULL, customEdges = NULL,
+  ..., removeDeterm = FALSE, useHydeDefaults = TRUE)
 
 mergeCustomNodes(node_df, customNodes)
 

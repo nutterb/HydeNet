@@ -41,6 +41,7 @@ summary.HydeNetwork <- function(object, ...)
       "\n\n",
       "Random Nodes: \n",
       random_node_summary(object, random_nodes),
+      "\n",
       sep = ""
   )
 }

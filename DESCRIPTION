@@ -44,4 +44,4 @@ LazyLoad: yes
 LazyData: true
 URL: https://github.com/nutterb/HydeNet,
 BugReports: https://github.com/nutterb/HydeNet/issues
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1

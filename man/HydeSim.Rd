@@ -5,8 +5,8 @@
 \alias{HydePosterior}
 \title{Simulated Distributions of a Decision Network}
 \usage{
-HydeSim(cHN, variable.names, n.iter, thin = 1, ..., monitor_observed = TRUE,
-  bind = TRUE)
+HydeSim(cHN, variable.names, n.iter, thin = 1, ...,
+  monitor_observed = TRUE, bind = TRUE)
 
 HydePosterior(...)
 }

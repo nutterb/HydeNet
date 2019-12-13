@@ -109,5 +109,5 @@ print.HydeNetwork <- function(x, ...)
             {
               "Yes"
             }))
-  cat(paste0("\n\n", nodeSummaries))
+  cat(paste0("\n\n", nodeSummaries, "\n"))
 }

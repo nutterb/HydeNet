@@ -69,7 +69,7 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
       "\n",
       sep=""
     )
-  
+
   factorEntryCommand <- function(variableName)
   {
     cat(hbar, "Enter Factor Levels for node '", variableName,"':\n\n",
@@ -79,7 +79,7 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
         "To start over entirely, enter '<s>'.\n",
         "To quit, enter <q>.", hbar, sep="")
   }
-  
+
   if(missing(factorLevels))
   {  # solicit the names of factor levels from the console
     factorLevels <- vector(mode = "list")
@@ -152,13 +152,12 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
       stop("Incompatible 'factorLevels' argument. See help('inputCPT()').")
     }
   }
-  
+ 
   facValWidths <- unlist(lapply(factorLevels, function(x) max(nchar(x))))
   
   # input the conditional probabilities
   data <- expand.grid(factorLevels)
-  
-  
+ 
   if(reduce)
   {
     cat(hbar,
@@ -169,7 +168,9 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
         "      as the complement of the inputted probabilities Pr(", dependentVar,
         " != ",factorLevels[[dependentVar]][1]," | ",
         paste(independentVars,collapse=", "), ").\n", hbar,sep="")
-    data <- data[data[dependentVar] %in% levels(data[dependentVar])[-1],]
+
+    data <- data[data[[dependentVar]] %in% levels(data[[dependentVar]])[-1],]
+
     cat("Enter the following conditional probabilities:\n")
   } 
   else 
@@ -179,10 +180,10 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
   }
   cat("Use '<q>' to halt execution.\n",
       "To go back one step and re-enter, enter '<b>'.\n", hbar, sep="")
-  
-  formattedDepVarLvls <- format(as.character(data[dependentVar]),
-                                width = facValWidths[dependentVar])
-  
+
+  formattedDepVarLvls <- format(as.character(data[[dependentVar]]),
+                                width = facValWidths[[dependentVar]])
+
   noNegativeProbs <- FALSE
   i <- 1
   optWarn <- options()$warn
@@ -251,7 +252,7 @@ inputCPT_workhorse <- function(variables, dependentVar, independentVars,
       complementProbs <- plyr::ddply(data, 
                                      independentVars,
                                      function(data) c("wt" = 1-sum(data[["wt"]])))
-      complementProbs[,dependentVar] <- levels(data[dependentVar])[1]
+      complementProbs[[dependentVar]] <- levels(data[[dependentVar]])[1]
       data <- rbind(data, complementProbs)
       if(min(data$wt)>=0)
       {

@@ -6,8 +6,8 @@
 \alias{fromFormula}
 \title{Set Node Relationships}
 \usage{
-setNode(network, node, nodeType, nodeFitter, nodeFormula, fitterArgs = list(),
-  decision = "current", utility = "current",
+setNode(network, node, nodeType, nodeFitter, nodeFormula,
+  fitterArgs = list(), decision = "current", utility = "current",
   fromData = !is.null(network$data), ..., nodeData = NULL,
   factorLevels = NULL, validate = TRUE,
   fitModel = getOption("Hyde_fitModel"), policyValues = factorLevels)
