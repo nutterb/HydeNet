@@ -51,7 +51,7 @@ Posterior <- HydeSim(compiledNet,
 Posterior
 
 #* For a single model (ie, not a decision model), the user may choose to 
-#* use the \\code{rjags} function \\code{coda.samples}.
+#* use the \code{rjags} function \code{coda.samples}.
 #* However, this does not have a succinct print method
 library(rjags)
 s <- coda.samples(compiledNet$jags, 

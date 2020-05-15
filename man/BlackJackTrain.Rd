@@ -4,7 +4,8 @@
 \name{BlackJackTrain}
 \alias{BlackJackTrain}
 \title{Black Jack Network Training Dataset}
-\format{A data frame with 10000 rows and 7 variables:
+\format{
+A data frame with 10000 rows and 7 variables:
 \describe{
   \item{dealerUpcard}{The card in the dealer's hand visible to all players}
   \item{card1}{Value of the first card}
@@ -19,7 +20,8 @@
   \item{hit3}{Binary variable indicating if a hit was taken}
   \item{card5}{Value of the fifth card}
   \item{pointsAfterCard5}{Total points with five cards}
-}}
+}
+}
 \source{
 Bicycle Cards, "Blackjack," 
 Retrieved from http://www.bicyclecards.com/card-games/rule/blackjack

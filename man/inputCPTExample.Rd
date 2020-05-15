@@ -4,7 +4,9 @@
 \name{inputCPTExample}
 \alias{inputCPTExample}
 \title{Example Conditional Probability Table Resulting from the \code{inputCPT} function.}
-\format{An object of class \code{cpt} (inherits from \code{array}) with 2 rows and 2 columns.}
+\format{
+An object of class \code{cpt} (inherits from \code{array}) with 2 rows and 2 columns.
+}
 \source{
 No Source.  It's really just made up.
 }

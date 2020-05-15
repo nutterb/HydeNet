@@ -4,7 +4,8 @@
 \name{jagsDists}
 \alias{jagsDists}
 \title{JAGS Probability Distributions.}
-\format{A data frame with 30 rows and 7 variables:
+\format{
+A data frame with 30 rows and 7 variables:
 \describe{
   \item{DistName}{Distribution Name}
   \item{FnName}{JAGS Function Name}
@@ -18,7 +19,8 @@
     ensure stated parameters are valid.}
   \item{Rsupport}{Logical value, indicating if an R equivalent is 
     supported by \code{HydeNet}}
-}}
+}
+}
 \source{
 \url{http://people.stat.sc.edu/hansont/stat740/jags_user_manual.pdf}
 }

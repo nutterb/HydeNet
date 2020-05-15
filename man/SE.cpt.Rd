@@ -4,7 +4,9 @@
 \name{SE.cpt}
 \alias{SE.cpt}
 \title{Conditional Probability Table for side effects as a function of emesis and drug.}
-\format{An object of class \code{cpt} (inherits from \code{array}) of dimension 2 x 2 x 2.}
+\format{
+An object of class \code{cpt} (inherits from \code{array}) of dimension 2 x 2 x 2.
+}
 \usage{
 SE.cpt
 }

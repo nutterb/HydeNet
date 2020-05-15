@@ -16,8 +16,14 @@
   \url{http://graphviz.org/}
 }
 \usage{
-\method{plot}{HydeNetwork}(x, customNodes = NULL, customEdges = NULL,
-  ..., removeDeterm = FALSE, useHydeDefaults = TRUE)
+\method{plot}{HydeNetwork}(
+  x,
+  customNodes = NULL,
+  customEdges = NULL,
+  ...,
+  removeDeterm = FALSE,
+  useHydeDefaults = TRUE
+)
 
 mergeCustomNodes(node_df, customNodes)
 
@@ -27,8 +33,13 @@ mergeCustomEdges(edge_df, customEdges)
 
 customNode(node_id, ...)
 
-HydePlotOptions(variable = NULL, determ = NULL, decision = NULL,
-  utility = NULL, restorePackageDefaults = FALSE)
+HydePlotOptions(
+  variable = NULL,
+  determ = NULL,
+  decision = NULL,
+  utility = NULL,
+  restorePackageDefaults = FALSE
+)
 }
 \arguments{
 \item{x}{an object of class \code{HydeNetwork}}

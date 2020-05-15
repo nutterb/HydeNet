@@ -4,10 +4,12 @@
 \name{BlackJack}
 \alias{BlackJack}
 \title{Black Jack Hybrid Decision Network}
-\format{A \code{HydeNetwork} object constructed using the code shown in 
+\format{
+A \code{HydeNetwork} object constructed using the code shown in 
 the example.  The network has seven random nodes, three ten deterministic
 nodes, three decision nodes, and one utility node.  This is (almost) the same 
-network used in `vignette("DecisionNetworks", package="HydeNet")`.}
+network used in `vignette("DecisionNetworks", package="HydeNet")`.
+}
 \usage{
 BlackJack
 }

@@ -7,3 +7,5 @@
 ^\z_supplemental\*.csv
 ^\z_supplemental\*.R
 ^z_supplemental$
+^doc$
+^Meta$

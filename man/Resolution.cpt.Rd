@@ -4,7 +4,9 @@
 \name{Resolution.cpt}
 \alias{Resolution.cpt}
 \title{Conditional Probability Table for resolution of side effects as a function drugs and emesis.}
-\format{An object of class \code{cpt} (inherits from \code{array}) of dimension 2 x 2 x 2 x 2 x 3.}
+\format{
+An object of class \code{cpt} (inherits from \code{array}) of dimension 2 x 2 x 2 x 2 x 3.
+}
 \usage{
 Resolution.cpt
 }

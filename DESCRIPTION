@@ -27,6 +27,7 @@ Imports:
     DiagrammeR (>= 0.9.0),
     plyr,
     dplyr,
+    graph,
     magrittr,
     pixiedust (>= 0.6.1),
     rjags,
@@ -36,6 +37,7 @@ Imports:
 Suggests:
     knitr,
     RCurl,
+    rmarkdown,
     survival,
     testthat
 VignetteBuilder: knitr
@@ -44,4 +46,4 @@ LazyLoad: yes
 LazyData: true
 URL: https://github.com/nutterb/HydeNet,
 BugReports: https://github.com/nutterb/HydeNet/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
