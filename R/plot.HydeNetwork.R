@@ -134,10 +134,10 @@ plot.HydeNetwork <- function(x,
   
   
   
-  DiagrammeR::create_graph(nodes_df = node_df,
-                           edges_df = edge_df,
-                           attr_theme = NULL) %>%
-    DiagrammeR::render_graph()
+  graph <- DiagrammeR::create_graph(nodes_df = node_df,
+                                    edges_df = edge_df,
+                                    attr_theme = NULL) 
+  DiagrammeR::render_graph(graph)
   
 }
 
@@ -215,7 +215,7 @@ mergeCustomNodes <- function(node_df, customNodes)
   names(node_df) <- gsub(pattern = "[.]x", 
                          replacement = "", 
                          x = names(node_df))
- 
+  
   node_df[, -which(names(node_df) == "nodes")] <- 
     lapply(X = node_df[, -which(names(node_df) == "nodes")],
            FUN = function(x) ifelse(test = is.na(x), 
@@ -304,12 +304,12 @@ HydePlotOptions <- function(variable = NULL,
     {
       for (s in shared_names)
       {
-        new_options[, s] <- 
-          mapply(FUN = function(x, y) ifelse(is.na(x), 
-                                             y, 
-                                             x),
-                 new_options[s],
-                 new_options[gsub("[.]x", ".y", s)])
+        new_options[[s]] <- 
+          as.vector(mapply(FUN = function(x, y) ifelse(is.na(x), 
+                                                          y, 
+                                                          x),
+                              new_options[s],
+                              new_options[gsub("[.]x", ".y", s)]))
       }
       new_options <- dplyr::select(new_options, -dplyr::ends_with('.y'))                                      
     }

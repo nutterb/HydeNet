@@ -172,7 +172,7 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   vars  <- c(dependentVar, independentVars)  
   
   #check for NAs, remove if the user wants
-  completeData <- data %>% dplyr::filter(stats::complete.cases(.))
+  completeData <- data[stats::complete.cases(data), ]
   if((nrow(data) != nrow(completeData)) * !na.rm){
     coll$push("Missing values in the supplied variable(s). See help('cpt')")
   }
@@ -228,8 +228,11 @@ cpt_workhorse <- function(variables, dependentVar, independentVars,
   ..independentVars <- lapply(X = independentVars, 
                               FUN = as.symbol)
   
-  data     <- dplyr::bind_cols(dplyr::tbl_df(data[,vars]),
-                               dplyr::tbl_df(data.frame(wt = wt)))
+  # data     <- dplyr::bind_cols(dplyr::tbl_df(data[,vars]),
+  #                              dplyr::tbl_df(data.frame(wt = wt)))
+  data <- cbind(data[, vars], 
+                data.frame(wt = wt, 
+                           stringsAsFactors = FALSE))
   
   
   joint <- 

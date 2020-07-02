@@ -1,8 +1,8 @@
 #' @name bindSim
-#' @importFrom dplyr bind_rows
 #' @export bindSim
 #' 
-#' @title Bind Simulated Distributions
+#' @title Bind Output From coda Samples
+#' 
 #' @description After determining the simulated distributions are satisfactory,
 #'   it can be advantageous to bind the simulated distributions together in
 #'   order to aggregate values and perform other manipulations and analyses.
@@ -53,17 +53,17 @@ bindSim <- function(hydeSim, relabel_factor=TRUE)
   if (class(hydeSim$codas) == "mcmc.list")
   {
     bound <- 
-      dplyr::bind_rows(
-        lapply(seq_along(hydeSim[["codas"]]), 
-               bind_chains_mcmclist, 
-               hydeSim
-        )
+      do.call("rbind",
+              lapply(seq_along(hydeSim[["codas"]]), 
+                     bind_chains_mcmclist, 
+                     hydeSim
+              )
       )
   }
   else 
   {
     bound <- 
-      dplyr::bind_rows(
+      do.call("rbind",
         lapply(hydeSim[["codas"]], 
                bind_chains_list
         )
@@ -94,26 +94,25 @@ bindSim <- function(hydeSim, relabel_factor=TRUE)
 #****                  when a decision network was run.
 bind_chains_mcmclist <- function(mcmc, hydeSim)
 {
-  as.data.frame(hydeSim$codas[[mcmc]]) %>%
-    dplyr::mutate_(
-      chain_index = ~mcmc,
-      obs_index = seq_along(mcmc)
-    )
+  out <- as.data.frame(hydeSim$codas[[mcmc]]) 
+  out$chain_index <- mcmc
+  out$obs_index <- seq_along(mcmc)
+  out
 }
 
 bind_chains_list <- function(mcmc)
 {
-  lapply(1:length(mcmc),
-         function(chain)
-         {
-           as.data.frame(mcmc[[chain]]) %>%
-             dplyr::mutate_(
-               chain_index = ~chain,
-               obs_index = seq_along(chain)
-             )
-         }
-  ) %>%
-  dplyr::bind_rows()
+  bound <- 
+    lapply(1:length(mcmc),
+           function(chain)
+           {
+             out <- as.data.frame(mcmc[[chain]]) 
+             out$chain_index <- chain
+             out$obs_index <- seq_along(chain)
+             out
+           }
+    ) 
+  do.call("rbind", bound)
 }
 
 

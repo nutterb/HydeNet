@@ -3,7 +3,7 @@
 \name{bindSim}
 \alias{bindSim}
 \alias{bindPosterior}
-\title{Bind Simulated Distributions}
+\title{Bind Output From coda Samples}
 \usage{
 bindSim(hydeSim, relabel_factor = TRUE)
 

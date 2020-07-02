@@ -1,4 +1,8 @@
-## 0.10.5 (6 January 2016)
+### 0.10.10 (15 May 2020)
+
+* Remove dependencies on `RBGL` and `Rgraphviz`
+
+### 0.10.5 (6 January 2016)
 * Update `plot.HydeNetwork` to accommodate changes in `DiagrammeR`.
 
 ### 0.10.4 (1 April 2016)
